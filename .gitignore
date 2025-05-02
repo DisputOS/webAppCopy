@@ -1,1 +1,27 @@
-node_modules
+# 👉 Основное
+node_modules/
+.next/
+out/
+dist/
+
+# 👉 MacOS
+.DS_Store
+
+# 👉 TypeScript
+*.tsbuildinfo
+
+# 👉 Логи и временные файлы
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# 👉 Секреты
+.env
+.env.*
+!.env.example
+
+# 👉 IDE
+.vscode/
+.idea/
+*.swp
