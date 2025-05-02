@@ -4,12 +4,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { openai } from '@/lib/openaiClient';
 import { calculateRisk } from '@/utils/riskEngine';
 
+// Тип из OpenAI SDK v4
+type ChatCompletionMessageParam = {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  name?: string;
+};
+
 export async function POST(req: NextRequest) {
   const { disputeId } = await req.json();
-  const description = 'Sample description'; // Тут можна зробити fetch із БД, якщо треба
+  const description = 'Sample description';
   const risk = calculateRisk(description);
 
-  const messages: typeof openai.types.ChatCompletionMessageParam[] = [
+  const messages: ChatCompletionMessageParam[] = [
     { role: 'system', content: 'You are a Ukrainian legal assistant.' },
     { role: 'user', content: description }
   ];
