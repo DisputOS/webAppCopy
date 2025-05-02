@@ -3,17 +3,16 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { openai } from '@/lib/openaiClient';
 import { calculateRisk } from '@/utils/riskEngine';
-import type { ChatCompletionMessageParam } from 'openai/resources/chat'; // 👈 Добавляем тип
 
 export async function POST(req: NextRequest) {
   const { disputeId } = await req.json();
   const description = 'Sample description'; // Тут можна зробити fetch із БД, якщо треба
   const risk = calculateRisk(description);
 
-  const messages: ChatCompletionMessageParam[] = [
+  const messages = [
     { role: 'system', content: 'You are a Ukrainian legal assistant.' },
     { role: 'user', content: description }
-  ];
+  ] as const;
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
