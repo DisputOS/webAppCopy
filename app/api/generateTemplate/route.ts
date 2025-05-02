@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { openai } from '@/lib/openaiClient';
 import { calculateRisk } from '@/utils/riskEngine';
@@ -15,7 +17,7 @@ export async function POST(req: NextRequest) {
   ];
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o', // ✅ правильна модель
+    model: 'gpt-4o',
     messages,
     temperature: 0.7
   });
