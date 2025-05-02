@@ -1,0 +1,13 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { generatePDF } from '@/utils/pdfGenerator';
+
+export async function POST(req: NextRequest) {
+  const { disputeId, templateText } = await req.json();
+  const buffer = await generatePDF(templateText, disputeId);
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="Disput_${disputeId}.pdf"`
+    }
+  });
+}
