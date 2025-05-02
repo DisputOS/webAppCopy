@@ -9,10 +9,10 @@ export async function POST(req: NextRequest) {
   const description = 'Sample description'; // Тут можна зробити fetch із БД, якщо треба
   const risk = calculateRisk(description);
 
-  const messages = [
+  const messages: typeof openai.types.ChatCompletionMessageParam[] = [
     { role: 'system', content: 'You are a Ukrainian legal assistant.' },
     { role: 'user', content: description }
-  ] as const;
+  ];
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
