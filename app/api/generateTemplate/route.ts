@@ -4,8 +4,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { openai } from '@/lib/openaiClient';
 import { calculateRisk } from '@/utils/riskEngine';
 
-export const runtime = 'nodejs'; // щоб уникнути глюків з openai
-
 export async function POST(req: NextRequest) {
   const { disputeId } = await req.json();
   const description = 'Sample description'; // Тут можна зробити fetch із БД, якщо треба
