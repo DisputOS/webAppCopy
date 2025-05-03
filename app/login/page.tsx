@@ -62,12 +62,15 @@ export default function LoginPage() {
           <Button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 border border-gray-500 text-lg text-white bg-transparent hover:bg-gray-800">
+            <User className="w-5 h-5" /> Login
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />} Log in
           </Button>
         </div>
 
+
+        
         <p className="mt-6 text-sm text-gray-400 text-center">
           Don't have an account?{' '}
           <Link
