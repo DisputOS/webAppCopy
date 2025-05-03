@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useSession } from '@supabase/auth-helpers-react';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 
 export default function SettingsPage() {
   const session = useSession();
