@@ -22,7 +22,7 @@ export default function EvidenceUploader({ caseId }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   // ─────────────────────────── config
-  const BUCKET = 'proof.bundle';       // ← точное имя бакета в Storage
+  const BUCKET = 'proofbundle';       // ← точное имя бакета в Storage
   const TABLE  = 'proof_bundle';       // ← точное имя таблицы в Postgres
 
   const handleUpload = async () => {
