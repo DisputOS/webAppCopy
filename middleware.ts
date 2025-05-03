@@ -11,7 +11,7 @@ export async function middleware(req: NextRequest) {
 
   const isProduction = process.env.VERCEL_ENV === 'production' || process.env.VERCEL === '1';
 
-  // 1. HTTP Basic Auth only for Vercel
+  // 1. Basic Auth (Vercel only)
   if (isProduction && process.env.ENABLE_BASIC_AUTH === 'true') {
     const authHeader = req.headers.get('authorization');
     const basicAuth = authHeader?.split(' ')[1];
@@ -30,10 +30,10 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // 2. Allow public access to /public/*
+  // 2. Allow everything under /public without auth
   const isPublic = pathname.startsWith('/public') || pathname === '/';
 
-  // 3. Protect everything else
+  // 3. If route is NOT public and user is not logged in — redirect
   if (!isPublic && !session) {
     return NextResponse.redirect(new URL('/public/login', req.url));
   }
@@ -41,7 +41,7 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-// Apply middleware to all routes except static files
+// Middleware should run on all routes except static files
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
