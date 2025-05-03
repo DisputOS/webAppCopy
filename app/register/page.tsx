@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
+  const supabase = useSupabaseClient(); // ✅ use context-aware Supabase client
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,10 +20,12 @@ export default function RegisterPage() {
   const handleRegister = async () => {
     setLoading(true);
     setError(null);
+
     const { error } = await supabase.auth.signUp({
       email,
-      password
+      password,
     });
+
     if (error) {
       setError(error.message);
       setLoading(false);
@@ -41,7 +45,7 @@ export default function RegisterPage() {
             type="email"
             placeholder="you@example.com"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
           <label className="block text-sm font-medium text-gray-600">Пароль</label>
@@ -49,18 +53,22 @@ export default function RegisterPage() {
             type="password"
             placeholder="********"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
           {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
         </div>
 
-        <Button onClick={handleRegister} disabled={loading} className="w-full flex justify-center">
+        <Button
+          onClick={handleRegister}
+          disabled={loading}
+          className="w-full flex justify-center"
+        >
           {loading ? <Loader2 className="animate-spin" /> : "Зареєструватись"}
         </Button>
 
         <p className="text-sm text-gray-600 text-center">
-          Вже маєте акаунт?{' '}
+          Вже маєте акаунт?{" "}
           <Link href="/login" className="text-blue-600 hover:underline">
             Увійти
           </Link>
