@@ -35,7 +35,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-6">
+    <main className="min-h-screen bg-gray-950 text-white font-mono flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-white mb-6 text-center uppercase tracking-wide">
           Login to Disput AI
@@ -65,7 +65,7 @@ export default function LoginPage() {
             className="w-full flex items-center justify-center gap-2 border border-gray-500 text-lg text-white bg-transparent hover:bg-gray-800"
           >
             {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <User className="w-5 h-5" />
             )}
@@ -74,7 +74,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-sm text-gray-400 text-center">
-          Don't have an account?{' '}
+          Don’t have an account?{" "}
           <Link
             href="/register"
             className="text-blue-400 hover:underline font-medium"
