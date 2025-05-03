@@ -6,7 +6,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 
 export default function LoginPage() {
   const supabase = useSupabaseClient();
@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
 
     setLoading(false);
@@ -62,15 +62,17 @@ export default function LoginPage() {
           <Button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 border border-gray-500 text-lg text-white bg-transparent hover:bg-gray-800">
-            <User className="w-5 h-5" /> Login
+            className="w-full flex items-center justify-center gap-2 border border-gray-500 text-lg text-white bg-transparent hover:bg-gray-800"
           >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />} Log in
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <User className="w-5 h-5" />
+            )}
+            Login
           </Button>
         </div>
 
-
-        
         <p className="mt-6 text-sm text-gray-400 text-center">
           Don't have an account?{' '}
           <Link
