@@ -15,59 +15,68 @@ export default function EvidenceUploader({ caseId }: Props) {
   const session = useSession();
   const router = useRouter();
 
+  // ─────────────────────────── state
   const [files, setFiles] = useState<FileList | null>(null);
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ─────────────────────────── config
+  const BUCKET = 'proof.bundle';       // ← точное имя бакета в Storage
+  const TABLE  = 'proof_bundle';       // ← точное имя таблицы в Postgres
+
   const handleUpload = async () => {
-    if (!files || files.length === 0) {
-      setError('Оберіть хоча б один файл');
-      return;
-    }
-    if (!session) {
-      setError('Потрібно увійти');
-      return;
-    }
+    // basic checks
+    if (!files?.length) return setError('Оберіть хоча б один файл');
+    if (!session)      return setError('Потрібно увійти');
+
     setError(null);
     setLoading(true);
 
     try {
-      // 1. загружаем файлы у bucket `proof_bundle`
+      /* 1. Upload every selected file to Storage bucket */
       const urls: string[] = [];
+
       for (const file of Array.from(files)) {
         const filePath = `${caseId}/${Date.now()}-${file.name}`;
-        const { error: uploadErr } = await supabase.storage
-          .from('proof.bundle')
+
+        const { error: uploadErr } = await supabase
+          .storage
+          .from(BUCKET)
           .upload(filePath, file, { upsert: false });
+
         if (uploadErr) throw uploadErr;
 
+        // get public URL of the uploaded object
         const {
           data: { publicUrl },
-        } = supabase.storage.from('proof_bundle').getPublicUrl(filePath);
+        } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
 
         urls.push(publicUrl);
       }
 
-      // 2. вставляем строку в таблицу `proof_bundle`
-      const { error: insertErr } = await supabase.from('proof_bundle').insert([
-        {
-          user_id: session.user.id,
-          dispute_id: caseId,
-          receipt_url: urls[0] || null, // первое загруженное как «чек» (пример)
-          evidence_source: 'user_upload',
-          dispute_type: 'digital_good',
-          screenshot_urls: urls.slice(1), // остальные как скрины
-          user_description: description,
-          policy_snapshot: null, // заполни, если надо
-        },
-      ]);
+      /* 2. Insert a row into proof_bundle table */
+      const { error: insertErr } = await supabase
+        .from(TABLE)
+        .insert([
+          {
+            user_id:       session.user.id,
+            dispute_id:    caseId,
+            receipt_url:   urls[0] ?? null,
+            evidence_source: 'user_upload',
+            dispute_type:  'digital_good',
+            screenshot_urls: urls.slice(1),
+            user_description: description,
+            policy_snapshot: null,
+          },
+        ]);
 
       if (insertErr) throw insertErr;
 
-      // 3. переход на шаг генерации
+      /* 3. Redirect to template‑generation step */
       router.push(`/cases/${caseId}/generate`);
     } catch (err: any) {
+      console.error(err);                      // ← увидите полный текст ошибки
       setError(err.message ?? 'Помилка завантаження');
     } finally {
       setLoading(false);
@@ -94,9 +103,13 @@ export default function EvidenceUploader({ caseId }: Props) {
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
 
-      <Button onClick={handleUpload} disabled={loading} className="flex items-center gap-2">
+      <Button
+        onClick={handleUpload}
+        disabled={loading}
+        className="flex items-center gap-2"
+      >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        Завантажити та продовжити
+        Завантажити та продовжити
       </Button>
     </div>
   );
