@@ -1,5 +1,16 @@
 'use client';
+import Header from '@/components/Header';
 
+export default function SomePage() {
+  return (
+    <>
+      <Header />
+      <main className="p-6">
+        {/* Your page content here */}
+      </main>
+    </>
+  );
+}
 import { useEffect, useState } from 'react';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import { Loader2, PlusCircle, AlertTriangle } from 'lucide-react';
