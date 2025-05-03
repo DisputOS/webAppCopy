@@ -30,18 +30,19 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // 2. Allow everything under /public without auth
-  const isPublic = pathname.startsWith('/public') || pathname === '/';
+  // 2. Allow only /public/* and root / without auth
+  const isPublicPath =
+    pathname === '/' || pathname.startsWith('/public');
 
-  // 3. If route is NOT public and user is not logged in — redirect
-  if (!isPublic && !session) {
+  // 3. Block access to everything else if not authenticated
+  if (!isPublicPath && !session) {
     return NextResponse.redirect(new URL('/public/login', req.url));
   }
 
   return res;
 }
 
-// Middleware should run on all routes except static files
+// Apply middleware to all routes except static files
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
