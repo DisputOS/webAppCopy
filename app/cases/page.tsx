@@ -1,4 +1,11 @@
 'use client';
+
+import { useEffect, useState } from 'react';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
+import { Loader2, PlusCircle, AlertTriangle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+
 import Header from '@/components/Header';
 
 export default function SomePage() {
@@ -11,10 +18,7 @@ export default function SomePage() {
     </>
   );
 }
-import { useEffect, useState } from 'react';
-import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
-import { Loader2, PlusCircle, AlertTriangle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
 
 interface DisputeWithProof extends Record<string, any> {
   hasProof: boolean;
