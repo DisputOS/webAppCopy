@@ -38,7 +38,7 @@ export default function EvidenceUploader({ caseId }: Props) {
       for (const file of Array.from(files)) {
         const filePath = `${caseId}/${Date.now()}-${file.name}`;
         const { error: uploadErr } = await supabase.storage
-          .from('proof_bundle')
+          .from('proof.bundle')
           .upload(filePath, file, { upsert: false });
         if (uploadErr) throw uploadErr;
 
