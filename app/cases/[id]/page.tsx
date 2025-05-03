@@ -1,4 +1,4 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -11,11 +11,11 @@ export const dynamic = 'force-dynamic'; // always fetch fresh data
  * Route: /cases/[id]
  */
 export default async function DisputeDetail({ params }: { params: { id: string } }) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = createPagesServerClient({ cookies });
 
   // Ensure the user is logged‑in
   const {
-    data: { session }
+    data: { session },
   } = await supabase.auth.getSession();
 
   if (!session) {
@@ -39,13 +39,16 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     draft: 'bg-gray-200 text-gray-600',
     open: 'bg-blue-100 text-blue-700',
     won: 'bg-green-100 text-green-700',
-    lost: 'bg-red-100 text-red-700'
+    lost: 'bg-red-100 text-red-700',
   } as Record<string, string>;
 
   return (
     <main className="max-w-3xl mx-auto p-6">
       {/* Back */}
-      <Link href="/cases" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 mb-4">
+      <Link
+        href="/cases"
+        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 mb-4"
+      >
         <ArrowLeft className="w-4 h-4" /> Повернутись до списку
       </Link>
 
@@ -55,7 +58,11 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
             {dispute.problem_type || 'Без категорії'}
           </h1>
-          <span className={`px-3 py-1 text-xs rounded-full ${statusColor[dispute.status] || 'bg-gray-100 text-gray-600'}`}>
+          <span
+            className={`px-3 py-1 text-xs rounded-full ${
+              statusColor[dispute.status] || 'bg-gray-100 text-gray-600'
+            }`}
+          >
             {dispute.status || 'невідомо'}
           </span>
         </div>
