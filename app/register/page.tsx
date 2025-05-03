@@ -10,36 +10,36 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   const supabase = useSupabaseClient();
-  const router = useRouter();
+  const router   = useRouter();
 
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
-  const [sent,  setSent]        = useState(false);   // ← show “check email” state
+  const [sent,  setSent]        = useState(false);
 
+  /* ————— SIGN‑UP ————— */
   const handleRegister = async () => {
     setLoading(true);
     setError(null);
+
+    const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;   // <— works in dev & prod
 
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/`  // where the magic‑link lands
+        emailRedirectTo: `${SITE_URL}/auth/callback`
       }
     });
 
     setLoading(false);
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setSent(true);                 // switch to “check your e‑mail” panel
-    }
+    if (error) setError(error.message);
+    else       setSent(true);         // show “Check your e‑mail” panel
   };
 
-  /* ------------- UI --------------- */
+  /* ————— UI ————— */
   return (
     <main className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-6 font-mono">
       <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-lg">
@@ -48,28 +48,23 @@ export default function RegisterPage() {
         </h1>
 
         {sent ? (
-          /* After sign‑up */
+          /* ——— Check e‑mail panel ——— */
           <div className="space-y-4 text-center">
             <MailCheck className="mx-auto w-12 h-12 text-blue-400" />
             <p className="text-sm text-gray-300">
-              Almost there! <br />
-              We’ve sent a confirmation link to&nbsp;
+              Almost there! We’ve sent a confirmation link to&nbsp;
               <span className="font-semibold">{email}</span>.
             </p>
             <p className="text-xs text-gray-500">
-              Open the e‑mail and click &ldquo;Confirm&rdquo; to activate your account.
+              Open the e‑mail and click “Confirm” to activate your account.
             </p>
 
-            <Button
-              variant="primary"
-              className="w-full mt-4"
-              onClick={() => router.push("/login")}
-            >
+            <Button className="w-full" onClick={() => router.push("/login")}>
               Back to login
             </Button>
           </div>
         ) : (
-          /* Sign‑up form */
+          /* ——— Sign‑up form ——— */
           <div className="space-y-5">
             <Input
               type="email"
