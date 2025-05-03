@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -15,68 +15,70 @@ export default function EvidenceUploader({ caseId }: Props) {
   const session = useSession();
   const router = useRouter();
 
-  // ─────────────────────────── state
   const [files, setFiles] = useState<FileList | null>(null);
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authUid, setAuthUid] = useState<string | null>(null);
 
-  // ─────────────────────────── config
-  const BUCKET = 'proofbundle';       // ← точное имя бакета в Storage
-  const TABLE  = 'proof_bundle';       // ← точное имя таблицы в Postgres
+  // 🔍 check actual auth.uid from token
+  useEffect(() => {
+    const fetchUid = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('auth.getUser() error:', error.message);
+        return;
+      }
+      setAuthUid(data?.user?.id ?? null);
+    };
+    fetchUid();
+  }, [supabase]);
 
   const handleUpload = async () => {
-    // basic checks
     if (!files?.length) return setError('Оберіть хоча б один файл');
-    if (!session)      return setError('Потрібно увійти');
+    if (!session || !authUid) return setError('Потрібно увійти');
+
+    if (session.user.id !== authUid) {
+      return setError('UID не збігається з auth.uid(). Спробуй перезайти.');
+    }
 
     setError(null);
     setLoading(true);
 
     try {
-      /* 1. Upload every selected file to Storage bucket */
       const urls: string[] = [];
+      const BUCKET = 'proofbundle';
+      const TABLE = 'proof_bundle';
 
       for (const file of Array.from(files)) {
         const filePath = `${caseId}/${Date.now()}-${file.name}`;
-
-        const { error: uploadErr } = await supabase
-          .storage
+        const { error: uploadErr } = await supabase.storage
           .from(BUCKET)
           .upload(filePath, file, { upsert: false });
-
         if (uploadErr) throw uploadErr;
 
-        // get public URL of the uploaded object
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-
-        urls.push(publicUrl);
+        const { data } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+        urls.push(data.publicUrl);
       }
 
-      /* 2. Insert a row into proof_bundle table */
-      const { error: insertErr } = await supabase
-        .from(TABLE)
-        .insert([
-          {
-            user_id:       session.user.id,
-            dispute_id:    caseId,
-            receipt_url:   urls[0] ?? null,
-            evidence_source: 'user_upload',
-            dispute_type:  'digital_good',
-            screenshot_urls: urls.slice(1),
-            user_description: description,
-            policy_snapshot: null,
-          },
-        ]);
+      const { error: insertErr } = await supabase.from(TABLE).insert([
+        {
+          user_id: session.user.id, // ✅ must match auth.uid()
+          dispute_id: caseId,
+          receipt_url: urls[0] ?? null,
+          evidence_source: 'user_upload',
+          dispute_type: 'digital_good',
+          screenshot_urls: urls.slice(1),
+          user_description: description,
+          policy_snapshot: null,
+        },
+      ]);
 
       if (insertErr) throw insertErr;
 
-      /* 3. Redirect to template‑generation step */
       router.push(`/cases/${caseId}/generate`);
     } catch (err: any) {
-      console.error(err);                      // ← увидите полный текст ошибки
+      console.error('Insert error:', err.message);
       setError(err.message ?? 'Помилка завантаження');
     } finally {
       setLoading(false);
@@ -109,7 +111,7 @@ export default function EvidenceUploader({ caseId }: Props) {
         className="flex items-center gap-2"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        Завантажити та продовжити
+        Завантажити та продовжити
       </Button>
     </div>
   );
