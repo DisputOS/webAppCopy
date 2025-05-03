@@ -1,46 +1,88 @@
-import { clsx } from 'clsx';
-import { ButtonHTMLAttributes } from 'react';
+"use client";
 
-export type Variant = 'primary' | 'outline' | 'secondary';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Loader2, User } from "lucide-react";
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-}
+export default function LoginPage() {
+  const supabase = useSupabaseClient();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export function Button({
-  className,
-  variant = 'primary',
-  ...props
-}: Props) {
-  /* base */
-  const base =
-    'px-4 py-2 rounded-lg font-medium transition-colors ' +
-    'focus:outline-none focus:ring-2 focus:ring-offset-2 ' +
-    'disabled:opacity-50 disabled:pointer-events-none ' +
-    'ring-offset-white dark:ring-offset-gray-950';
+  const handleLogin = async () => {
+    setLoading(true);
+    setError(null);
 
-  /* variants */
-  const variants: Record<Variant, string> = {
-    primary: clsx(
-      'bg-blue-600 text-white hover:bg-blue-500',
-      'dark:bg-blue-500 dark:hover:bg-blue-400'
-    ),
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    outline: clsx(
-      'border border-blue-600 text-blue-600 hover:bg-blue-50',
-      'dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-500/10'
-    ),
+    setLoading(false);
 
-    secondary: clsx(
-      'bg-gray-600 text-white hover:bg-gray-500',
-      'dark:bg-gray-700 dark:hover:bg-gray-600'
-    )
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/cases");
+    }
   };
 
   return (
-    <button
-      className={clsx(base, variants[variant], className)}
-      {...props}
-    />
+    <main className="min-h-screen bg-gray-950 text-white font-mono flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-xl">
+        <h1 className="text-2xl font-bold text-white mb-6 text-center uppercase tracking-wide">
+          Login to Disput AI
+        </h1>
+
+        <div className="space-y-4">
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          {error && (
+            <p className="text-sm text-red-500 text-center">{error}</p>
+          )}
+
+          <Button
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 border border-gray-500 text-lg text-white bg-transparent hover:bg-gray-800"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <User className="w-5 h-5" />
+            )}
+            Login
+          </Button>
+        </div>
+
+        <p className="mt-6 text-sm text-gray-400 text-center">
+          Don’t have an account?{" "}
+          <Link
+            href="/register"
+            className="text-blue-400 hover:underline font-medium"
+          >
+            Register
+          </Link>
+        </p>
+      </div>
+    </main>
   );
 }
