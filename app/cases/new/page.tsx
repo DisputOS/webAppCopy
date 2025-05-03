@@ -9,12 +9,12 @@ import { CheckCircle, Circle } from 'lucide-react';
 import clsx from 'clsx';
 
 const steps = [
-  'Сума та валюта',
-  'Платформа',
-  'Дата покупки',
-  'Тип проблеми',
-  'Опис проблеми',
-  'Підтвердження'
+  'Amount & Currency',
+  'Platform',
+  'Purchase Date',
+  'Problem Type',
+  'Problem Description',
+  'Confirmation'
 ];
 
 export default function NewDisputePage() {
@@ -85,34 +85,33 @@ export default function NewDisputePage() {
   };
 
   return (
-    <main className="max-w-xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-blue-700 mb-4">Новий спір</h1>
+    <main className="max-w-xl mx-auto p-6 text-white font-mono">
+      <h1 className="text-2xl font-bold text-white mb-4">New Dispute</h1>
 
-      {/* Step indicator */}
       <div className="flex justify-center gap-2 mb-6">
         {steps.map((_, i) => (
           <span key={i}>
             {i <= step ? (
-              <CheckCircle className="w-5 h-5 text-blue-600" />
+              <CheckCircle className="w-5 h-5 text-green-500" />
             ) : (
-              <Circle className="w-5 h-5 text-gray-300" />
+              <Circle className="w-5 h-5 text-gray-500" />
             )}
           </span>
         ))}
       </div>
 
-      <div className="bg-white shadow-md rounded-xl p-6 space-y-6 animate-fadeIn">
-        <h2 className="text-lg font-semibold text-gray-700">Крок {step + 1} / {steps.length}: {steps[step]}</h2>
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6 animate-fadeIn">
+        <h2 className="text-lg font-semibold">Step {step + 1} / {steps.length}: {steps[step]}</h2>
 
         {step === 0 && (
           <div className="space-y-4">
-            <Input placeholder="Сума (наприклад, 300)" value={form.purchase_amount} onChange={(e) => handleChange('purchase_amount', e.target.value)} />
-            <Input placeholder="Валюта (наприклад, євро)" value={form.currency} onChange={(e) => handleChange('currency', e.target.value)} />
+            <Input placeholder="Amount (e.g., 300)" value={form.purchase_amount} onChange={(e) => handleChange('purchase_amount', e.target.value)} />
+            <Input placeholder="Currency (e.g., EUR)" value={form.currency} onChange={(e) => handleChange('currency', e.target.value)} />
           </div>
         )}
 
         {step === 1 && (
-          <Input placeholder="Платформа (наприклад, Kaufland)" value={form.platform_name} onChange={(e) => handleChange('platform_name', e.target.value)} />
+          <Input placeholder="Platform (e.g., Kaufland)" value={form.platform_name} onChange={(e) => handleChange('platform_name', e.target.value)} />
         )}
 
         {step === 2 && (
@@ -120,15 +119,15 @@ export default function NewDisputePage() {
         )}
 
         {step === 3 && (
-          <Input placeholder="Тип проблеми (наприклад, товар не прийшов)" value={form.problem_type} onChange={(e) => handleChange('problem_type', e.target.value)} />
+          <Input placeholder="Problem type (e.g., item not delivered)" value={form.problem_type} onChange={(e) => handleChange('problem_type', e.target.value)} />
         )}
 
         {step === 4 && (
           <textarea
-            placeholder="Опис ситуації (мінімум 20 символів)..."
+            placeholder="Describe the issue (at least 20 characters)..."
             value={form.description}
             onChange={(e) => handleChange('description', e.target.value)}
-            className="w-full border rounded p-3 text-sm min-h-[100px]"
+            className="w-full border border-gray-700 rounded p-3 text-sm min-h-[100px] bg-gray-950 text-white"
           />
         )}
 
@@ -136,18 +135,18 @@ export default function NewDisputePage() {
           <div className="space-y-4">
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-              <span className="text-sm text-gray-700">Я підтверджую достовірність інформації</span>
+              <span className="text-sm">I confirm the information is accurate</span>
             </label>
           </div>
         )}
 
         <div className="flex justify-between pt-4">
-          <Button variant="outline" onClick={back} disabled={step === 0}>Назад</Button>
+          <Button variant="outline" onClick={back} disabled={step === 0}>Back</Button>
           {step < steps.length - 1 ? (
-            <Button onClick={next} disabled={!validateStep()}>Далі</Button>
+            <Button onClick={next} disabled={!validateStep()}>Next</Button>
           ) : (
             <Button onClick={handleSubmit} disabled={loading || !validateStep()}>
-              {loading ? 'Збереження...' : 'Завершити'}
+              {loading ? 'Saving...' : 'Submit'}
             </Button>
           )}
         </div>
