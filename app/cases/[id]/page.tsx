@@ -6,20 +6,14 @@ import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp } from 'lucide-reac
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Detail page for a single dispute with action buttons (proof / template / pdf)
- * Route: /cases/[id]
- */
 export default async function DisputeDetail({ params }: { params: { id: string } }) {
   const supabase = createServerComponentClient({ cookies });
 
-  // session
   const {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session) redirect('/login');
 
-  // dispute
   const { data: dispute, error } = await supabase
     .from('disputes')
     .select('*')
@@ -28,7 +22,6 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     .single();
   if (error || !dispute) notFound();
 
-  // proof files count
   const { count: rawCount } = await supabase
     .from('proof_bundle')
     .select('*', { count: 'exact', head: true })
@@ -36,8 +29,6 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     .eq('user_id', session.user.id);
 
   const proofCount: number = rawCount ?? 0;
-
-  // pdf ready?
   const pdfReady = Boolean(dispute.pdf_url);
 
   const statusColor: Record<string, string> = {
@@ -48,109 +39,100 @@ export default async function DisputeDetail({ params }: { params: { id: string }
   };
 
   return (
-    <main className="max-w-3xl mx-auto p-6 space-y-6">
-      {/* back */}
-      <Link
-        href="/cases"
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-      >
-        <ArrowLeft className="w-4 h-4" /> Повернутись до списку
+    <main className="min-h-screen bg-gray-950 text-white font-mono p-6 space-y-8">
+      <Link href="/cases" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
 
-      {/* dispute card */}
-      <div className="bg-white shadow-lg rounded-2xl p-8 space-y-6 animate-fadeInUp">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            {dispute.problem_type || 'Без категорії'}
+          <h1 className="text-2xl font-bold">
+            {dispute.problem_type || 'Untitled Dispute'}
           </h1>
           <span
             className={`px-3 py-1 text-xs rounded-full ${
-              statusColor[dispute.status] || 'bg-gray-100 text-gray-600'
+              statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
             }`}
           >
-            {dispute.status || 'невідомо'}
+            {dispute.status || 'unknown'}
           </span>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-700">
+        <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-400">
           <div>
-            <p className="font-medium text-gray-500">Платформа</p>
+            <p className="font-medium text-gray-500">Platform</p>
             <p>{dispute.platform_name}</p>
           </div>
           <div>
-            <p className="font-medium text-gray-500">Дата покупки</p>
+            <p className="font-medium text-gray-500">Purchase Date</p>
             <p>{new Date(dispute.purchase_date).toLocaleDateString()}</p>
           </div>
           <div>
-            <p className="font-medium text-gray-500">Сума</p>
+            <p className="font-medium text-gray-500">Amount</p>
             <p>
               {dispute.purchase_amount ?? '—'} {dispute.currency ?? ''}
             </p>
           </div>
           <div>
-            <p className="font-medium text-gray-500">Створено</p>
+            <p className="font-medium text-gray-500">Created At</p>
             <p>{new Date(dispute.created_at).toLocaleDateString()}</p>
           </div>
         </div>
 
         <div>
-          <p className="font-medium text-gray-500 mb-1">Опис</p>
-          <p className="whitespace-pre-line text-gray-800 leading-relaxed">
+          <p className="font-medium text-gray-500 mb-1">Description</p>
+          <p className="whitespace-pre-line text-gray-100 leading-relaxed">
             {dispute.description}
           </p>
         </div>
 
         {dispute.status === 'won' && (
-          <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
-            <BadgeCheck className="w-5 h-5" /> Вітаємо! Ваш спір вирішено на вашу користь.
+          <div className="flex items-center gap-2 text-green-500 bg-green-950 border border-green-800 rounded-lg p-3">
+            <BadgeCheck className="w-5 h-5" /> Congratulations! Your dispute was resolved in your favor.
           </div>
         )}
       </div>
 
-      {/* action panel */}
-      <div className="bg-white shadow rounded-xl p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="space-y-1 text-sm text-gray-600">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
+        <div className="space-y-1 text-sm text-gray-400">
           {proofCount === 0 ? (
-            <p>Для подальших дій додайте хоча б один доказ.</p>
+            <p>Please upload at least one proof to proceed.</p>
           ) : (
-            <p>Файлів додано: <strong>{proofCount}</strong></p>
+            <p>Proof files uploaded: <strong>{proofCount}</strong></p>
           )}
           {!pdfReady && proofCount > 0 && (
-            <p className="text-xs text-gray-400">PDF буде доступний після генерації.</p>
+            <p className="text-xs text-gray-500">PDF will be available after generation.</p>
           )}
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {/* Add proof */}
           <Link
             href={`/cases/${params.id}/evidence`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
           >
-            <FileUp className="w-4 h-4" /> Додати Proof
+            <FileUp className="w-4 h-4" /> Add Proof
           </Link>
 
-          {/* Generate template (disabled if no proof) */}
           <Link
             href={proofCount > 0 ? `/cases/${params.id}/generate` : '#'}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md shadow transition ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
               proofCount > 0
                 ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
             }`}
           >
-            <PlusCircle className="w-4 h-4" /> Згенерувати шаблон
+            <PlusCircle className="w-4 h-4" /> Generate Template
           </Link>
 
-          {/* Review PDF (disabled until ready) */}
           <Link
             href={pdfReady ? `/cases/${params.id}/review?pdf=${encodeURIComponent(dispute.pdf_url)}` : '#'}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md shadow transition ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
               pdfReady
                 ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
             }`}
           >
-            <FileText className="w-4 h-4" /> Переглянути PDF
+            <FileText className="w-4 h-4" /> View PDF
           </Link>
         </div>
       </div>
