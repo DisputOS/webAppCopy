@@ -103,7 +103,7 @@ export default function CasesPage() {
                   {d.problem_type || 'Untitled'}
                 </h2>
                 {!d.hasProof && (
-                  <AlertTriangle className="w-5 h-5 text-red-500" title="No proof uploaded" />
+                  <AlertTriangle className="w-5 h-5 text-red-500" />
                 )}
               </div>
               <p className="text-sm text-gray-400 line-clamp-2 mb-4">
