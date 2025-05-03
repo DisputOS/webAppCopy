@@ -29,7 +29,7 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient({ req, res })
 
   const { data: { session } } = await supabase.auth.getSession()
-  const isProtected = req.nextUrl.pathname.startsWith('/cases')
+  const isProtected = req.nextUrl.pathname.startsWith('/cases', '/settings','/profile','/api')
 
   if (isProtected && !session) {
     return NextResponse.redirect(new URL('/login', req.url))
