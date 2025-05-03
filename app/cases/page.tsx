@@ -64,7 +64,7 @@ export default function CasesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white font-mono p-6 max-w-6xl mx-auto">
+    <main className="min-h-screen bg-gray-950 text-white font-mono p-6 w-full">
       <div className="flex items-center justify-between mb-10">
         <h1 className="text-3xl font-bold">My Disputes</h1>
         <button
