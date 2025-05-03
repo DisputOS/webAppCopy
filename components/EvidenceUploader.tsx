@@ -80,7 +80,7 @@ export default function EvidenceUploader({ caseId }: Props) {
   };
 
   return (
-    <div className="space-y-6 bg-gray-900 p-6 rounded-xl border border-gray-700">
+    <div className="space-y-6 bg-gradient-to-b from-gray-900 via-gray-950 to-black p-6 rounded-xl border border-gray-700 shadow-lg">
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">Upload Files</label>
         <input
@@ -88,7 +88,7 @@ export default function EvidenceUploader({ caseId }: Props) {
           multiple
           accept="image/*,application/pdf"
           onChange={(e) => setFiles(e.target.files)}
-          className="w-full border border-gray-700 bg-gray-800 text-sm text-white rounded-lg px-4 py-2 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-600 hover:file:bg-blue-500"
+          className="w-full border border-gray-700 bg-gray-800 text-sm text-white rounded-lg px-4 py-2 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-gray-700 hover:file:bg-gray-600"
         />
       </div>
 
@@ -108,7 +108,7 @@ export default function EvidenceUploader({ caseId }: Props) {
       <Button
         onClick={handleUpload}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 border border-gray-500 text-white bg-transparent hover:bg-gray-800"
+        className="w-full flex items-center justify-center gap-2 border border-gray-600 text-white bg-gray-800 hover:bg-gray-700"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />} Upload & Continue
       </Button>
