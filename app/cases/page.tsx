@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
-import { Loader2, PlusCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, PlusCircle, AlertTriangle, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface DisputeWithProof extends Record<string, any> {
@@ -17,14 +17,12 @@ export default function CasesPage() {
   const [disputes, setDisputes] = useState<DisputeWithProof[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /** fetch disputes + whether they have proof_bundle rows */
   useEffect(() => {
     if (!session) return;
 
     const fetchData = async () => {
       setLoading(true);
 
-      // 1. get disputes
       const { data: base, error } = await supabase
         .from('disputes')
         .select('*')
@@ -36,7 +34,6 @@ export default function CasesPage() {
         return;
       }
 
-      // 2. for each dispute check proof_bundle count
       const withProof: DisputeWithProof[] = await Promise.all(
         base.map(async (d) => {
           const { count } = await supabase
@@ -92,36 +89,44 @@ export default function CasesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {disputes.map((d) => (
-            <div
-              key={d.id}
-              onClick={() => router.push(`/cases/${d.id}`)}
-              className="cursor-pointer border border-gray-800 rounded-xl p-5 bg-gray-900 hover:border-blue-600 transition"
-            >
-              <div className="flex justify-between items-start mb-3">
-                <h2 className="text-lg font-semibold">
-                  {d.problem_type || 'Untitled'}
-                </h2>
+          {disputes.map((d, index) => {
+            const isNew = index === 0;
+            return (
+              <div
+                key={d.id}
+                onClick={() => router.push(`/cases/${d.id}`)}
+                className="cursor-pointer border border-gray-800 rounded-xl p-5 bg-gray-900 hover:border-blue-600 transition relative"
+              >
+                {isNew && (
+                  <span className="absolute top-2 right-2 text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> New
+                  </span>
+                )}
+                <div className="flex justify-between items-start mb-3">
+                  <h2 className="text-lg font-semibold">
+                    {d.problem_type || 'Untitled'}
+                  </h2>
+                  {!d.hasProof && (
+                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                  )}
+                </div>
+                <p className="text-sm text-gray-400 line-clamp-2 mb-4">
+                  {d.description}
+                </p>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>
+                    Amount: <strong>{d.purchase_amount ?? '—'} {d.currency ?? ''}</strong>
+                  </span>
+                  <span>{new Date(d.created_at).toLocaleDateString()}</span>
+                </div>
                 {!d.hasProof && (
-                  <AlertTriangle className="w-5 h-5 text-red-500" />
+                  <p className="mt-3 text-xs text-red-500 font-medium">
+                    Upload proof to continue
+                  </p>
                 )}
               </div>
-              <p className="text-sm text-gray-400 line-clamp-2 mb-4">
-                {d.description}
-              </p>
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>
-                  Amount: <strong>{d.purchase_amount ?? '—'} {d.currency ?? ''}</strong>
-                </span>
-                <span>{new Date(d.created_at).toLocaleDateString()}</span>
-              </div>
-              {!d.hasProof && (
-                <p className="mt-3 text-xs text-red-500">
-                  Upload proof to continue
-                </p>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </main>
