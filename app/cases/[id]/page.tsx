@@ -7,7 +7,7 @@ import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp } from 'lucide-reac
 export const dynamic = 'force-dynamic';
 
 /**
- * Detail page for a single dispute with action buttons (evidence / template / pdf)
+ * Detail page for a single dispute with action buttons (proof / template / pdf)
  * Route: /cases/[id]
  */
 export default async function DisputeDetail({ params }: { params: { id: string } }) {
@@ -28,12 +28,14 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     .single();
   if (error || !dispute) notFound();
 
-  // evidence count
-  const { count: evidenceCount } = await supabase
-    .from('evidence')
+  // proof files count
+  const { count: rawCount } = await supabase
+    .from('proof_bundle')
     .select('*', { count: 'exact', head: true })
     .eq('dispute_id', params.id)
     .eq('user_id', session.user.id);
+
+  const proofCount: number = rawCount ?? 0;
 
   // pdf ready?
   const pdfReady = Boolean(dispute.pdf_url);
@@ -108,30 +110,30 @@ export default async function DisputeDetail({ params }: { params: { id: string }
       {/* action panel */}
       <div className="bg-white shadow rounded-xl p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div className="space-y-1 text-sm text-gray-600">
-          {evidenceCount === 0 ? (
+          {proofCount === 0 ? (
             <p>Для подальших дій додайте хоча б один доказ.</p>
           ) : (
-            <p>Доказів додано: <strong>{evidenceCount}</strong></p>
+            <p>Файлів додано: <strong>{proofCount}</strong></p>
           )}
-          {!pdfReady && evidenceCount > 0 && (
+          {!pdfReady && proofCount > 0 && (
             <p className="text-xs text-gray-400">PDF буде доступний після генерації.</p>
           )}
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {/* Add evidence */}
+          {/* Add proof */}
           <Link
             href={`/cases/${params.id}/evidence`}
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition"
           >
-            <FileUp className="w-4 h-4" /> Додати доказ
+            <FileUp className="w-4 h-4" /> Додати Proof
           </Link>
 
-          {/* Generate template (disabled if no evidence) */}
+          {/* Generate template (disabled if no proof) */}
           <Link
-            href={evidenceCount > 0 ? `/cases/${params.id}/generate` : '#'}
+            href={proofCount > 0 ? `/cases/${params.id}/generate` : '#'}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md shadow transition ${
-              evidenceCount > 0
+              proofCount > 0
                 ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
