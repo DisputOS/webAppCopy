@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const supabase = useSupabaseClient(); // ✅ this uses the session-aware client
+  const supabase = useSupabaseClient();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,20 +25,20 @@ export default function LoginPage() {
       password
     });
 
+    setLoading(false);
+
     if (error) {
       setError(error.message);
-      setLoading(false);
-      return;
+    } else {
+      router.push("/cases");
     }
-
-    router.push("/cases");
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-50 via-indigo-50 to-teal-50 p-6">
-      <div className="w-full max-w-md rounded-2xl shadow-xl bg-white/80 backdrop-blur-lg p-8 animate-fadeInUp border border-blue-100">
-        <h1 className="text-2xl font-bold text-blue-700 mb-6 text-center">
-          Вхід у Disput AI
+    <main className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-xl">
+        <h1 className="text-2xl font-bold text-white mb-6 text-center uppercase tracking-wide">
+          Login to Disput AI
         </h1>
 
         <div className="space-y-4">
@@ -50,13 +50,13 @@ export default function LoginPage() {
           />
           <Input
             type="password"
-            placeholder="Пароль"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
           {error && (
-            <p className="text-sm text-red-600 text-center">{error}</p>
+            <p className="text-sm text-red-500 text-center">{error}</p>
           )}
 
           <Button
@@ -64,17 +64,17 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full flex items-center justify-center gap-2"
           >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />} Увійти
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />} Log in
           </Button>
         </div>
 
-        <p className="mt-6 text-sm text-gray-600 text-center">
-          Не маєте акаунта?{' '}
+        <p className="mt-6 text-sm text-gray-400 text-center">
+          Don't have an account?{' '}
           <Link
             href="/register"
-            className="text-blue-600 hover:underline font-medium"
+            className="text-blue-400 hover:underline font-medium"
           >
-            Зареєструватися
+            Register
           </Link>
         </p>
       </div>
