@@ -9,7 +9,7 @@ export default function LandingComingSoon() {
       {/* Logo & tagline */}
       <div className="mb-10 animate-fadeInUp">
         <h1 className="text-5xl font-extrabold tracking-wider">
-          Disput<span className="text-blue-400">.ai</span>
+          Disput<span className="text-blue-400">.Brain</span>
         </h1>
         <p className="mt-2 uppercase text-sm tracking-[0.3em] text-gray-400">
           Legal Operating System
@@ -28,7 +28,7 @@ export default function LandingComingSoon() {
 
       {/* Footer */}
       <p className="animate-fadeInSlow absolute bottom-4 text-xs text-gray-500">
-        © 2025 Disput.ai — All rights reserved.
+        © 2025 DisputBrain — All rights reserved.
       </p>
 
       {/* Tailwind keyframes */}
