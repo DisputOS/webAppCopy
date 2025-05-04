@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 export default function LandingComingSoon() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gray-950 px-6 py-12 font-mono text-white text-center">
@@ -22,28 +20,11 @@ export default function LandingComingSoon() {
       <h2 className="mb-6 animate-fadeInUp text-4xl font-bold">We’re cooking something big.</h2>
 
       <p className="mx-auto max-w-lg animate-fadeInUp text-base leading-relaxed text-gray-300">
-        Disput.ai is currently in private alpha. Our AI‑powered legal engine will let you
-        file disputes, generate rock‑solid evidence bundles, and reclaim your digital
-        consumer rights in minutes. Stay tuned — public beta drops soon.
+        Disput.ai is building an AI‑powered autopilot for digital consumers. Soon you’ll be able
+        to file e‑commerce disputes, auto‑generate legally sound evidence bundles, and reclaim your
+        rights in minutes — not weeks. Our team is working hard on the private alpha; public beta
+        will open later this year.
       </p>
-
-      {/* CTA */}
-      <div className="mt-10 flex flex-col gap-4 animate-fadeInUp sm:flex-row">
-        <Link
-          href="mailto:hello@disput.ai?subject=Beta%20Access"
-          className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-blue-500 transition"
-        >
-          Request Beta Access
-        </Link>
-        <Link
-          href="https://twitter.com/disput_ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-lg border border-gray-600 px-6 py-3 text-sm font-semibold text-gray-300 hover:bg-gray-800 transition"
-        >
-          Follow Updates ↗
-        </Link>
-      </div>
 
       {/* Footer */}
       <p className="animate-fadeInSlow absolute bottom-4 text-xs text-gray-500">
