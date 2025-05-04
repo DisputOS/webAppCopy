@@ -1,57 +1,34 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function LandingComingSoon() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gray-950 px-6 py-12 font-mono text-white text-center">
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 -z-10 bg-[conic-gradient(at_bottom_right,theme(colors.blue.900),theme(colors.indigo.900),theme(colors.black))] bg-[length:400%_400%] animate-[spin_30s_linear_infinite] opacity-25 blur-3xl" />
+      {/* Animated background gradient using pure CSS */}
+      <div className="absolute inset-0 -z-10 bg-[conic-gradient(at_bottom_right,theme(colors.blue.900),theme(colors.indigo.900),theme(colors.black))] bg-[length:400%_400%] animate-slowSpin opacity-25 blur-3xl" />
 
       {/* Logo & tagline */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="mb-10"
-      >
+      <div className="mb-10 animate-fadeInUp">
         <h1 className="text-5xl font-extrabold tracking-wider">
           Disput<span className="text-blue-400">.ai</span>
         </h1>
         <p className="mt-2 uppercase text-sm tracking-[0.3em] text-gray-400">
           Legal Operating System
         </p>
-      </motion.div>
+      </div>
 
       {/* Message */}
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-        className="mb-6 text-4xl sm:text-5xl font-bold"
-      >
-        We’re cooking something big.
-      </motion.h2>
+      <h2 className="mb-6 animate-fadeInUp text-4xl font-bold">We’re cooking something big.</h2>
 
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.8 }}
-        className="mx-auto max-w-lg text-gray-300 text-base leading-relaxed"
-      >
+      <p className="mx-auto max-w-lg animate-fadeInUp text-base leading-relaxed text-gray-300">
         Disput.ai is currently in private alpha. Our AI‑powered legal engine will let you
         file disputes, generate rock‑solid evidence bundles, and reclaim your digital
         consumer rights in minutes. Stay tuned — public beta drops soon.
-      </motion.p>
+      </p>
 
       {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.8 }}
-        className="mt-10 flex flex-col gap-4 sm:flex-row"
-      >
+      <div className="mt-10 flex flex-col gap-4 animate-fadeInUp sm:flex-row">
         <Link
           href="mailto:hello@disput.ai?subject=Beta%20Access"
           className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-blue-500 transition"
@@ -66,17 +43,33 @@ export default function LandingComingSoon() {
         >
           Follow Updates ↗
         </Link>
-      </motion.div>
+      </div>
 
       {/* Footer */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.4 }}
-        transition={{ delay: 1.2, duration: 1 }}
-        className="absolute bottom-4 text-xs text-gray-500"
-      >
+      <p className="animate-fadeInSlow absolute bottom-4 text-xs text-gray-500">
         © 2025 Disput.ai — All rights reserved.
-      </motion.p>
+      </p>
+
+      {/* Tailwind keyframes */}
+      <style jsx>{`
+        @keyframes slowSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .animate-slowSpin { animation: slowSpin 40s linear infinite; }
+
+        @keyframes fadeInUp {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
+
+        @keyframes fadeInSlow {
+          0% { opacity: 0; }
+          100% { opacity: 0.4; }
+        }
+        .animate-fadeInSlow { animation: fadeInSlow 2s ease forwards 1.2s; }
+      `}</style>
     </main>
   );
 }
