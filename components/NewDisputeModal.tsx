@@ -58,10 +58,12 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-    if (!session) return;
-    setLoading(true);
+  if (!session) return;
+  setLoading(true);
 
-    const { error } = await supabase.from('disputes').insert([
+  const { data, error } = await supabase
+    .from('disputes')
+    .insert([
       {
         user_id: session.user.id,
         purchase_amount: parseFloat(form.purchase_amount),
@@ -72,14 +74,21 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         description: form.description,
         status: 'draft'
       }
-    ]);
+    ])
+    .select('id') // ⬅ отримуємо ID
+    .single();     // ⬅ витягуємо як один запис
 
-    setLoading(false);
-    if (!error) {
-      onClose();
-      location.reload(); // Refresh case list
-    }
-  };
+  setLoading(false);
+
+  if (error) {
+    console.error('Failed to create dispute:', error);
+    return;
+  }
+
+  if (data?.id) {
+    router.push(`/cases/${data.id}`); // ⬅ перенаправлення
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
