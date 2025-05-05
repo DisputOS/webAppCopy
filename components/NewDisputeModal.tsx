@@ -5,7 +5,7 @@ import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { CheckCircle, Circle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
+import { useRouter } from 'next/navigation';
 const steps = [
   'Amount & Currency',
   'Platform',
