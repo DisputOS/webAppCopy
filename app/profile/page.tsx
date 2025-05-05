@@ -41,7 +41,7 @@ export default function ProfilePage() {
     <>
       <Header />
 
-      <main className="min-h-screen bg-gray-950 text-white font-mono p-6">
+      <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
         <h1 className="text-2xl font-bold mb-6">My Profile</h1>
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 max-w-lg">
