@@ -59,7 +59,7 @@ export default function RegisterPage() {
 
   /* ───────────── UI ───────────── */
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-lg">
         <h1 className="text-2xl font-bold text-white mb-6 text-center uppercase tracking-wide">
           Create account
