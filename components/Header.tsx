@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import Link from 'next/link';
-import { User, Settings, LogOut, Menu, X } from 'lucide-react';
+import { User, Settings, LogOut, Menu, X, Folder } from 'lucide-react'; // ✅ додано Folder
 import clsx from 'clsx';
 
 export default function Header() {
@@ -36,7 +36,7 @@ export default function Header() {
     return (
       <Link
         href={href}
-        onClick={() => setMenuOpen(false)} // auto close on mobile
+        onClick={() => setMenuOpen(false)}
         className={clsx(
           'flex items-center gap-3 text-sm transition px-4 py-2 rounded',
           isActive ? 'text-white bg-gray-800' : 'text-gray-300 hover:text-white'
@@ -70,6 +70,7 @@ export default function Header() {
         {/* Desktop Nav */}
         {session && (
           <nav className="hidden sm:flex items-center gap-4">
+            <NavLink href="/cases" icon={Folder} label="Cases" /> {/* ✅ додано */}
             <NavLink href="/profile" icon={User} label="Profile" />
             <NavLink href="/settings" icon={Settings} label="Settings" />
             <button
@@ -85,10 +86,9 @@ export default function Header() {
 
       {/* Mobile Slide-out Nav */}
       {menuOpen && session && (
-        <div
-          className="sm:hidden absolute top-full left-0 w-full bg-gray-900 border-t border-gray-800 shadow-md animate-fade-in-down"
-        >
+        <div className="sm:hidden absolute top-full left-0 w-full bg-gray-900 border-t border-gray-800 shadow-md animate-fade-in-down">
           <div className="flex flex-col py-2">
+            <NavLink href="/cases" icon={Folder} label="Cases" /> {/* ✅ додано */}
             <NavLink href="/profile" icon={User} label="Profile" />
             <NavLink href="/settings" icon={Settings} label="Settings" />
             <button
