@@ -8,13 +8,15 @@ export async function POST(req: NextRequest) {
   const disputeId = formData.get('dispute_id');
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session || !disputeId) return NextResponse.redirect('/login');
+    data: { user },
+  } = await supabase.auth.getUser(); // ✅ secure
+  if (!user || !disputeId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-  const userId = session.user.id;
+  const userId = user.id;
 
-  // 🛡 Optional: ensure dispute not submitted
+  // Optional: prevent deleting submitted disputes
   const { data: dispute } = await supabase
     .from('disputes')
     .select('used_in_contest')
@@ -26,14 +28,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Dispute already submitted. Cannot delete.' }, { status: 403 });
   }
 
-  // 🗑 Delete dispute
+  // Delete dispute
   await supabase
     .from('disputes')
     .delete()
     .eq('id', disputeId)
     .eq('user_id', userId);
 
-  // 🧾 Log deletion
+  // Log action
   await supabase.from('dispute_logs').insert({
     dispute_id: disputeId,
     user_id: userId,
@@ -41,5 +43,6 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   });
 
-  return NextResponse.redirect(new URL('/cases', req.url));
+  // ✅ Return JSON instead of redirect
+  return NextResponse.json({ success: true });
 }
