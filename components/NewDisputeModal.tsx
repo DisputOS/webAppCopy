@@ -18,7 +18,7 @@ const steps = [
 export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
   const session = useSession();
-
+  const router = useRouter(); // <-- Вот это добавь!
   const [step, setStep] = useState(0);
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
