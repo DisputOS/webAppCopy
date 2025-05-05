@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Archive, Undo2 } from 'lucide-react';
 
 export function ArchiveControls({
   disputeId,
@@ -27,28 +28,25 @@ export function ArchiveControls({
     }
   };
 
+  if (archived) {
+    return (
+      <button
+        onClick={() => handleArchiveToggle(false)}
+        className="flex items-center gap-2 text-sm text-yellow-500 hover:text-yellow-400 transition w-full px-2 py-1"
+      >
+        <Undo2 className="w-4 h-4" />
+        Undo Archive
+      </button>
+    );
+  }
+
   return (
-    <div className="mt-6">
-      {archived ? (
-        <div className="bg-yellow-800 text-yellow-100 p-4 rounded flex justify-between items-center">
-          <span>This dispute has been archived.</span>
-          {undoAvailable && (
-            <button
-              onClick={() => handleArchiveToggle(false)}
-              className="ml-4 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-sm"
-            >
-              Undo
-            </button>
-          )}
-        </div>
-      ) : (
-        <button
-          onClick={() => handleArchiveToggle(true)}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-        >
-          Archive Dispute
-        </button>
-      )}
-    </div>
+    <button
+      onClick={() => handleArchiveToggle(true)}
+      className="flex items-center gap-2 text-sm text-gray-300 hover:text-gray-100 transition w-full px-2 py-1"
+    >
+      <Archive className="w-4 h-4" />
+      Archive
+    </button>
   );
 }
