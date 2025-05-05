@@ -40,7 +40,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
   };
 
   return (
-    <main className=""min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6"">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
       <Link href="/cases" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
