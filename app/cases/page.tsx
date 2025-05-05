@@ -31,6 +31,7 @@ export default function CasesPage() {
       .from('disputes')
       .select('*')
       .eq('user_id', session.user.id)
+      .eq('archived', false)
       .order('created_at', { ascending: false });
 
     const withProof = await Promise.all(
