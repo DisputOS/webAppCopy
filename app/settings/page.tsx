@@ -103,7 +103,7 @@ export default function SettingsPage() {
   return (
     <>
       <Header />
-    <main className="min-h-screen bg-gray-950 text-white p-6 font-mono">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
       <div className="max-w-3xl mx-auto space-y-10">
         <h1 className="text-3xl font-bold">My Settings</h1>
 
