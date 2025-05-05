@@ -10,6 +10,7 @@ export default function SettingsPage() {
   const session = useSession();
   const supabase = useSupabaseClient();
 
+  const [username, setUsername] = useState('');
   const [retentionOptIn, setRetentionOptIn] = useState(false);
   const [language, setLanguage] = useState('en');
   const [tone, setTone] = useState('auto');
@@ -24,11 +25,12 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
       const { data, error } = await supabase
         .from('users')
-        .select('retention_opt_in, language_code, ai_response_tone_preference, plan')
+        .select('username, retention_opt_in, language_code, ai_response_tone_preference, plan')
         .eq('id', session.user.id)
         .single();
 
       if (data) {
+        setUsername(data.username || '');
         setRetentionOptIn(data.retention_opt_in);
         setLanguage(data.language_code || 'en');
         setTone(data.ai_response_tone_preference || 'auto');
@@ -49,6 +51,7 @@ export default function SettingsPage() {
     const { error } = await supabase
       .from('users')
       .update({
+        username,
         retention_opt_in: retentionOptIn,
         language_code: language,
         ai_response_tone_preference: tone,
@@ -65,6 +68,19 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold">My Settings</h1>
 
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
+          <div>
+            <Label htmlFor="username" className="block mb-1">👤 Username</Label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
+              placeholder="yourname"
+            />
+            <p className="text-xs text-gray-500 mt-1">Used for display and refund documents.</p>
+          </div>
+
           <div className="flex items-center justify-between">
             <Label htmlFor="retention">🛡 Keep my uploaded data after case is closed</Label>
             <Switch id="retention" checked={retentionOptIn} onChange={setRetentionOptIn} />
@@ -106,7 +122,7 @@ export default function SettingsPage() {
           </div>
 
           <Button onClick={handleSave} disabled={loading}>
-            {loading ? 'Saving...' : saved ? 'Saved ✅' : 'Save Settings'}
+            {loading ? 'Saving...' : saved ? 'Save Settings ✅' : 'Save Settings'}
           </Button>
         </section>
 
