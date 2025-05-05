@@ -3,9 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp } from 'lucide-react';
-
-import { ArchiveControls } from '@/components/ArchiveControls';
-import { DeleteButton } from '@/components/DeleteButton';
+ import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +44,11 @@ export default async function DisputeDetail({ params }: { params: { id: string }
       <Link href="/cases" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
+     
 
+<div className="mt-6 flex justify-end">
+  <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
+</div>
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="text-2xl font-bold">
@@ -140,11 +142,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         </div>
       </div>
 
-      {/* ✅ Кнопки архівування + видалення */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-4">
-        <ArchiveControls disputeId={dispute.id} isArchived={dispute.archived} />
-        <DeleteButton disputeId={dispute.id} />
-      </div>
+
     </main>
   );
 }
