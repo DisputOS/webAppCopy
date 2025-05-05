@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
@@ -11,7 +10,7 @@ export default function SettingsPage() {
   const session = useSession();
   const supabase = useSupabaseClient();
 
-  const [consent, setConsent] = useState(false);
+  const [retentionOptIn, setRetentionOptIn] = useState(false);
   const [language, setLanguage] = useState('en');
   const [tone, setTone] = useState('auto');
   const [plan, setPlan] = useState('free');
@@ -25,15 +24,17 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
       const { data, error } = await supabase
         .from('users')
-        .select('user_upload_consent, language_code, ai_response_tone_preference, plan')
+        .select('retention_opt_in, language_code, ai_response_tone_preference, plan')
         .eq('id', session.user.id)
         .single();
 
       if (data) {
-        setConsent(data.user_upload_consent);
+        setRetentionOptIn(data.retention_opt_in);
         setLanguage(data.language_code || 'en');
         setTone(data.ai_response_tone_preference || 'auto');
         setPlan(data.plan || 'free');
+      } else {
+        console.error('Failed to load settings:', error);
       }
     };
 
@@ -44,10 +45,11 @@ export default function SettingsPage() {
     if (!session?.user) return;
 
     setLoading(true);
+
     const { error } = await supabase
       .from('users')
       .update({
-        user_upload_consent: consent,
+        retention_opt_in: retentionOptIn,
         language_code: language,
         ai_response_tone_preference: tone,
       })
@@ -64,8 +66,8 @@ export default function SettingsPage() {
 
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <Label htmlFor="consent">🛡 Consent to use uploaded files as legal proof</Label>
-            <Switch id="consent" checked={consent} onChange={setConsent} />
+            <Label htmlFor="retention">🛡 Keep my uploaded data after case is closed</Label>
+            <Switch id="retention" checked={retentionOptIn} onChange={setRetentionOptIn} />
           </div>
 
           <div>
@@ -97,7 +99,9 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <Label className="text-gray-400">💼 Plan: <span className="text-white font-semibold">{plan}</span></Label>
+            <Label className="text-gray-400">
+              💼 Plan: <span className="text-white font-semibold">{plan}</span>
+            </Label>
             <p className="text-xs text-gray-500">Plan controls PDF watermarking and escalation options.</p>
           </div>
 
@@ -107,7 +111,7 @@ export default function SettingsPage() {
         </section>
 
         <p className="text-xs text-gray-500 text-center">
-          Your preferences power Legal UX, AI logic and risk handling in Disput.ai.
+          Your preferences power Legal UX, AI logic and fraud control.
         </p>
       </div>
     </main>
