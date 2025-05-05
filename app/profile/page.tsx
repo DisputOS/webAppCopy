@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Modal from '@/components/Modal';
 
 export default function ProfilePage() {
   const [showPlans, setShowPlans] = useState(false);
+  const router = useRouter();
 
   const handleSelectPlan = (plan: string) => {
-    // Here you can send it to Supabase or API
     console.log(`User selected: ${plan}`);
     setShowPlans(false);
   };
@@ -25,11 +26,19 @@ export default function ProfilePage() {
           <p className="text-sm text-gray-500">Plan</p>
           <p className="text-white font-medium">Free</p>
         </div>
+
         <button
           onClick={() => setShowPlans(true)}
-          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded transition"
+          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded transition w-full"
         >
           Upgrade Plan
+        </button>
+
+        <button
+          onClick={() => router.push('/cases/archived')}
+          className="mt-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded transition w-full"
+        >
+          View Archived Disputes
         </button>
       </div>
 
