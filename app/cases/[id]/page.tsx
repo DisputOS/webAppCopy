@@ -135,6 +135,20 @@ export default async function DisputeDetail({ params }: { params: { id: string }
             <FileText className="w-4 h-4" /> View PDF
           </Link>
         </div>
+
+                <form
+        action="/api/disputes/delete"
+        method="POST"
+        onSubmit={() => confirm('Are you sure you want to delete this dispute? This action cannot be undone.')}
+        >
+        <input type="hidden" name="dispute_id" value={dispute.id} />
+        <button
+            type="submit"
+            className="mt-6 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+            Delete Dispute
+        </button>
+        </form>
+
       </div>
     </main>
   );
