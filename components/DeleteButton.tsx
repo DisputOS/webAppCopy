@@ -1,5 +1,7 @@
 'use client';
 
+import { Trash2 } from 'lucide-react';
+
 export function DeleteButton({ disputeId }: { disputeId: string }) {
   const handleDelete = async () => {
     const confirmed = confirm(
@@ -23,9 +25,10 @@ export function DeleteButton({ disputeId }: { disputeId: string }) {
   return (
     <button
       onClick={handleDelete}
-      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+      className="flex items-center gap-2 text-sm text-red-500 hover:text-red-400 transition w-full px-2 py-1"
     >
-      Delete Dispute
+      <Trash2 className="w-4 h-4" />
+      Delete
     </button>
   );
 }
