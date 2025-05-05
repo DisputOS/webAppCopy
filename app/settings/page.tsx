@@ -65,7 +65,7 @@ export default function SettingsPage() {
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
           <div className="flex items-center justify-between">
             <Label htmlFor="consent">🛡 Consent to use uploaded files as legal proof</Label>
-            <Switch id="consent" checked={consent} onCheckedChange={setConsent} />
+            <Switch id="consent" checked={consent} onChange={setConsent} />
           </div>
 
           <div>
