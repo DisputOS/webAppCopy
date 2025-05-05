@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import Modal from '@/components/Modal';
 import ArchivedDisputesModal from '@/components/ArchivedDisputesModal';
+import Header from '@/components/Header';
 
 export default function ProfilePage() {
   const [showPlans, setShowPlans] = useState(false);
@@ -37,7 +38,17 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white font-mono p-6">
+    <>
+      <Header />
+
+      <main className="min-h-screen bg-gray-950 text-white font-mono p-6">
+        <h1 className="text-2xl font-bold mb-6">My Profile</h1>
+
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 max-w-lg">
+          {!userData ? (
+            <p className="text-gray-400 text-sm">Loading user data...</p>
+          ) : (
+            <>
       <h1 className="text-2xl font-bold mb-6">My Profile</h1>
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 max-w-lg">
@@ -147,5 +158,6 @@ export default function ProfilePage() {
         <ArchivedDisputesModal onClose={() => setShowArchived(false)} />
       )}
     </main>
+       </>
   );
 }
