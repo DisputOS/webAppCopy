@@ -69,7 +69,7 @@ export default function CasesPage() {
     <>
       <Header />
 
-      <main className="min-h-screen bg-gray-950 text-white font-mono p-6">
+      <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
         <div className="flex items-center justify-between mb-10">
           <h1 className="text-3xl font-bold">My Disputes</h1>
           <button
