@@ -1,7 +1,7 @@
 // components/ui/Toggle.tsx
 import React from 'react';
 
-export function Toggle({ checked, onChange, id }: {
+export function Switch({ checked, onChange, id }: {
   checked: boolean;
   onChange: (value: boolean) => void;
   id: string;
