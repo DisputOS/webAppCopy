@@ -4,21 +4,24 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp } from 'lucide-react';
 
+import { ArchiveControls } from '@/components/ArchiveControls';
+import { DeleteButton } from '@/components/DeleteButton';
+
 export const dynamic = 'force-dynamic';
 
 export default async function DisputeDetail({ params }: { params: { id: string } }) {
   const supabase = createServerComponentClient({ cookies });
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+    data: { user },
+  } = await supabase.auth.getUser(); // ✅ secure user check
+  if (!user) redirect('/login');
 
   const { data: dispute, error } = await supabase
     .from('disputes')
     .select('*')
     .eq('id', params.id)
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .single();
   if (error || !dispute) notFound();
 
@@ -26,7 +29,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     .from('proof_bundle')
     .select('*', { count: 'exact', head: true })
     .eq('dispute_id', params.id)
-    .eq('user_id', session.user.id);
+    .eq('user_id', user.id);
 
   const proofCount: number = rawCount ?? 0;
   const pdfReady = Boolean(dispute.pdf_url);
@@ -135,20 +138,12 @@ export default async function DisputeDetail({ params }: { params: { id: string }
             <FileText className="w-4 h-4" /> View PDF
           </Link>
         </div>
+      </div>
 
-                <form
-        action="/api/disputes/delete"
-        method="POST"
-        onSubmit={() => confirm('Are you sure you want to delete this dispute? This action cannot be undone.')}
-        >
-        <input type="hidden" name="dispute_id" value={dispute.id} />
-        <button
-            type="submit"
-            className="mt-6 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
-            Delete Dispute
-        </button>
-        </form>
-
+      {/* ✅ Кнопки архівування + видалення */}
+      <div className="mt-6 flex flex-col sm:flex-row gap-4">
+        <ArchiveControls disputeId={dispute.id} isArchived={dispute.archived} />
+        <DeleteButton disputeId={dispute.id} />
       </div>
     </main>
   );
