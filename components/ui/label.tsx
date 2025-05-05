@@ -3,15 +3,15 @@ import React from 'react';
 import type { LabelHTMLAttributes } from 'react';
 
 interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
-  htmlFor: string;
   children: React.ReactNode;
+  htmlFor?: string; // ← тепер НЕ обов'язковий
 }
 
-export function Label({ htmlFor, children, className = '', ...props }: LabelProps) {
+export function Label({ children, className = '', htmlFor, ...props }: LabelProps) {
   return (
     <label
       htmlFor={htmlFor}
-      className={`block mb-1 text-sm font-medium text-gray-300 ${className}`}
+      className={`block text-sm font-medium text-gray-300 ${className}`}
       {...props}
     >
       {children}
