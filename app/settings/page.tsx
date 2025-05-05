@@ -69,7 +69,7 @@ export default function SettingsPage() {
 
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
           <div>
-            <Label htmlFor="username" className="block mb-1">👤 Username</Label>
+            <Label htmlFor="username" className="block mb-1">Username</Label>
             <input
               id="username"
               type="text"
@@ -82,12 +82,12 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="retention">🛡 Keep my uploaded data after case is closed</Label>
+            <Label htmlFor="retention">Keep my uploaded data after case is closed</Label>
             <Switch id="retention" checked={retentionOptIn} onChange={setRetentionOptIn} />
           </div>
 
           <div>
-            <Label htmlFor="language" className="block mb-1">🌍 Interface Language</Label>
+            <Label htmlFor="language" className="block mb-1">Interface Language</Label>
             <select
               id="language"
               value={language}
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <Label htmlFor="tone" className="block mb-1">🎛 AI Tone Preference</Label>
+            <Label htmlFor="tone" className="block mb-1">AI Tone Preference</Label>
             <select
               id="tone"
               value={tone}
@@ -116,7 +116,7 @@ export default function SettingsPage() {
 
           <div>
             <Label className="text-gray-400">
-              💼 Plan: <span className="text-white font-semibold">{plan}</span>
+              Plan: <span className="text-white font-semibold">{plan}</span>
             </Label>
             <p className="text-xs text-gray-500">Plan controls PDF watermarking and escalation options.</p>
           </div>
