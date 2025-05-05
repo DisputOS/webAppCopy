@@ -15,25 +15,33 @@ export async function middleware(req: NextRequest) {
   if (isProduction && process.env.ENABLE_BASIC_AUTH === 'true') {
     const authHeader = req.headers.get('authorization');
 
-    if (authHeader) {
-      try {
-        const basicAuth = authHeader.split(' ')[1];
-        const [user, pass] = atob(basicAuth).split(':');
+    if (!authHeader) {
+      // 👈 якщо немає заголовка — викликаємо prompt
+      return new NextResponse('Authentication Required', {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': 'Basic realm="Restricted Area"',
+        },
+      });
+    }
 
-        if (
-          user !== process.env.HTUSER ||
-          pass !== process.env.HTPASS
-        ) {
-          return new NextResponse('Authentication Required', {
-            status: 401,
-            headers: {
-              'WWW-Authenticate': 'Basic realm="Restricted Area"',
-            },
-          });
-        }
-      } catch {
-        return new NextResponse('Bad auth format', { status: 400 });
+    try {
+      const basicAuth = authHeader.split(' ')[1];
+      const [user, pass] = atob(basicAuth).split(':');
+
+      if (
+        user !== process.env.HTUSER ||
+        pass !== process.env.HTPASS
+      ) {
+        return new NextResponse('Authentication Required', {
+          status: 401,
+          headers: {
+            'WWW-Authenticate': 'Basic realm="Restricted Area"',
+          },
+        });
       }
+    } catch {
+      return new NextResponse('Bad auth format', { status: 400 });
     }
   }
 
