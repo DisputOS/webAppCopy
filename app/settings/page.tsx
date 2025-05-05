@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import Header from '@/components/Header';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 
 export default function SettingsPage() {
@@ -100,6 +101,8 @@ export default function SettingsPage() {
   };
 
   return (
+    <>
+      <Header />
     <main className="min-h-screen bg-gray-950 text-white p-6 font-mono">
       <div className="max-w-3xl mx-auto space-y-10">
         <h1 className="text-3xl font-bold">My Settings</h1>
@@ -205,5 +208,6 @@ export default function SettingsPage() {
         </p>
       </div>
     </main>
+      </>
   );
 }
