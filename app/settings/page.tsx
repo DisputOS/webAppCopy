@@ -16,6 +16,11 @@ export default function SettingsPage() {
   const [tone, setTone] = useState('auto');
   const [plan, setPlan] = useState('free');
 
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -62,6 +67,38 @@ export default function SettingsPage() {
     setLoading(false);
   };
 
+  const handlePasswordChange = async () => {
+    setPasswordError('');
+    setPasswordSuccess(false);
+
+    if (!session?.user?.email) {
+      setPasswordError('User email not found.');
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: session.user.email,
+      password: currentPassword,
+    });
+
+    if (signInError) {
+      setPasswordError('Current password is incorrect.');
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      setPasswordError('Failed to update password.');
+    } else {
+      setPasswordSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-950 text-white p-6 font-mono">
       <div className="max-w-3xl mx-auto space-y-10">
@@ -78,7 +115,6 @@ export default function SettingsPage() {
               className="w-full bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
               placeholder="yourname"
             />
-            <p className="text-xs text-gray-500 mt-1">Used for display and refund documents.</p>
           </div>
 
           <div className="flex items-center justify-between">
@@ -123,6 +159,44 @@ export default function SettingsPage() {
 
           <Button onClick={handleSave} disabled={loading}>
             {loading ? 'Saving...' : saved ? 'Save Settings ✅' : 'Save Settings'}
+          </Button>
+        </section>
+
+        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <h2 className="text-xl font-semibold mb-2">Change Password</h2>
+
+          <div>
+            <Label htmlFor="current-password" className="block mb-1">Current Password</Label>
+            <input
+              id="current-password"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
+              placeholder="Enter current password"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="new-password" className="block mb-1">New Password</Label>
+            <input
+              id="new-password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
+              placeholder="Enter new password"
+            />
+          </div>
+
+          {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+          {passwordSuccess && <p className="text-green-500 text-sm">Password updated successfully</p>}
+
+          <Button
+            onClick={handlePasswordChange}
+            disabled={!currentPassword || !newPassword}
+          >
+            Change Password
           </Button>
         </section>
 
