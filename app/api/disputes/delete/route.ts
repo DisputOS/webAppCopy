@@ -41,5 +41,5 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   });
 
-  return NextResponse.redirect('/cases');
+  return NextResponse.redirect(new URL('/cases', req.url));
 }
