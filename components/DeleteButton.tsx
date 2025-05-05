@@ -2,7 +2,9 @@
 
 export function DeleteButton({ disputeId }: { disputeId: string }) {
   const handleDelete = async () => {
-    const confirmed = confirm('Are you sure you want to permanently delete this dispute? This action cannot be undone.');
+    const confirmed = confirm(
+      'Are you sure you want to permanently delete this dispute? This action cannot be undone.'
+    );
     if (!confirmed) return;
 
     const res = await fetch('/api/disputes/delete', {
@@ -13,7 +15,8 @@ export function DeleteButton({ disputeId }: { disputeId: string }) {
     if (res.ok) {
       window.location.href = '/cases';
     } else {
-      alert('Failed to delete dispute');
+      const result = await res.json();
+      alert(result.error || 'Failed to delete dispute');
     }
   };
 
