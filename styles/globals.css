@@ -18,27 +18,51 @@
 }
 
 @layer utilities {
-  .bg-glow {
-    background:
-      radial-gradient(circle at top left, rgba(255, 0, 255, 0.2), transparent),
-      radial-gradient(circle at top right, rgba(0, 255, 255, 0.2), transparent),
-      radial-gradient(circle at bottom left, rgba(255, 255, 0, 0.2), transparent),
-      radial-gradient(circle at bottom right, rgba(255, 136, 0, 0.2), transparent);
+  .glow-corner {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.5;
+    animation: glowPulse 10s ease-in-out infinite;
     mix-blend-mode: screen;
   }
 
-  @keyframes pulseGlow {
+  .top-left {
+    top: -100px;
+    left: -100px;
+    background: radial-gradient(circle, rgba(255,0,255,0.4), transparent);
+  }
+
+  .top-right {
+    top: -100px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(0,255,255,0.4), transparent);
+  }
+
+  .bottom-left {
+    bottom: -100px;
+    left: -100px;
+    background: radial-gradient(circle, rgba(255,255,0,0.4), transparent);
+  }
+
+  .bottom-right {
+    bottom: -100px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(255,136,0,0.4), transparent);
+  }
+
+  @keyframes glowPulse {
     0%, 100% {
       opacity: 0.3;
-      filter: blur(40px);
+      filter: blur(80px);
     }
     50% {
       opacity: 0.6;
-      filter: blur(80px);
+      filter: blur(120px);
     }
-  }
-
-  .animate-pulseGlow {
-    animation: pulseGlow 10s ease-in-out infinite;
   }
 }
