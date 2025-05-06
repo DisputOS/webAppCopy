@@ -82,9 +82,6 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end">
-        <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
-      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 ">
