@@ -23,9 +23,9 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     .single();
   if (error || !dispute) notFound();
 
-  const { count: rawCount } = await supabase
+  const { data: proofs, count: rawCount } = await supabase
     .from('proof_bundle')
-    .select('*', { count: 'exact', head: true })
+    .select('*', { count: 'exact' })
     .eq('dispute_id', params.id)
     .eq('user_id', user.id);
 
@@ -141,7 +141,18 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           {proofCount === 0 ? (
             <p>Please upload at least one proof to proceed.</p>
           ) : (
-            <p>Proof files uploaded: <strong>{proofCount}</strong></p>
+            <>
+              <p>Proof files uploaded: <strong>{proofCount}</strong></p>
+              <ul className="mt-2 space-y-1 list-disc list-inside text-gray-300">
+                {proofs?.map((proof) => (
+                  <li key={proof.id}>
+                    <a href={proof.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+                      {proof.filename || proof.url?.split('/').pop()}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
           {!pdfReady && proofCount > 0 && (
             <p className="text-xs text-gray-500">PDF will be available after generation.</p>
