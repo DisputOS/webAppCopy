@@ -87,7 +87,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 lg:sticky top-6 self-start">
+        <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 ">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <h1 className="text-2xl font-bold">
               {dispute.problem_type || 'Untitled Dispute'}
