@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp } from 'lucide-react';
- import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
+import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
 
   const {
     data: { user },
-  } = await supabase.auth.getUser(); // ✅ secure user check
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: dispute, error } = await supabase
@@ -39,26 +39,33 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     lost: 'bg-red-100 text-red-700',
   };
 
+  const steps = ["Create", "Proof", "Template", "Review"];
+  const currentStep = pdfReady ? 3 : proofCount > 0 ? 2 : 1;
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
       <Link href="/cases" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
-     
 
-<div className="mt-6 flex justify-end">
-  <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
-</div>
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-800 rounded-full h-2.5 mb-4">
+        <div
+          className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+          style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+        />
+      </div>
+
+      <div className="mt-6 flex justify-end">
+        <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
+      </div>
+
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="text-2xl font-bold">
             {dispute.problem_type || 'Untitled Dispute'}
           </h1>
-          <span
-            className={`px-3 py-1 text-xs rounded-full ${
-              statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
-            }`}
-          >
+          <span className={`px-3 py-1 text-xs rounded-full ${statusColor[dispute.status] || 'bg-gray-700 text-gray-300'}`}>
             {dispute.status || 'unknown'}
           </span>
         </div>
@@ -121,9 +128,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           <Link
             href={proofCount > 0 ? `/cases/${params.id}/generate` : '#'}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              proofCount > 0
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+              proofCount > 0 ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-800 text-gray-500 cursor-not-allowed'
             }`}
           >
             <PlusCircle className="w-4 h-4" /> Generate Template
@@ -132,17 +137,13 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           <Link
             href={pdfReady ? `/cases/${params.id}/review?pdf=${encodeURIComponent(dispute.pdf_url)}` : '#'}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              pdfReady
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+              pdfReady ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-800 text-gray-500 cursor-not-allowed'
             }`}
           >
             <FileText className="w-4 h-4" /> View PDF
           </Link>
         </div>
       </div>
-
-
     </main>
   );
 }
