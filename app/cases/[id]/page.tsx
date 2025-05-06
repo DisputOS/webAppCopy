@@ -57,7 +57,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
 
-      {/* Progress Bar with labels and highlight */}
+      {/* Progress Bar */}
       <div className="w-full mb-6">
         <div className="relative w-full bg-gray-800 rounded-full h-2.5">
           <div
@@ -128,31 +128,36 @@ export default async function DisputeDetail({ params }: { params: { id: string }
             {dispute.description}
           </p>
         </div>
-
-        {dispute.status === 'won' && (
-          <div className="flex items-center gap-2 text-green-500 bg-green-950 border border-green-800 rounded-lg p-3">
-            <BadgeCheck className="w-5 h-5" /> Congratulations! Your dispute was resolved in your favor.
-          </div>
-        )}
       </div>
+
+      {proofCount > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <h2 className="text-lg font-semibold mb-4 text-white">Uploaded Proofs</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {proofs?.map((proof) => (
+              proof.receipt_url && (
+                <div key={proof.proof_id} className="rounded-lg overflow-hidden border border-gray-700">
+                  <img
+                    src={proof.receipt_url}
+                    alt="Uploaded proof"
+                    className="w-full h-40 object-cover"
+                  />
+                  <div className="p-2 text-xs text-gray-400 truncate">
+                    {proof.receipt_url.split('/').pop()}
+                  </div>
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
         <div className="space-y-1 text-sm text-gray-400">
           {proofCount === 0 ? (
             <p>Please upload at least one proof to proceed.</p>
           ) : (
-            <>
-              <p>Proof files uploaded: <strong>{proofCount}</strong></p>
-              <ul className="mt-2 space-y-1 list-disc list-inside text-gray-300">
-                {proofs?.map((proof) => (
-                  <li key={proof.id}>
-                    <a href={proof.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-                      {proof.filename || proof.url?.split('/').pop()}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </>
+            <p>Proof files uploaded: <strong>{proofCount}</strong></p>
           )}
           {!pdfReady && proofCount > 0 && (
             <p className="text-xs text-gray-500">PDF will be available after generation.</p>
