@@ -26,76 +26,63 @@
     z-index: 0;
     border-radius: 50%;
     filter: blur(100px);
-    opacity: 0.5;
-    animation: glowPulse 10s ease-in-out infinite, glowColorShift 20s linear infinite;
+    opacity: 0.4;
+    animation: pulseGlow 6s ease-in-out infinite, shiftColor 20s ease-in-out infinite;
     mix-blend-mode: screen;
+    background: radial-gradient(circle, rgba(255, 0, 255, 0.4), transparent);
+    background-size: 200% 200%;
+    background-position: center;
+    transition: background 1s ease-in-out;
   }
 
   .top-left {
     top: -100px;
     left: -100px;
-    background: radial-gradient(circle, var(--glow-color-1, rgba(255, 0, 255, 0.4)), transparent);
   }
 
   .top-right {
     top: -100px;
     right: -100px;
-    background: radial-gradient(circle, var(--glow-color-2, rgba(0, 255, 255, 0.4)), transparent);
   }
 
   .bottom-left {
     bottom: -100px;
     left: -100px;
-    background: radial-gradient(circle, var(--glow-color-3, rgba(255, 255, 0, 0.4)), transparent);
   }
 
   .bottom-right {
     bottom: -100px;
     right: -100px;
-    background: radial-gradient(circle, var(--glow-color-4, rgba(255, 136, 0, 0.4)), transparent);
   }
 
-  @keyframes glowPulse {
+  @keyframes pulseGlow {
     0%, 100% {
       opacity: 0.3;
-      filter: blur(80px);
+      transform: scale(1);
+      filter: blur(60px);
     }
     50% {
       opacity: 0.6;
-      filter: blur(120px);
+      transform: scale(1.15);
+      filter: blur(90px);
     }
   }
 
-  @keyframes glowColorShift {
+  @keyframes shiftColor {
     0% {
-      --glow-color-1: rgba(255, 0, 255, 0.4);
-      --glow-color-2: rgba(0, 255, 255, 0.4);
-      --glow-color-3: rgba(255, 255, 0, 0.4);
-      --glow-color-4: rgba(255, 136, 0, 0.4);
+      background: radial-gradient(circle, rgba(255, 0, 255, 0.4), transparent);
     }
     25% {
-      --glow-color-1: rgba(136, 0, 255, 0.4);
-      --glow-color-2: rgba(0, 136, 255, 0.4);
-      --glow-color-3: rgba(136, 255, 0, 0.4);
-      --glow-color-4: rgba(255, 0, 136, 0.4);
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.4), transparent);
     }
     50% {
-      --glow-color-1: rgba(0, 255, 136, 0.4);
-      --glow-color-2: rgba(255, 0, 255, 0.4);
-      --glow-color-3: rgba(255, 136, 0, 0.4);
-      --glow-color-4: rgba(0, 255, 255, 0.4);
+      background: radial-gradient(circle, rgba(255, 255, 0, 0.4), transparent);
     }
     75% {
-      --glow-color-1: rgba(255, 255, 0, 0.4);
-      --glow-color-2: rgba(255, 0, 136, 0.4);
-      --glow-color-3: rgba(136, 0, 255, 0.4);
-      --glow-color-4: rgba(0, 255, 136, 0.4);
+      background: radial-gradient(circle, rgba(255, 136, 0, 0.4), transparent);
     }
     100% {
-      --glow-color-1: rgba(255, 0, 255, 0.4);
-      --glow-color-2: rgba(0, 255, 255, 0.4);
-      --glow-color-3: rgba(255, 255, 0, 0.4);
-      --glow-color-4: rgba(255, 136, 0, 0.4);
+      background: radial-gradient(circle, rgba(255, 0, 255, 0.4), transparent);
     }
   }
 }
