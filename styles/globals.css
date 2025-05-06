@@ -25,53 +25,44 @@
     pointer-events: none;
     z-index: 0;
     border-radius: 50%;
-    opacity: 0.4;
-    animation: pulseGlow 6s ease-in-out infinite, hueShift 20s linear infinite;
+    filter: blur(100px);
+    opacity: 0.5;
+    animation: glowPulse 10s ease-in-out infinite;
     mix-blend-mode: screen;
-    background: radial-gradient(circle, rgba(255, 0, 255, 0.4), transparent 70%);
-    filter: blur(80px);
   }
 
   .top-left {
     top: -100px;
     left: -100px;
+    background: radial-gradient(circle, rgba(255,0,255,0.4), transparent);
   }
 
   .top-right {
     top: -100px;
     right: -100px;
+    background: radial-gradient(circle, rgba(0,255,255,0.4), transparent);
   }
 
   .bottom-left {
     bottom: -100px;
     left: -100px;
+    background: radial-gradient(circle, rgba(255,255,0,0.4), transparent);
   }
 
   .bottom-right {
     bottom: -100px;
     right: -100px;
+    background: radial-gradient(circle, rgba(255,136,0,0.4), transparent);
   }
 
-  @keyframes pulseGlow {
+  @keyframes glowPulse {
     0%, 100% {
       opacity: 0.3;
-      transform: scale(1);
-      filter: blur(60px) hue-rotate(0deg);
+      filter: blur(80px);
     }
     50% {
       opacity: 0.6;
-      transform: scale(1.15);
-      filter: blur(90px) hue-rotate(0deg);
-    }
-  }
-
-  @keyframes hueShift {
-    0% {
-      filter: hue-rotate(0deg);
-    }
-    100% {
-      filter: hue-rotate(360deg);
+      filter: blur(120px);
     }
   }
 }
-
