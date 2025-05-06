@@ -27,32 +27,32 @@
     border-radius: 50%;
     filter: blur(100px);
     opacity: 0.5;
-    animation: glowPulse 10s ease-in-out infinite;
+    animation: glowPulse 10s ease-in-out infinite, glowColorShift 20s linear infinite;
     mix-blend-mode: screen;
   }
 
   .top-left {
     top: -100px;
     left: -100px;
-    background: radial-gradient(circle, rgba(255,0,255,0.4), transparent);
+    background: radial-gradient(circle, var(--glow-color-1, rgba(255, 0, 255, 0.4)), transparent);
   }
 
   .top-right {
     top: -100px;
     right: -100px;
-    background: radial-gradient(circle, rgba(0,255,255,0.4), transparent);
+    background: radial-gradient(circle, var(--glow-color-2, rgba(0, 255, 255, 0.4)), transparent);
   }
 
   .bottom-left {
     bottom: -100px;
     left: -100px;
-    background: radial-gradient(circle, rgba(255,255,0,0.4), transparent);
+    background: radial-gradient(circle, var(--glow-color-3, rgba(255, 255, 0, 0.4)), transparent);
   }
 
   .bottom-right {
     bottom: -100px;
     right: -100px;
-    background: radial-gradient(circle, rgba(255,136,0,0.4), transparent);
+    background: radial-gradient(circle, var(--glow-color-4, rgba(255, 136, 0, 0.4)), transparent);
   }
 
   @keyframes glowPulse {
@@ -63,6 +63,39 @@
     50% {
       opacity: 0.6;
       filter: blur(120px);
+    }
+  }
+
+  @keyframes glowColorShift {
+    0% {
+      --glow-color-1: rgba(255, 0, 255, 0.4);
+      --glow-color-2: rgba(0, 255, 255, 0.4);
+      --glow-color-3: rgba(255, 255, 0, 0.4);
+      --glow-color-4: rgba(255, 136, 0, 0.4);
+    }
+    25% {
+      --glow-color-1: rgba(136, 0, 255, 0.4);
+      --glow-color-2: rgba(0, 136, 255, 0.4);
+      --glow-color-3: rgba(136, 255, 0, 0.4);
+      --glow-color-4: rgba(255, 0, 136, 0.4);
+    }
+    50% {
+      --glow-color-1: rgba(0, 255, 136, 0.4);
+      --glow-color-2: rgba(255, 0, 255, 0.4);
+      --glow-color-3: rgba(255, 136, 0, 0.4);
+      --glow-color-4: rgba(0, 255, 255, 0.4);
+    }
+    75% {
+      --glow-color-1: rgba(255, 255, 0, 0.4);
+      --glow-color-2: rgba(255, 0, 136, 0.4);
+      --glow-color-3: rgba(136, 0, 255, 0.4);
+      --glow-color-4: rgba(0, 255, 136, 0.4);
+    }
+    100% {
+      --glow-color-1: rgba(255, 0, 255, 0.4);
+      --glow-color-2: rgba(0, 255, 255, 0.4);
+      --glow-color-3: rgba(255, 255, 0, 0.4);
+      --glow-color-4: rgba(255, 136, 0, 0.4);
     }
   }
 }
