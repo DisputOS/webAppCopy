@@ -16,3 +16,29 @@
 .animate-fade-in-down {
   animation: fade-in-down 0.2s ease-out forwards;
 }
+
+@layer utilities {
+  .bg-glow {
+    background:
+      radial-gradient(circle at top left, rgba(255, 0, 255, 0.2), transparent),
+      radial-gradient(circle at top right, rgba(0, 255, 255, 0.2), transparent),
+      radial-gradient(circle at bottom left, rgba(255, 255, 0, 0.2), transparent),
+      radial-gradient(circle at bottom right, rgba(255, 136, 0, 0.2), transparent);
+    mix-blend-mode: screen;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 0.3;
+      filter: blur(40px);
+    }
+    50% {
+      opacity: 0.6;
+      filter: blur(80px);
+    }
+  }
+
+  .animate-pulseGlow {
+    animation: pulseGlow 10s ease-in-out infinite;
+  }
+}
