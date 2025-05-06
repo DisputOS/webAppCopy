@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
 import dynamic from 'next/dynamic';
+import ProofCarousel from '@/components/ProofCarousel'; // new import
 
 // ────────────────────────────────────────────────────────────────
 //  Client‑side carousel for proofs (lazy‑loaded)
