@@ -65,7 +65,11 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           <h1 className="text-2xl font-bold">
             {dispute.problem_type || 'Untitled Dispute'}
           </h1>
-          <span className={`px-3 py-1 text-xs rounded-full ${statusColor[dispute.status] || 'bg-gray-700 text-gray-300'}`}>
+          <span
+            className={`px-3 py-1 text-xs rounded-full ${
+              statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
+            }`}
+          >
             {dispute.status || 'unknown'}
           </span>
         </div>
@@ -128,7 +132,9 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           <Link
             href={proofCount > 0 ? `/cases/${params.id}/generate` : '#'}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              proofCount > 0 ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+              proofCount > 0
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
             }`}
           >
             <PlusCircle className="w-4 h-4" /> Generate Template
@@ -137,7 +143,9 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           <Link
             href={pdfReady ? `/cases/${params.id}/review?pdf=${encodeURIComponent(dispute.pdf_url)}` : '#'}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              pdfReady ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+              pdfReady
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
             }`}
           >
             <FileText className="w-4 h-4" /> View PDF
