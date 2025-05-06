@@ -1,7 +1,7 @@
 {
     "name": "Disput.ai",
     "short_name": "Disput",
-    "start_url": "/",
+    "start_url": "/public/login",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#000000",
