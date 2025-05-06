@@ -11,31 +11,11 @@ export async function middleware(req: NextRequest) {
 
   const isProduction = process.env.VERCEL_ENV === 'production' || process.env.VERCEL === '1';
 
-  
-
-    try {
-      const basicAuth = authHeader.split(' ')[1];
-      const [user, pass] = atob(basicAuth).split(':');
-
-      if (
-        user !== process.env.HTUSER ||
-        pass !== process.env.HTPASS
-      ) {
-        return new NextResponse('Authentication Required', {
-          status: 401,
-          headers: {
-            'WWW-Authenticate': 'Basic realm="Restricted Area"',
-          },
-        });
-      }
-    } catch {
-      return new NextResponse('Bad auth format', { status: 400 });
-    }
-  }
+ 
 
   // ✅ 2. Allow only /public/* and root / without auth
-  const isPublicPath =
-    pathname === '/' || pathname.startsWith('/public');
+  const isPublicPath = pathname.startsWith('/public') || pathname.startsWith('/icons');
+
 
   // ✅ 3. Block access to everything else if not authenticated
   if (!isPublicPath && !session) {
