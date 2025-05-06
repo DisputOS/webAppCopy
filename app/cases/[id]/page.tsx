@@ -17,15 +17,14 @@ import {
 } from 'lucide-react';
 import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
 import dynamic from 'next/dynamic';
-import ProofCarousel from '@/components/ProofCarousel'; // new import
 
 // ────────────────────────────────────────────────────────────────
 //  Client‑side carousel for proofs (lazy‑loaded)
 // ────────────────────────────────────────────────────────────────
-const ProofCarousel = dynamic(() => import('./_ProofCarousel'), {
+
+const ProofCarousel = dynamic(() => import('@/components/ProofCarousel'), {
   ssr: false,
 });
-
 export const dynamic = 'force-dynamic';
 
 export default async function DisputeDetail({ params }: { params: { id: string } }) {
