@@ -39,17 +39,17 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     lost: 'bg-red-100 text-red-700',
   };
 
-  const steps = ["Proof", "Template", "PDF"];
+  const steps: Array<'Proof' | 'Template' | 'PDF'> = ['Proof', 'Template', 'PDF'];
   const currentStep = pdfReady ? 3 : proofCount > 0 ? 2 : 1;
 
   const StepIcon = ({ step }: { step: 'Proof' | 'Template' | 'PDF' }) => {
-  const icons = {
-    Proof: <FileCheck2 className="w-4 h-4" />,
-    Template: <FileSignature className="w-4 h-4" />,
-    PDF: <FileText className="w-4 h-4" />,
+    const icons = {
+      Proof: <FileCheck2 className="w-4 h-4" />,
+      Template: <FileSignature className="w-4 h-4" />,
+      PDF: <FileText className="w-4 h-4" />,
+    };
+    return icons[step];
   };
-  return icons[step];
-};
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
@@ -57,18 +57,22 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
 
-      {/* Progress Bar */}
-      <div className="w-full mb-4">
-        <div className="bg-gray-800 rounded-full h-2.5">
+      {/* Progress Bar with labels */}
+      <div className="w-full mb-6">
+        <div className="relative w-full bg-gray-800 rounded-full h-2.5">
           <div
-            className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+            className="absolute top-0 left-0 bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
         <div className="flex justify-between text-xs text-gray-400 mt-2">
           {steps.map((step, index) => (
-            <div key={step} className="flex flex-col items-center gap-1 w-1/3">
-              <StepIcon step={step} />
+            <div key={step} className="flex flex-col items-center w-1/3">
+              <div
+                className={`w-2 h-2 rounded-full mb-1 ${
+                  currentStep > index ? 'bg-indigo-500' : 'bg-gray-600'
+                }`}
+              />
               <span>{step}</span>
             </div>
           ))}
