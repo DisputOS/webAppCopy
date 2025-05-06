@@ -1,4 +1,5 @@
-// Dispute detail page with 3‑item carousel + touch swipe – Next 13 app dir
+// Dispute detail page with 3‑item carousel + touch swipe
+// Next 13 app dir – server component
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
@@ -10,31 +11,41 @@ import {
   FileUp,
 } from 'lucide-react';
 import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
-import dynamicImport from 'next/dynamic';          // alias to avoid “dynamic” clash
+import dynamicFn from 'next/dynamic';          // alias to avoid name clash
 
-// ────────────────────────────────────────────────────────────────
-//  Types
-// ────────────────────────────────────────────────────────────────
+/* ────────────────────────────────────────────────────────── *
+ *  Types                                                     *
+ * ────────────────────────────────────────────────────────── */
+
 interface Proof {
-  id: string;
-  file_url: string;
-  type: string;
-  // …add the other columns you actually store
+  proof_id: string;
+  dispute_id: string;
+  user_id: string;
+  receipt_url: string | null;
+  tracking_id: string | null;
+  carrier: string | null;
+  screenshot_urls: string[] | null;           // Supabase text[] → string[]
+  evidence_source: string | null;
+  policy_snapshot: unknown | null;            // jsonb
+  user_description: string | null;
+  dispute_type: string | null;
+  created_at: string;
 }
 
-// ────────────────────────────────────────────────────────────────
-//  Client‑side carousel for proofs (lazy‑loaded)
-// ────────────────────────────────────────────────────────────────
-const ProofCarousel = dynamicImport(() => import('@/components/ProofCarousel'), {
+/* ────────────────────────────────────────────────────────── *
+ *  Client‑only carousel (lazy‑loaded)                        *
+ * ────────────────────────────────────────────────────────── */
+
+const ProofCarousel = dynamicFn(() => import('@/components/ProofCarousel'), {
   ssr: false,
 });
 
-// opt‑in to on‑demand ISR in the app‑dir
 export const dynamic = 'force-dynamic';
 
-// ────────────────────────────────────────────────────────────────
-//  Page
-// ────────────────────────────────────────────────────────────────
+/* ────────────────────────────────────────────────────────── *
+ *  Page component                                            *
+ * ────────────────────────────────────────────────────────── */
+
 export default async function DisputeDetail({
   params,
 }: {
@@ -47,6 +58,7 @@ export default async function DisputeDetail({
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
+  /* ─── Dispute row ──────────────────────────── */
   const { data: dispute, error } = await supabase
     .from('disputes')
     .select('*')
@@ -56,18 +68,15 @@ export default async function DisputeDetail({
 
   if (error || !dispute) notFound();
 
-  // ——— proofs ---------------------------------------------------
+  /* ─── Proof bundle rows ────────────────────── */
   const { data: proofs = [], count } = await supabase
-    .from('proof_bundle')
-    .select<Proof[]>('*', { count: 'exact' }) // <—— generic makes the type Proof[]
-    .eq('dispute_id', params.id)
-    .eq('user_id', user.id);
+    .from<Proof>('proof_bundle')         // row type here
+    .select('*', { count: 'exact' });    // keep columns as string
 
-  const proofCount = count ?? 0;
+  const proofCount = count ?? proofs.length;
   const pdfReady   = Boolean(dispute.pdf_url);
 
-  // ………………………………………………………………… render (unchanged below except for small clean‑ups)
-
+  /* ─── Status → badge colour map ───────────── */
   const statusColor: Record<string, string> = {
     draft: 'bg-gray-200 text-gray-600',
     open:  'bg-blue-100 text-blue-700',
@@ -75,31 +84,41 @@ export default async function DisputeDetail({
     lost:  'bg-red-100 text-red-700',
   };
 
+  /* ─── Progress bar state ───────────────────── */
   const steps: Array<'Proof' | 'Template' | 'PDF'> = ['Proof', 'Template', 'PDF'];
   const currentStep = pdfReady ? 3 : proofCount > 0 ? 2 : 1;
 
+  /* ──────────────────────────────────────────── */
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
-      {/* back link */}
+      {/* Back link */}
       <Link
         href="/cases"
         className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to all cases
+        <ArrowLeft className="w-4 h-4" />
+        Back to all cases
       </Link>
 
-      {/* progress bar */}
+      {/* Progress bar */}
       <ProgressBar steps={steps} current={currentStep} />
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* left – dispute info */}
-        <DisputeInfo dispute={dispute} statusColor={statusColor} />
+        {/* ───────── Left column – dispute info */}
+        <DisputeCard dispute={dispute} statusColor={statusColor} />
 
-        {/* right – proofs */}
-        {proofCount > 0 && <ProofCarousel proofs={proofs} />}
+        {/* ───────── Right column – proofs */}
+        {proofCount > 0 ? (
+          <ProofCarousel proofs={proofs} />
+        ) : (
+          <div className="flex-1 flex items-center justify-center border border-gray-800 rounded-xl">
+            <p className="text-gray-500 py-24">No proofs yet</p>
+          </div>
+        )}
       </div>
 
-      {/* footer actions */}
+      {/* Footer actions */}
       <FooterActions
         pdfReady={pdfReady}
         proofCount={proofCount}
@@ -110,12 +129,15 @@ export default async function DisputeDetail({
   );
 }
 
-// ───────────────────────── helpers / tiny components ────────────
+/* ────────────────────────────────────────────────────────── *
+ *  Sub‑components (server side)                              *
+ * ────────────────────────────────────────────────────────── */
+
 function ProgressBar({
   steps,
   current,
 }: {
-  steps: Array<'Proof' | 'Template' | 'PDF'>;
+  steps: string[];
   current: number;
 }) {
   return (
@@ -127,18 +149,18 @@ function ProgressBar({
         />
       </div>
       <div className="flex justify-between text-xs text-gray-400 mt-2">
-        {steps.map((step, i) => (
+        {steps.map((step, idx) => (
           <div key={step} className="flex flex-col items-center w-1/3">
             <div
               className={`w-2.5 h-2.5 rounded-full mb-1 ${
-                current - 1 === i
+                current - 1 === idx
                   ? 'bg-white ring-2 ring-indigo-500'
-                  : current > i
+                  : current > idx
                   ? 'bg-indigo-500'
                   : 'bg-gray-600'
               }`}
             />
-            <span className={current - 1 === i ? 'text-white font-medium' : ''}>
+            <span className={current - 1 === idx ? 'text-white font-medium' : ''}>
               {step}
             </span>
           </div>
@@ -148,7 +170,7 @@ function ProgressBar({
   );
 }
 
-function DisputeInfo({
+function DisputeCard({
   dispute,
   statusColor,
 }: {
@@ -159,9 +181,7 @@ function DisputeInfo({
     <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">
-            {dispute.problem_type || 'Untitled Dispute'}
-          </h1>
+          <h1 className="text-2xl font-bold">{dispute.problem_type || 'Untitled Dispute'}</h1>
           <span
             className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
               statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
@@ -170,26 +190,14 @@ function DisputeInfo({
             {dispute.status || 'unknown'}
           </span>
         </div>
-        <DisputeActionsMenu
-          disputeId={dispute.id}
-          isArchived={dispute.archived}
-        />
+        <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-400">
-        <Detail label="Platform" value={dispute.platform_name} />
-        <Detail
-          label="Purchase Date"
-          value={new Date(dispute.purchase_date).toLocaleDateString()}
-        />
-        <Detail
-          label="Amount"
-          value={`${dispute.purchase_amount ?? '—'} ${dispute.currency ?? ''}`}
-        />
-        <Detail
-          label="Created At"
-          value={new Date(dispute.created_at).toLocaleDateString()}
-        />
+        <Detail label="Platform"       value={dispute.platform_name} />
+        <Detail label="Purchase Date"  value={new Date(dispute.purchase_date).toLocaleDateString()} />
+        <Detail label="Amount"         value={`${dispute.purchase_amount ?? '—'} ${dispute.currency ?? ''}`} />
+        <Detail label="Created At"     value={new Date(dispute.created_at).toLocaleDateString()} />
       </div>
 
       <div>
@@ -211,6 +219,8 @@ function Detail({ label, value }: { label: string; value: string }) {
   );
 }
 
+/* ─── Footer actions ───────────────────────────────────────── */
+
 function FooterActions({
   pdfReady,
   proofCount,
@@ -229,18 +239,16 @@ function FooterActions({
           <p>Please upload at least one proof to proceed.</p>
         ) : (
           <p>
-            Proof files uploaded: <strong>{proofCount}</strong>
+            Proof files uploaded:&nbsp;<strong>{proofCount}</strong>
           </p>
         )}
         {!pdfReady && proofCount > 0 && (
-          <p className="text-xs text-gray-500">
-            PDF will be available after generation.
-          </p>
+          <p className="text-xs text-gray-500">PDF will be available after generation.</p>
         )}
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <ActionLink href={`/cases/${disputeId}/evidence`} variant="blue">
+        <ActionLink href={`/cases/${disputeId}/evidence`}                     variant="blue">
           <FileUp className="w-4 h-4" /> Add Proof
         </ActionLink>
         <ActionLink
@@ -250,9 +258,7 @@ function FooterActions({
           <PlusCircle className="w-4 h-4" /> Generate Template
         </ActionLink>
         <ActionLink
-          href={
-            pdfReady ? `/cases/${disputeId}/review?pdf=${encodeURIComponent(pdfUrl)}` : '#'
-          }
+          href={pdfReady ? `/cases/${disputeId}/review?pdf=${encodeURIComponent(pdfUrl)}` : '#'}
           variant={pdfReady ? 'green' : 'disabled'}
         >
           <FileText className="w-4 h-4" /> View PDF
