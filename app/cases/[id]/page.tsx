@@ -88,18 +88,21 @@ export default async function DisputeDetail({ params }: { params: { id: string }
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 ">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <h1 className="text-2xl font-bold">
-              {dispute.problem_type || 'Untitled Dispute'}
-            </h1>
-            <span
-              className={`px-3 py-1 text-xs rounded-full ${
-                statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
-              }`}
-            >
-              {dispute.status || 'unknown'}
-            </span>
-          </div>
+          <div className="flex items-start justify-between gap-4">
+  <div>
+    <h1 className="text-2xl font-bold">
+      {dispute.problem_type || 'Untitled Dispute'}
+    </h1>
+    <span
+      className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
+        statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
+      }`}
+    >
+      {dispute.status || 'unknown'}
+    </span>
+  </div>
+  <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
+</div>
 
           <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-400">
             <div>
