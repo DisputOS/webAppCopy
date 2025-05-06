@@ -11,19 +11,7 @@ export async function middleware(req: NextRequest) {
 
   const isProduction = process.env.VERCEL_ENV === 'production' || process.env.VERCEL === '1';
 
-  // ✅ 1. Basic Auth (Vercel only)
-  if (isProduction && process.env.ENABLE_BASIC_AUTH === 'true') {
-    const authHeader = req.headers.get('authorization');
-
-    if (!authHeader) {
-      // 👈 якщо немає заголовка — викликаємо prompt
-      return new NextResponse('Authentication Required', {
-        status: 401,
-        headers: {
-          'WWW-Authenticate': 'Basic realm="Restricted Area"',
-        },
-      });
-    }
+  
 
     try {
       const basicAuth = authHeader.split(' ')[1];
