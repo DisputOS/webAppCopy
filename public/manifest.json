@@ -1,10 +1,10 @@
 {
     "name": "Disput.ai",
-    "short_name": "Disput",
-    "start_url": "/public/login",
+    "short_name": "Disput App",
+    "start_url": "/public/cases",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#000000",
+    "background_color": "#1a202c",
+    "theme_color": "#1a202c",
     "orientation": "portrait",
     "icons": [
       {
