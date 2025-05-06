@@ -1,7 +1,7 @@
 {
     "name": "Disput.ai",
     "short_name": "Disput App",
-    "start_url": "/public/cases",
+    "start_url": "https://www.disput.app/cases",
     "display": "standalone",
     "background_color": "#1a202c",
     "theme_color": "#1a202c",
