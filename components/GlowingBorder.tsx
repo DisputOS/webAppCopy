@@ -1,7 +1,4 @@
 // components/GlowingBorder.tsx
-import React from "react";
-import styles from "./GlowingBorder.module.css";
-
 export default function GlowingBorder() {
-  return <div className={styles.glow}></div>;
+  return <div className="fixed inset-0 z-0 pointer-events-none animate-pulseGlow bg-glow" />;
 }
