@@ -42,14 +42,14 @@ export default async function DisputeDetail({ params }: { params: { id: string }
   const steps = ["Proof", "Template", "PDF"];
   const currentStep = pdfReady ? 3 : proofCount > 0 ? 2 : 1;
 
-  const StepIcon = ({ step }: { step: string }) => {
-    const icons = {
-      Proof: <FileCheck2 className="w-4 h-4" />,
-      Template: <FileSignature className="w-4 h-4" />,
-      PDF: <FileText className="w-4 h-4" />,
-    };
-    return icons[step] || <FileSearch className="w-4 h-4" />;
+  const StepIcon = ({ step }: { step: 'Proof' | 'Template' | 'PDF' }) => {
+  const icons = {
+    Proof: <FileCheck2 className="w-4 h-4" />,
+    Template: <FileSignature className="w-4 h-4" />,
+    PDF: <FileText className="w-4 h-4" />,
   };
+  return icons[step];
+};
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
