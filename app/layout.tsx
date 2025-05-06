@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="theme-color" content="#000000" />
         {/* Можно добавить ещё OpenGraph, favicon.ico и пр. */}
       </head>
-      <body className="min-h-screen bg-gray-50 relative overflow-hidden">
+      <body className="min-h-screen bg-gray-50 relative">
         <GlowingBorder />
         <Providers>{children}</Providers>
       </body>
