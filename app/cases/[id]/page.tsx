@@ -2,7 +2,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp } from 'lucide-react';
+import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp, FileCheck2, FileSignature, FileSearch } from 'lucide-react';
 import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
 
 export const dynamic = 'force-dynamic';
@@ -39,8 +39,17 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     lost: 'bg-red-100 text-red-700',
   };
 
-  const steps = ["Create", "Proof", "Template", "Review"];
+  const steps = ["Proof", "Template", "PDF"];
   const currentStep = pdfReady ? 3 : proofCount > 0 ? 2 : 1;
+
+  const StepIcon = ({ step }: { step: string }) => {
+    const icons = {
+      Proof: <FileCheck2 className="w-4 h-4" />,
+      Template: <FileSignature className="w-4 h-4" />,
+      PDF: <FileText className="w-4 h-4" />,
+    };
+    return icons[step] || <FileSearch className="w-4 h-4" />;
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
@@ -49,11 +58,21 @@ export default async function DisputeDetail({ params }: { params: { id: string }
       </Link>
 
       {/* Progress Bar */}
-      <div className="w-full bg-gray-800 rounded-full h-2.5 mb-4">
-        <div
-          className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-          style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-        />
+      <div className="w-full mb-4">
+        <div className="bg-gray-800 rounded-full h-2.5">
+          <div
+            className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / steps.length) * 100}%` }}
+          />
+        </div>
+        <div className="flex justify-between text-xs text-gray-400 mt-2">
+          {steps.map((step, index) => (
+            <div key={step} className="flex flex-col items-center gap-1 w-1/3">
+              <StepIcon step={step} />
+              <span>{step}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="mt-6 flex justify-end">
