@@ -82,6 +82,9 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         </div>
       </div>
 
+      <div className="mt-6 flex justify-end">
+        <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 ">
@@ -133,10 +136,10 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         {proofCount > 0 && (
           <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-6 overflow-y-auto max-h-[80vh]">
             <h2 className="text-lg font-semibold mb-4 text-white">Uploaded Proofs</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="flex overflow-x-auto gap-4 pb-2">
               {proofs?.map((proof) => (
                 proof.receipt_url && (
-                  <div key={proof.proof_id} className="rounded-lg overflow-hidden border border-gray-700">
+                  <div key={proof.proof_id} className="min-w-[160px] rounded-lg overflow-hidden border border-gray-700 flex-shrink-0">
                     <img
                       src={proof.receipt_url}
                       alt="Uploaded proof"
