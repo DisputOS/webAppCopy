@@ -1,6 +1,5 @@
 // Dispute detail page with 3‑item carousel + touch swipe
 // Next 13 app dir – server component
-
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
@@ -16,13 +15,13 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
-import dynamic from 'next/dynamic';
+import dynamicFn from 'next/dynamic';   // alias to avoid name clash
 
 // ────────────────────────────────────────────────────────────────
 //  Client‑side carousel for proofs (lazy‑loaded)
 // ────────────────────────────────────────────────────────────────
 
-const ProofCarousel = dynamic(() => import('@/components/ProofCarousel'), {
+const ProofCarousel = dynamicFn(() => import('@/components/ProofCarousel'), {
   ssr: false,
 });
 export const dynamic = 'force-dynamic';
