@@ -57,7 +57,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
 
-      {/* Progress Bar with labels */}
+      {/* Progress Bar with labels and highlight */}
       <div className="w-full mb-6">
         <div className="relative w-full bg-gray-800 rounded-full h-2.5">
           <div
@@ -69,11 +69,15 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           {steps.map((step, index) => (
             <div key={step} className="flex flex-col items-center w-1/3">
               <div
-                className={`w-2 h-2 rounded-full mb-1 ${
-                  currentStep > index ? 'bg-indigo-500' : 'bg-gray-600'
+                className={`w-2.5 h-2.5 rounded-full mb-1 ${
+                  currentStep - 1 === index
+                    ? 'bg-white ring-2 ring-indigo-500'
+                    : currentStep > index
+                    ? 'bg-indigo-500'
+                    : 'bg-gray-600'
                 }`}
               />
-              <span>{step}</span>
+              <span className={currentStep - 1 === index ? 'text-white font-medium' : ''}>{step}</span>
             </div>
           ))}
         </div>
