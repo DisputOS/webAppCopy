@@ -1,5 +1,4 @@
-// Dispute detail page with 3‑item carousel + touch swipe
-// Next 13 app dir – server component
+// Dispute detail page with 3‑item carousel + touch swipe – Next 13 app dir
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
@@ -9,24 +8,38 @@ import {
   PlusCircle,
   FileText,
   FileUp,
-  FileCheck2,
-  FileSignature,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
-import dynamicFn from 'next/dynamic';   // alias to avoid name clash
+import dynamicImport from 'next/dynamic';          // alias to avoid “dynamic” clash
+
+// ────────────────────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────────────────────
+interface Proof {
+  id: string;
+  file_url: string;
+  type: string;
+  // …add the other columns you actually store
+}
 
 // ────────────────────────────────────────────────────────────────
 //  Client‑side carousel for proofs (lazy‑loaded)
 // ────────────────────────────────────────────────────────────────
-
-const ProofCarousel = dynamicFn(() => import('@/components/ProofCarousel'), {
+const ProofCarousel = dynamicImport(() => import('@/components/ProofCarousel'), {
   ssr: false,
 });
+
+// opt‑in to on‑demand ISR in the app‑dir
 export const dynamic = 'force-dynamic';
 
-export default async function DisputeDetail({ params }: { params: { id: string } }) {
+// ────────────────────────────────────────────────────────────────
+//  Page
+// ────────────────────────────────────────────────────────────────
+export default async function DisputeDetail({
+  params,
+}: {
+  params: { id: string };
+}) {
   const supabase = createServerComponentClient({ cookies });
 
   const {
@@ -40,22 +53,26 @@ export default async function DisputeDetail({ params }: { params: { id: string }
     .eq('id', params.id)
     .eq('user_id', user.id)
     .single();
+
   if (error || !dispute) notFound();
 
-  const { data: proofs = [], count: rawCount } = await supabase
+  // ——— proofs ---------------------------------------------------
+  const { data: proofs = [], count } = await supabase
     .from('proof_bundle')
-    .select('*', { count: 'exact' })
+    .select<Proof[]>('*', { count: 'exact' }) // <—— generic makes the type Proof[]
     .eq('dispute_id', params.id)
     .eq('user_id', user.id);
 
-  const proofCount: number = rawCount ?? 0;
-  const pdfReady = Boolean(dispute.pdf_url);
+  const proofCount = count ?? 0;
+  const pdfReady   = Boolean(dispute.pdf_url);
+
+  // ………………………………………………………………… render (unchanged below except for small clean‑ups)
 
   const statusColor: Record<string, string> = {
     draft: 'bg-gray-200 text-gray-600',
-    open: 'bg-blue-100 text-blue-700',
-    won: 'bg-green-100 text-green-700',
-    lost: 'bg-red-100 text-red-700',
+    open:  'bg-blue-100 text-blue-700',
+    won:   'bg-green-100 text-green-700',
+    lost:  'bg-red-100 text-red-700',
   };
 
   const steps: Array<'Proof' | 'Template' | 'PDF'> = ['Proof', 'Template', 'PDF'];
@@ -63,77 +80,26 @@ export default async function DisputeDetail({ params }: { params: { id: string }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 space-y-6">
-      {/* ─── Back link ─────────────────────────────────────── */}
-      <Link href="/cases" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+      {/* back link */}
+      <Link
+        href="/cases"
+        className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
+      >
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
 
-      {/* ─── Progress bar ─────────────────────────────────── */}
-      <div className="w-full mb-6">
-        <div className="relative w-full bg-gray-800 rounded-full h-2.5">
-          <div
-            className="absolute top-0 left-0 bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / steps.length) * 100}%` }}
-          />
-        </div>
-        <div className="flex justify-between text-xs text-gray-400 mt-2">
-          {steps.map((step, index) => (
-            <div key={step} className="flex flex-col items-center w-1/3">
-              <div
-                className={`w-2.5 h-2.5 rounded-full mb-1 ${
-                  currentStep - 1 === index
-                    ? 'bg-white ring-2 ring-indigo-500'
-                    : currentStep > index
-                    ? 'bg-indigo-500'
-                    : 'bg-gray-600'
-                }`}
-              />
-              <span className={currentStep - 1 === index ? 'text-white font-medium' : ''}>{step}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* progress bar */}
+      <ProgressBar steps={steps} current={currentStep} />
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* ───────────────────────── Left column – dispute info */}
-        <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 ">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">{dispute.problem_type || 'Untitled Dispute'}</h1>
-              <span
-                className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
-                  statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
-                }`}
-              >
-                {dispute.status || 'unknown'}
-              </span>
-            </div>
-            <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
-          </div>
+        {/* left – dispute info */}
+        <DisputeInfo dispute={dispute} statusColor={statusColor} />
 
-          <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-400">
-            <Detail label="Platform" value={dispute.platform_name} />
-            <Detail label="Purchase Date" value={new Date(dispute.purchase_date).toLocaleDateString()} />
-            <Detail
-              label="Amount"
-              value={`${dispute.purchase_amount ?? '—'} ${dispute.currency ?? ''}`}
-            />
-            <Detail label="Created At" value={new Date(dispute.created_at).toLocaleDateString()} />
-          </div>
-
-          <div>
-            <p className="font-medium text-gray-500 mb-1">Description</p>
-            <p className="whitespace-pre-line text-gray-100 leading-relaxed">{dispute.description}</p>
-          </div>
-        </div>
-
-        {/* ───────────────────────── Right column – proofs */}
-        {proofCount > 0 && (
-          <ProofCarousel proofs={proofs} />
-        )}
+        {/* right – proofs */}
+        {proofCount > 0 && <ProofCarousel proofs={proofs} />}
       </div>
 
-      {/* ─── Footer actions ────────────────────────────────── */}
+      {/* footer actions */}
       <FooterActions
         pdfReady={pdfReady}
         proofCount={proofCount}
@@ -144,9 +110,98 @@ export default async function DisputeDetail({ params }: { params: { id: string }
   );
 }
 
-// ────────────────────────────────────────────────────────────────
-//  Re‑usable sub‑components (server side)
-// ────────────────────────────────────────────────────────────────
+// ───────────────────────── helpers / tiny components ────────────
+function ProgressBar({
+  steps,
+  current,
+}: {
+  steps: Array<'Proof' | 'Template' | 'PDF'>;
+  current: number;
+}) {
+  return (
+    <div className="w-full mb-6">
+      <div className="relative w-full bg-gray-800 rounded-full h-2.5">
+        <div
+          className="absolute top-0 left-0 bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+          style={{ width: `${(current / steps.length) * 100}%` }}
+        />
+      </div>
+      <div className="flex justify-between text-xs text-gray-400 mt-2">
+        {steps.map((step, i) => (
+          <div key={step} className="flex flex-col items-center w-1/3">
+            <div
+              className={`w-2.5 h-2.5 rounded-full mb-1 ${
+                current - 1 === i
+                  ? 'bg-white ring-2 ring-indigo-500'
+                  : current > i
+                  ? 'bg-indigo-500'
+                  : 'bg-gray-600'
+              }`}
+            />
+            <span className={current - 1 === i ? 'text-white font-medium' : ''}>
+              {step}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DisputeInfo({
+  dispute,
+  statusColor,
+}: {
+  dispute: any;
+  statusColor: Record<string, string>;
+}) {
+  return (
+    <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">
+            {dispute.problem_type || 'Untitled Dispute'}
+          </h1>
+          <span
+            className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
+              statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
+            }`}
+          >
+            {dispute.status || 'unknown'}
+          </span>
+        </div>
+        <DisputeActionsMenu
+          disputeId={dispute.id}
+          isArchived={dispute.archived}
+        />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-400">
+        <Detail label="Platform" value={dispute.platform_name} />
+        <Detail
+          label="Purchase Date"
+          value={new Date(dispute.purchase_date).toLocaleDateString()}
+        />
+        <Detail
+          label="Amount"
+          value={`${dispute.purchase_amount ?? '—'} ${dispute.currency ?? ''}`}
+        />
+        <Detail
+          label="Created At"
+          value={new Date(dispute.created_at).toLocaleDateString()}
+        />
+      </div>
+
+      <div>
+        <p className="font-medium text-gray-500 mb-1">Description</p>
+        <p className="whitespace-pre-line text-gray-100 leading-relaxed">
+          {dispute.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -178,7 +233,9 @@ function FooterActions({
           </p>
         )}
         {!pdfReady && proofCount > 0 && (
-          <p className="text-xs text-gray-500">PDF will be available after generation.</p>
+          <p className="text-xs text-gray-500">
+            PDF will be available after generation.
+          </p>
         )}
       </div>
 
@@ -193,7 +250,9 @@ function FooterActions({
           <PlusCircle className="w-4 h-4" /> Generate Template
         </ActionLink>
         <ActionLink
-          href={pdfReady ? `/cases/${disputeId}/review?pdf=${encodeURIComponent(pdfUrl)}` : '#'}
+          href={
+            pdfReady ? `/cases/${disputeId}/review?pdf=${encodeURIComponent(pdfUrl)}` : '#'
+          }
           variant={pdfReady ? 'green' : 'disabled'}
         >
           <FileText className="w-4 h-4" /> View PDF
@@ -219,7 +278,10 @@ function ActionLink({
     disabled: 'bg-gray-800 text-gray-500 cursor-not-allowed',
   };
   return (
-    <Link href={href} className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${styles[variant]}`}>
+    <Link
+      href={href}
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${styles[variant]}`}
+    >
       {children}
     </Link>
   );
