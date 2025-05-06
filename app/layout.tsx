@@ -3,6 +3,7 @@ import { ReactNode } from 'react'
 import Providers from './providers'
 import GlowingBorder from '@/components/GlowingBorder'
 
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="uk">
