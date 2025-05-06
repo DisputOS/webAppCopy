@@ -8,8 +8,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="uk">
       <head>
-        <title>Disput.ai – AI Legal Assistant</title> {/* 👈 название вкладки */}
-        <link rel="icon" href="/mainicon.png" type="image/x-icon" /> {/* 👈 иконка */}
+        <title>DisputApp</title> {/* 👈 название вкладки */}
+        <link rel="icon" type="image/png" href="/mainicon.png" />
       </head>
       <body className="min-h-screen bg-gray-50 relative overflow-hidden">
         <GlowingBorder />
