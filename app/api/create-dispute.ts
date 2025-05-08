@@ -9,22 +9,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const response = await fetch('https://dzzyasrcofzdryfbmxrg.functions.supabase.co/insert_dispute_with_flag', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'cf-ipcountry': req.headers['cf-ipcountry'] || 'unknown',
-      },
-      body: JSON.stringify({
-        user_id,
-        platform_name,
-        purchase_amount,
-        currency,
-        purchase_date,
-        problem_type,
-        description,
-      }),
-    });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+    'cf-ipcountry': Array.isArray(req.headers['cf-ipcountry'])
+      ? req.headers['cf-ipcountry'][0]
+      : req.headers['cf-ipcountry'] || 'unknown',
+  },
+  body: JSON.stringify({
+    user_id,
+    platform_name,
+    purchase_amount,
+    currency,
+    purchase_date,
+    problem_type,
+    description,
+  }),
+});
+
 
     const data = await response.json();
 
