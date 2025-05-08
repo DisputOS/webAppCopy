@@ -92,7 +92,8 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           user_id: session.user.id,
