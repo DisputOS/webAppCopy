@@ -95,7 +95,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
 
     setLoading(true);
 
-    const fullDisputePayload = {
+    const fullDisputePayload: Record<string, any> = {
       user_id: session.user.id,
       platform_name: form.platform_name,
       purchase_amount: parseFloat(form.purchase_amount || '0') || 0,
@@ -108,23 +108,14 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       user_confirmed_input: true,
       training_permission: false,
       archived: false,
-      gpt_response: null,
-      fraud_flags: null,
-      ai_confidence_score: null,
-      risk_score: null,
-      proof_clarity_score: null,
       success_flow_triggered: false,
       user_confirmed_nda: false,
-      ai_act_risk_level: null,
-      dispute_health: null,
       pii_filtered: false,
       data_deleted: false,
-      gdpr_erased_at: null,
-      ai_override_executed: false,
-      case_health: null
+      ai_override_executed: false
     };
 
-    console.log('[fullDisputePayload]', fullDisputePayload);
+    console.log('[📤 Sending payload]', JSON.stringify(fullDisputePayload, null, 2));
 
     try {
       const res = await fetch('/functions/v1/submit_dispute', {
@@ -134,7 +125,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Unknown error');
+      if (!res.ok) throw new Error(result.details || result.error || 'Unknown error');
 
       router.push(`/cases/${result.id}`);
     } catch (err: any) {
