@@ -88,13 +88,17 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-    if (!session) return;
+    if (!session || !session.user || !session.user.id) {
+      alert('User not authenticated');
+      return;
+    }
+
     setLoading(true);
 
     const fullDisputePayload = {
       user_id: session.user.id,
       platform_name: form.platform_name,
-      purchase_amount: parseFloat(form.purchase_amount || '0'),
+      purchase_amount: parseFloat(form.purchase_amount || '0') || 0,
       currency: form.currency,
       purchase_date: form.purchase_date ? new Date(form.purchase_date).toISOString() : null,
       problem_type: form.problem_type,
@@ -119,6 +123,8 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       ai_override_executed: false,
       case_health: null
     };
+
+    console.log('[fullDisputePayload]', fullDisputePayload);
 
     try {
       const res = await fetch('/functions/v1/submit_dispute', {
