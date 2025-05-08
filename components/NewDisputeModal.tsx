@@ -86,25 +86,33 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const next = () => validateStep() && setStep((s) => Math.min(s + 1, flowSteps.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  const handleSubmit = async () => {
-    if (!session) return;
-    setLoading(true);
+ const response = await fetch(
+  'https://dzzyasrcofzdryfbmxrg.functions.supabase.co/insert_dispute_with_flag',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // public anon key, если функция «public»: 
+      'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      platform_name: form.platform_name,
+      purchase_amount: parseFloat(form.purchase_amount || '0'),
+      currency: form.currency,
+      purchase_date: form.purchase_date,
+      problem_type: form.problem_type,
+      description: form.description,
+      service_usage: form.service_usage,
+      tracking_info: form.tracking_info,
+      user_plan: 'free',
+      status: 'draft',
+      user_confirmed_input: true,
+      archived: false
+    })
+  }
+);
 
-    const response = await fetch('/api/create-dispute', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: session.user.id,
-        platform_name: form.platform_name,
-        purchase_amount: parseFloat(form.purchase_amount || '0'),
-        currency: form.currency,
-        purchase_date: form.purchase_date,
-        problem_type: form.problem_type,
-        description: form.description,
-        service_usage: form.service_usage,
-        tracking_info: form.tracking_info
-      })
-    });
 
     const data = await response.json();
     setLoading(false);
