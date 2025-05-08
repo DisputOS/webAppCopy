@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useState } from 'react';
+import { useSession } from '@supabase/auth-helpers-react';
 import { CheckCircle, Circle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,14 +35,12 @@ const QUESTION_FLOW_BY_TYPE: Record<string, string[]> = {
 };
 
 export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
-  const supabase = useSupabaseClient();
   const session = useSession();
   const router = useRouter();
 
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
-  const [jurisdiction, setJurisdiction] = useState<string | null>(null);
 
   const [form, setForm] = useState<any>({
     purchase_amount: '',
@@ -54,13 +52,6 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     service_usage: '',
     tracking_info: ''
   });
-
-  useEffect(() => {
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => setJurisdiction(data.country_code))
-      .catch(() => console.warn('Could not determine jurisdiction'));
-  }, []);
 
   const flowSteps = QUESTION_FLOW_BY_TYPE[form.problem_type] || QUESTION_FLOW_BY_TYPE['other'];
   const currentStep = flowSteps[step];
@@ -99,47 +90,28 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     if (!session) return;
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from('disputes')
-      .insert([
-        {
-          user_id: session.user.id,
-          platform_name: form.platform_name,
-          purchase_amount: parseFloat(form.purchase_amount || '0'),
-          currency: form.currency,
-          purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
-          problem_type: form.problem_type,
-          description: form.description,
-          user_plan: 'free',
-          status: 'draft',
-          user_confirmed_input: true,
-          training_permission: false,
-          archived: false,
-          gpt_response: null,
-          fraud_flags: null,
-          ai_confidence_score: null,
-          risk_score: null,
-          proof_clarity_score: null,
-          jurisdiction_flag: jurisdiction,
-          success_flow_triggered: false,
-          user_confirmed_nda: false,
-          ai_act_risk_level: null,
-          dispute_health: null,
-          pii_filtered: false,
-          data_deleted: false,
-          gdpr_erased_at: null,
-          ai_override_executed: false,
-          case_health: null
-        }
-      ])
-      .select('id')
-      .single();
+    const response = await fetch('/api/create-dispute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: session.user.id,
+        platform_name: form.platform_name,
+        purchase_amount: parseFloat(form.purchase_amount || '0'),
+        currency: form.currency,
+        purchase_date: form.purchase_date,
+        problem_type: form.problem_type,
+        description: form.description,
+        service_usage: form.service_usage,
+        tracking_info: form.tracking_info
+      })
+    });
 
+    const data = await response.json();
     setLoading(false);
 
-    if (error) {
-      console.error('❌ Supabase insert failed:', error.message, error.details);
-      alert('Insert error: ' + error.message);
+    if (!response.ok) {
+      console.error('❌ Server error:', data.error);
+      alert('Insert error: ' + data.error);
       return;
     }
 
@@ -167,11 +139,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         );
       case 'problem_type':
         return (
-          <select
-            value={form.problem_type}
-            onChange={(e) => handleChange('problem_type', e.target.value)}
-            className="w-full bg-gray-950 border border-gray-700 rounded p-2"
-          >
+          <select value={form.problem_type} onChange={(e) => handleChange('problem_type', e.target.value)} className="w-full bg-gray-950 border border-gray-700 rounded p-2">
             <option value="">Select problem type</option>
             <option value="subscription_auto_renewal">Subscription auto-renewal</option>
             <option value="item_not_delivered">Item not delivered</option>
@@ -180,11 +148,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         );
       case 'service_usage':
         return (
-          <select
-            value={form.service_usage}
-            onChange={(e) => handleChange('service_usage', e.target.value)}
-            className="w-full bg-gray-950 border border-gray-700 rounded p-2"
-          >
+          <select value={form.service_usage} onChange={(e) => handleChange('service_usage', e.target.value)} className="w-full bg-gray-950 border border-gray-700 rounded p-2">
             <option value="">Did you use the service?</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
@@ -196,12 +160,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         );
       case 'description':
         return (
-          <textarea
-            className="w-full bg-gray-950 border border-gray-700 rounded p-3 text-sm min-h-[120px]"
-            placeholder="Describe the issue in detail (min 20 characters)..."
-            value={form.description}
-            onChange={(e) => handleChange('description', e.target.value)}
-          />
+          <textarea className="w-full bg-gray-950 border border-gray-700 rounded p-3 text-sm min-h-[120px]" placeholder="Describe the issue in detail (min 20 characters)..." value={form.description} onChange={(e) => handleChange('description', e.target.value)} />
         );
       case 'confirm':
         return (
@@ -219,9 +178,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         <button onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl">
           <X />
         </button>
-
         <h2 className="text-xl font-bold mb-4 text-center">New Dispute</h2>
-
         <div className="flex gap-3 justify-center mb-6">
           {flowSteps.map((_, i) => (
             <span key={i}>
@@ -233,7 +190,6 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
             </span>
           ))}
         </div>
-
         <section className="space-y-6">
           {renderStep()}
           <div className="flex justify-between pt-4">
