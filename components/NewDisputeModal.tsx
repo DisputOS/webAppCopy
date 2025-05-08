@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 
+// Define the steps shown for each problem type
 const QUESTION_FLOW_BY_TYPE: Record<string, string[]> = {
   subscription_auto_renewal: [
     'amount_currency',
@@ -43,7 +44,8 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
 
-  const [form, setForm] = useState<any>({
+  // All the form fields we collect from the user
+  const [form, setForm] = useState({
     purchase_amount: '',
     currency: '',
     platform_name: '',
@@ -54,6 +56,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     tracking_info: ''
   });
 
+  // What is the current question flow based on problem type?
   const flowSteps = QUESTION_FLOW_BY_TYPE[form.problem_type] || QUESTION_FLOW_BY_TYPE['other'];
   const currentStep = flowSteps[step];
 
@@ -61,6 +64,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     setForm({ ...form, [field]: value });
   };
 
+  // Validation for each step
   const validateStep = () => {
     switch (currentStep) {
       case 'amount_currency':
@@ -87,75 +91,85 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const next = () => validateStep() && setStep((s) => Math.min(s + 1, flowSteps.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
+  // Submit the form to Supabase
   const handleSubmit = async () => {
-  if (!session) return;
-  setLoading(true);
+    if (!session) return;
+    setLoading(true);
 
-  const { data, error } = await supabase
-    .from('disputes')
-    .insert([
-      {
-        user_id: session.user.id,
-        platform_name: form.platform_name,
-        purchase_amount: parseFloat(form.purchase_amount || '0'),
-        currency: form.currency,
-        purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
-        problem_type: form.problem_type,
-        description: form.description,
-        user_plan: 'free', // або отримати з профілю
-        status: 'draft',
-        user_confirmed_input: true,
-        training_permission: false,
-        archived: false,
-        gpt_response: null,
-        fraud_flags: null,
-        ai_confidence_score: null,
-        risk_score: null,
-        proof_clarity_score: null,
-        jurisdiction_flag: null,
-        success_flow_triggered: false,
-        user_confirmed_nda: false,
-        ai_act_risk_level: null,
-        dispute_health: null,
-        pii_filtered: false,
-        data_deleted: false,
-        gdpr_erased_at: null,
-        ai_override_executed: false,
-        case_health: null
-      }
-    ])
-    .select('id')
-    .single();
+    const { data, error } = await supabase
+      .from('disputes')
+      .insert([
+        {
+          user_id: session.user.id,
+          platform_name: form.platform_name,
+          purchase_amount: parseFloat(form.purchase_amount || '0'),
+          currency: form.currency,
+          purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
+          problem_type: form.problem_type,
+          description: form.description,
+          user_plan: 'free',
+          status: 'draft',
+          user_confirmed_input: true,
+          training_permission: false,
+          archived: false,
+          proof_clarity_score: null,
+          jurisdiction_flag: null,
+          success_flow_triggered: false,
+          user_confirmed_nda: false,
+          service_usage: form.service_usage,
+          // ✅ store the tracking info (trimmed) or null if empty
+          tracking_info: form.tracking_info?.trim() || null
+        }
+      ])
+      .select('id')
+      .single();
 
-  setLoading(false);
+    setLoading(false);
 
-  if (error) {
-    console.error('❌ Supabase insert failed:', error.message, error.details);
-    alert('Insert error: ' + error.message);
-    return;
-  }
+    if (error) {
+      console.error('❌ Supabase insert failed:', error.message, error.details);
+      alert('Insert error: ' + error.message);
+      return;
+    }
 
-  if (data?.id) {
-    router.push(`/cases/${data.id}`);
-  }
-};
+    if (data?.id) {
+      router.push(`/cases/${data.id}`);
+    }
+  };
 
+  // Render the UI for the current step
   const renderStep = () => {
     switch (currentStep) {
       case 'amount_currency':
         return (
           <>
-            <Input placeholder="Amount (e.g. 20)" value={form.purchase_amount} onChange={(e) => handleChange('purchase_amount', e.target.value)} />
-            <Input placeholder="Currency (e.g. EUR)" value={form.currency} onChange={(e) => handleChange('currency', e.target.value)} />
+            <Input
+              placeholder="Amount (e.g. 20)"
+              value={form.purchase_amount}
+              onChange={(e) => handleChange('purchase_amount', e.target.value)}
+            />
+            <Input
+              placeholder="Currency (e.g. EUR)"
+              value={form.currency}
+              onChange={(e) => handleChange('currency', e.target.value)}
+            />
           </>
         );
       case 'platform':
         return (
-          <Input placeholder="Platform (e.g. Notion)" value={form.platform_name} onChange={(e) => handleChange('platform_name', e.target.value)} />
+          <Input
+            placeholder="Platform (e.g. Notion)"
+            value={form.platform_name}
+            onChange={(e) => handleChange('platform_name', e.target.value)}
+          />
         );
       case 'purchase_date':
         return (
-          <Input type="date" value={form.purchase_date} onChange={(e) => handleChange('purchase_date', e.target.value)} />
+          <Input
+            type="date"
+            value={form.purchase_date}
+            onChange={(e) => handleChange('purchase_date', e.target.value)}
+          />
         );
       case 'problem_type':
         return (
@@ -184,7 +198,11 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         );
       case 'tracking_info':
         return (
-          <Input placeholder="Tracking number (optional)" value={form.tracking_info} onChange={(e) => handleChange('tracking_info', e.target.value)} />
+          <Input
+            placeholder="Tracking number (optional)"
+            value={form.tracking_info}
+            onChange={(e) => handleChange('tracking_info', e.target.value)}
+          />
         );
       case 'description':
         return (
@@ -198,7 +216,11 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       case 'confirm':
         return (
           <label className="flex items-center gap-3 text-sm text-gray-300">
-            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+            />
             I confirm the information is accurate.
           </label>
         );
@@ -208,7 +230,10 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="bg-gray-900 border border-gray-700 text-white rounded-2xl p-6 w-full max-w-xl shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl"
+        >
           <X />
         </button>
 
