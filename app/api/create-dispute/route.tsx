@@ -16,10 +16,7 @@ export async function POST(req: NextRequest) {
       tracking_info,
     } = body;
 
-    const cfCountry =
-      Array.isArray(req.headers.get('cf-ipcountry'))
-        ? (req.headers.get('cf-ipcountry') as string[])[0]
-        : req.headers.get('cf-ipcountry') || 'unknown';
+    const cfCountry = req.headers.get('cf-ipcountry') || 'unknown';
 
     const response = await fetch('https://dzzyasrcofzdryfbmxrg.functions.supabase.co/insert_dispute_with_flag', {
       method: 'POST',
