@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { user_id, platform_name, purchase_amount, currency, purchase_date, problem_type, description } = req.body;
 
   try {
-    const response = await fetch('https://YOUR_PROJECT_ID.functions.supabase.co/insert_dispute_with_flag', {
+    const response = await fetch('https://dzzyasrcofzdryfbmxrg.functions.supabase.co/insert_dispute_with_flag', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
