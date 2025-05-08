@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { CheckCircle, Circle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
+  const [jurisdiction, setJurisdiction] = useState<string | null>(null);
 
   const [form, setForm] = useState<any>({
     purchase_amount: '',
@@ -53,6 +54,13 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     service_usage: '',
     tracking_info: ''
   });
+
+  useEffect(() => {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => setJurisdiction(data.country_code))
+      .catch(() => console.warn('Could not determine jurisdiction'));
+  }, []);
 
   const flowSteps = QUESTION_FLOW_BY_TYPE[form.problem_type] || QUESTION_FLOW_BY_TYPE['other'];
   const currentStep = flowSteps[step];
@@ -74,7 +82,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       case 'service_usage':
         return form.service_usage === 'yes' || form.service_usage === 'no';
       case 'tracking_info':
-        return true; // optional
+        return true;
       case 'description':
         return form.description.trim().length >= 20;
       case 'confirm':
@@ -88,57 +96,57 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-  if (!session) return;
-  setLoading(true);
+    if (!session) return;
+    setLoading(true);
 
-  const { data, error } = await supabase
-    .from('disputes')
-    .insert([
-      {
-        user_id: session.user.id,
-        platform_name: form.platform_name,
-        purchase_amount: parseFloat(form.purchase_amount || '0'),
-        currency: form.currency,
-        purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
-        problem_type: form.problem_type,
-        description: form.description,
-        user_plan: 'free', // або отримати з профілю
-        status: 'draft',
-        user_confirmed_input: true,
-        training_permission: false,
-        archived: false,
-        gpt_response: null,
-        fraud_flags: null,
-        ai_confidence_score: null,
-        risk_score: null,
-        proof_clarity_score: null,
-        jurisdiction_flag: null,
-        success_flow_triggered: false,
-        user_confirmed_nda: false,
-        ai_act_risk_level: null,
-        dispute_health: null,
-        pii_filtered: false,
-        data_deleted: false,
-        gdpr_erased_at: null,
-        ai_override_executed: false,
-        case_health: null
-      }
-    ])
-    .select('id')
-    .single();
+    const { data, error } = await supabase
+      .from('disputes')
+      .insert([
+        {
+          user_id: session.user.id,
+          platform_name: form.platform_name,
+          purchase_amount: parseFloat(form.purchase_amount || '0'),
+          currency: form.currency,
+          purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
+          problem_type: form.problem_type,
+          description: form.description,
+          user_plan: 'free',
+          status: 'draft',
+          user_confirmed_input: true,
+          training_permission: false,
+          archived: false,
+          gpt_response: null,
+          fraud_flags: null,
+          ai_confidence_score: null,
+          risk_score: null,
+          proof_clarity_score: null,
+          jurisdiction_flag: jurisdiction,
+          success_flow_triggered: false,
+          user_confirmed_nda: false,
+          ai_act_risk_level: null,
+          dispute_health: null,
+          pii_filtered: false,
+          data_deleted: false,
+          gdpr_erased_at: null,
+          ai_override_executed: false,
+          case_health: null
+        }
+      ])
+      .select('id')
+      .single();
 
-  setLoading(false);
+    setLoading(false);
 
-  if (error) {
-    console.error('❌ Supabase insert failed:', error.message, error.details);
-    alert('Insert error: ' + error.message);
-    return;
-  }
+    if (error) {
+      console.error('❌ Supabase insert failed:', error.message, error.details);
+      alert('Insert error: ' + error.message);
+      return;
+    }
 
-  if (data?.id) {
-    router.push(`/cases/${data.id}`);
-  }
-};
+    if (data?.id) {
+      router.push(`/cases/${data.id}`);
+    }
+  };
 
   const renderStep = () => {
     switch (currentStep) {
