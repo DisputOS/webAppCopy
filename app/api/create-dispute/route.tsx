@@ -26,16 +26,23 @@ export async function POST(req: NextRequest) {
         'cf-ipcountry': cfCountry,
       },
       body: JSON.stringify({
-        user_id,
-        platform_name,
-        purchase_amount,
-        currency,
-        purchase_date,
-        problem_type,
-        description,
-        service_usage,
-        tracking_info,
-      }),
+  user_id,
+  platform_name,
+  purchase_amount,
+  currency,
+  purchase_date,
+  problem_type,
+  description,
+  service_usage,
+  tracking_info,
+
+  // 👇 обязательные
+  user_plan: 'free',
+  status: 'draft',
+  user_confirmed_input: true,
+  archived: false
+}),
+
     });
 
     const data = await response.json();
