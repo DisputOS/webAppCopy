@@ -74,7 +74,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       case 'service_usage':
         return form.service_usage === 'yes' || form.service_usage === 'no';
       case 'tracking_info':
-        return true;
+        return true; // optional
       case 'description':
         return form.description.trim().length >= 20;
       case 'confirm':
@@ -88,53 +88,57 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-    if (!session || !session.user || !session.user.id) {
-      alert('User not authenticated');
-      return;
-    }
+  if (!session) return;
+  setLoading(true);
 
-    setLoading(true);
+  const { data, error } = await supabase
+    .from('disputes')
+    .insert([
+      {
+        user_id: session.user.id,
+        platform_name: form.platform_name,
+        purchase_amount: parseFloat(form.purchase_amount || '0'),
+        currency: form.currency,
+        purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
+        problem_type: form.problem_type,
+        description: form.description,
+        user_plan: 'free', // або отримати з профілю
+        status: 'draft',
+        user_confirmed_input: true,
+        training_permission: false,
+        archived: false,
+        gpt_response: null,
+        fraud_flags: null,
+        ai_confidence_score: null,
+        risk_score: null,
+        proof_clarity_score: null,
+        jurisdiction_flag: null,
+        success_flow_triggered: false,
+        user_confirmed_nda: false,
+        ai_act_risk_level: null,
+        dispute_health: null,
+        pii_filtered: false,
+        data_deleted: false,
+        gdpr_erased_at: null,
+        ai_override_executed: false,
+        case_health: null
+      }
+    ])
+    .select('id')
+    .single();
 
-    const fullDisputePayload: Record<string, any> = {
-      user_id: session.user.id,
-      platform_name: form.platform_name,
-      purchase_amount: parseFloat(form.purchase_amount || '0') || 0,
-      currency: form.currency,
-      purchase_date: form.purchase_date ? new Date(form.purchase_date).toISOString() : null,
-      problem_type: form.problem_type,
-      description: form.description,
-      user_plan: 'free',
-      status: 'draft',
-      user_confirmed_input: true,
-      training_permission: false,
-      archived: false,
-      success_flow_triggered: false,
-      user_confirmed_nda: false,
-      pii_filtered: false,
-      data_deleted: false,
-      ai_override_executed: false
-    };
+  setLoading(false);
 
-    console.log('[📤 Sending payload]', JSON.stringify(fullDisputePayload, null, 2));
+  if (error) {
+    console.error('❌ Supabase insert failed:', error.message, error.details);
+    alert('Insert error: ' + error.message);
+    return;
+  }
 
-    try {
-      const res = await fetch('/functions/v1/submit_dispute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fullDisputePayload)
-      });
-
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.details || result.error || 'Unknown error');
-
-      router.push(`/cases/${result.id}`);
-    } catch (err: any) {
-      console.error('❌ Edge Function error:', err.message);
-      alert('Insert failed: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (data?.id) {
+    router.push(`/cases/${data.id}`);
+  }
+};
 
   const renderStep = () => {
     switch (currentStep) {
