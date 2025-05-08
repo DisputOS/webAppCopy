@@ -87,56 +87,57 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const next = () => validateStep() && setStep((s) => Math.min(s + 1, flowSteps.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
   if (!session) return;
   setLoading(true);
 
-  const { data, error } = await supabase
-    .from('disputes')
-    .insert([
-      {
-        user_id: session.user.id,
-        platform_name: form.platform_name,
-        purchase_amount: parseFloat(form.purchase_amount || '0'),
-        currency: form.currency,
-        purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
-        problem_type: form.problem_type,
-        description: form.description,
-        user_plan: 'free', // або отримати з профілю
-        status: 'draft',
-        user_confirmed_input: true,
-        training_permission: false,
-        archived: false,
-        gpt_response: null,
-        fraud_flags: null,
-        ai_confidence_score: null,
-        risk_score: null,
-        proof_clarity_score: null,
-        jurisdiction_flag: null,
-        success_flow_triggered: false,
-        user_confirmed_nda: false,
-        ai_act_risk_level: null,
-        dispute_health: null,
-        pii_filtered: false,
-        data_deleted: false,
-        gdpr_erased_at: null,
-        ai_override_executed: false,
-        case_health: null
-      }
-    ])
-    .select('id')
-    .single();
+  const fullDisputePayload = {
+    user_id: session.user.id,
+    platform_name: form.platform_name,
+    purchase_amount: parseFloat(form.purchase_amount || '0'),
+    currency: form.currency,
+    purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
+    problem_type: form.problem_type,
+    description: form.description,
+    user_plan: 'free',
+    status: 'draft',
+    user_confirmed_input: true,
+    training_permission: false,
+    archived: false,
+    gpt_response: null,
+    fraud_flags: null,
+    ai_confidence_score: null,
+    risk_score: null,
+    proof_clarity_score: null,
+    // ❌ we don't send this one — it's set automatically:
+    // jurisdiction_flag: '...',
+    success_flow_triggered: false,
+    user_confirmed_nda: false,
+    ai_act_risk_level: null,
+    dispute_health: null,
+    pii_filtered: false,
+    data_deleted: false,
+    gdpr_erased_at: null,
+    ai_override_executed: false,
+    case_health: null
+  };
 
-  setLoading(false);
+  try {
+    const res = await fetch('/functions/v1/submit_dispute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fullDisputePayload)
+    });
 
-  if (error) {
-    console.error('❌ Supabase insert failed:', error.message, error.details);
-    alert('Insert error: ' + error.message);
-    return;
-  }
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Unknown error');
 
-  if (data?.id) {
-    router.push(`/cases/${data.id}`);
+    router.push(`/cases/${result.id}`);
+  } catch (err: any) {
+    console.error('❌ Edge Function error:', err.message);
+    alert('Insert failed: ' + err.message);
+  } finally {
+    setLoading(false);
   }
 };
 
