@@ -88,39 +88,57 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-    if (!session) return;
-    setLoading(true);
+  if (!session) return;
+  setLoading(true);
 
-    const { data, error } = await supabase
-      .from('disputes')
-      .insert([
-        {
-          user_id: session.user.id,
-          purchase_amount: parseFloat(form.purchase_amount),
-          currency: form.currency,
-          platform_name: form.platform_name,
-          purchase_date: form.purchase_date,
-          problem_type: form.problem_type,
-          description: form.description,
-          service_usage: form.service_usage,
-          tracking_info: form.tracking_info,
-          status: 'draft'
-        }
-      ])
-      .select('id')
-      .single();
+  const { data, error } = await supabase
+    .from('disputes')
+    .insert([
+      {
+        user_id: session.user.id,
+        platform_name: form.platform_name,
+        purchase_amount: parseFloat(form.purchase_amount || '0'),
+        currency: form.currency,
+        purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
+        problem_type: form.problem_type,
+        description: form.description,
+        user_plan: 'free', // або отримати з профілю
+        status: 'draft',
+        user_confirmed_input: true,
+        training_permission: false,
+        archived: false,
+        gpt_response: null,
+        fraud_flags: null,
+        ai_confidence_score: null,
+        risk_score: null,
+        proof_clarity_score: null,
+        jurisdiction_flag: null,
+        success_flow_triggered: false,
+        user_confirmed_nda: false,
+        ai_act_risk_level: null,
+        dispute_health: null,
+        pii_filtered: false,
+        data_deleted: false,
+        gdpr_erased_at: null,
+        ai_override_executed: false,
+        case_health: null
+      }
+    ])
+    .select('id')
+    .single();
 
-    setLoading(false);
+  setLoading(false);
 
-    if (error) {
-      console.error('Failed to create dispute:', error);
-      return;
-    }
+  if (error) {
+    console.error('❌ Supabase insert failed:', error.message, error.details);
+    alert('Insert error: ' + error.message);
+    return;
+  }
 
-    if (data?.id) {
-      router.push(`/cases/${data.id}`);
-    }
-  };
+  if (data?.id) {
+    router.push(`/cases/${data.id}`);
+  }
+};
 
   const renderStep = () => {
     switch (currentStep) {
