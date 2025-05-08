@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 
-// Define the steps shown for each problem type
+// ---------------------------
+// Question flow configuration
+// ---------------------------
 const QUESTION_FLOW_BY_TYPE: Record<string, string[]> = {
   subscription_auto_renewal: [
     'amount_currency',
@@ -40,11 +42,13 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const session = useSession();
   const router = useRouter();
 
+  // ---------------------------
+  // Local state
+  // ---------------------------
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
 
-  // All the form fields we collect from the user
   const [form, setForm] = useState({
     purchase_amount: '',
     currency: '',
@@ -56,15 +60,16 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     tracking_info: ''
   });
 
-  // What is the current question flow based on problem type?
   const flowSteps = QUESTION_FLOW_BY_TYPE[form.problem_type] || QUESTION_FLOW_BY_TYPE['other'];
   const currentStep = flowSteps[step];
 
+  // ---------------------------
+  // Helpers
+  // ---------------------------
   const handleChange = (field: string, value: string) => {
     setForm({ ...form, [field]: value });
   };
 
-  // Validation for each step
   const validateStep = () => {
     switch (currentStep) {
       case 'amount_currency':
@@ -91,7 +96,9 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const next = () => validateStep() && setStep((s) => Math.min(s + 1, flowSteps.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  // Submit the form to Supabase
+  // ---------------------------
+  // Submit handler
+  // ---------------------------
   const handleSubmit = async () => {
     if (!session) return;
     setLoading(true);
@@ -112,13 +119,24 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
           user_confirmed_input: true,
           training_permission: false,
           archived: false,
+          gpt_response: null,
+          fraud_flags: null,
+          ai_confidence_score: null,
+          risk_score: null,
           proof_clarity_score: null,
           jurisdiction_flag: null,
           success_flow_triggered: false,
           user_confirmed_nda: false,
-          service_usage: form.service_usage,
-          // ✅ store the tracking info (trimmed) or null if empty
-          tracking_info: form.tracking_info?.trim() || null
+          ai_act_risk_level: null,
+          dispute_health: null,
+          pii_filtered: false,
+          data_deleted: false,
+          gdpr_erased_at: null,
+          ai_override_executed: false,
+          case_health: null,
+          // Optional user-input fields
+          service_usage: form.service_usage || null,
+          tracking_info: form.tracking_info || null
         }
       ])
       .select('id')
@@ -137,7 +155,9 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  // Render the UI for the current step
+  // ---------------------------
+  // Step renderer
+  // ---------------------------
   const renderStep = () => {
     switch (currentStep) {
       case 'amount_currency':
@@ -227,9 +247,13 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  // ---------------------------
+  // Component markup
+  // ---------------------------
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="bg-gray-900 border border-gray-700 text-white rounded-2xl p-6 w-full max-w-xl shadow-2xl relative">
+        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl"
@@ -239,6 +263,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
 
         <h2 className="text-xl font-bold mb-4 text-center">New Dispute</h2>
 
+        {/* Progress dots */}
         <div className="flex gap-3 justify-center mb-6">
           {flowSteps.map((_, i) => (
             <span key={i}>
@@ -251,12 +276,16 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
           ))}
         </div>
 
+        {/* Dynamic step content */}
         <section className="space-y-6">
           {renderStep()}
+
+          {/* Navigation buttons */}
           <div className="flex justify-between pt-4">
             <Button variant="outline" onClick={back} disabled={step === 0}>
               Back
             </Button>
+
             {step < flowSteps.length - 1 ? (
               <Button onClick={next} disabled={!validateStep()}>
                 Next
