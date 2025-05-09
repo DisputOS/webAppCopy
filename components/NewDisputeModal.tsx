@@ -75,8 +75,6 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         return form.service_usage === "yes" || form.service_usage === "no";
       case "tracking_info":
         return true; // optional
-      case "country":
-        return !!form.country;                                        // NEW
       case "description":
         return form.description.trim().length >= 20;
       case "disclaimer":
