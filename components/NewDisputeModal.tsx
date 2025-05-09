@@ -8,11 +8,21 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
 // -----------------------------------------------------------------------------
-// Question flows
-// Each problem type gets a tailored sequence of UI steps. Every flow ALWAYS ends
-// with:  ▸ legal AI-disclaimer  ▸ training permission  ▸ final confirmation.
+// Step definitions -------------------------------------------------------------
 // -----------------------------------------------------------------------------
-const BASE_FLOW = [
+export type FlowStep =
+  | "amount_currency"
+  | "platform"
+  | "purchase_date"
+  | "problem_type"
+  | "service_usage"
+  | "tracking_info"
+  | "description"
+  | "disclaimer"
+  | "training_permission"
+  | "confirm";
+
+const BASE_FLOW: readonly FlowStep[] = [
   "amount_currency",
   "platform",
   "purchase_date",
@@ -20,22 +30,20 @@ const BASE_FLOW = [
   "service_usage",
   "tracking_info",
   "description",
-  // the three system-wide steps ↓
   "disclaimer",
   "training_permission",
   "confirm",
 ] as const;
 
-type FlowStep = (typeof BASE_FLOW)[number];
-
+// Map problem‑types to their bespoke question flows ---------------------------
 const QUESTION_FLOW_BY_TYPE: Record<string, FlowStep[]> = {
-  subscription_auto_renewal: BASE_FLOW,
+  subscription_auto_renewal: [...BASE_FLOW],
   item_not_delivered: BASE_FLOW.filter((s) => s !== "service_usage"),
-  other: BASE_FLOW,
+  other: [...BASE_FLOW],
 };
 
 // -----------------------------------------------------------------------------
-// Component
+// Component -------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
@@ -69,10 +77,10 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   // Helpers
   // -------------------------------------------------
   const handleChange = (field: string, value: string) => {
-    setForm({ ...form, [field]: value });
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const validateStep = () => {
+  const validateStep = (): boolean => {
     switch (currentStep) {
       case "amount_currency":
         return !!form.purchase_amount &&
@@ -81,19 +89,17 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       case "platform":
         return !!form.platform_name;
       case "purchase_date":
-        return (
-          !!form.purchase_date && new Date(form.purchase_date) <= new Date()
-        );
+        return !!form.purchase_date && new Date(form.purchase_date) <= new Date();
       case "problem_type":
         return !!form.problem_type;
       case "service_usage":
         return form.service_usage === "yes" || form.service_usage === "no";
-      case "tracking_info":
-        return true; // optional
       case "description":
         return form.description.trim().length >= 20;
       case "training_permission":
-        return form.training_permission === "yes" || form.training_permission === "no";
+        return (
+          form.training_permission === "yes" || form.training_permission === "no"
+        );
       case "confirm":
         return agreeAccuracy;
       default:
@@ -119,15 +125,12 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
           purchase_date: form.purchase_date ? new Date(form.purchase_date) : null,
           problem_type: form.problem_type,
           description: form.description,
-          // UX-required flags
-          user_confirmed_input: true, // user accuracy checkbox
-          legal_disclaimer_shown: true, // user saw the AI disclaimer
+          user_confirmed_input: true,
+          legal_disclaimer_shown: true,
           training_permission: form.training_permission === "yes",
-          // system fields
           user_plan: "free",
           status: "draft",
           archived: false,
-          // optional user inputs
           service_usage: form.service_usage || null,
           tracking_info: form.tracking_info || null,
         },
@@ -272,7 +275,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setAgreeAccuracy(e.target.checked)}
               className="accent-blue-500 w-4 h-4"
             />
-            I confirm that all information I provided is accurate and complete.
+            I confirm that all information I provide is accurate and complete.
           </label>
         );
     }
