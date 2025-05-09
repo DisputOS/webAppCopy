@@ -35,9 +35,11 @@ const BASE_FLOW: readonly FlowStep[] = [
   "confirm",
 ] as const;
 
-// Map problem‑types to their bespoke question flows ---------------------------
+// Map problem‑types to bespoke flows -----------------------------------------
+// * Subscription auto‑renewal → no tracking info step
+// * Item not delivered      → no service‑usage step (needs tracking)
 const QUESTION_FLOW_BY_TYPE: Record<string, FlowStep[]> = {
-  subscription_auto_renewal: [...BASE_FLOW],
+  subscription_auto_renewal: BASE_FLOW.filter((s) => s !== "tracking_info"),
   item_not_delivered: BASE_FLOW.filter((s) => s !== "service_usage"),
   other: [...BASE_FLOW],
 };
@@ -72,6 +74,12 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const flowSteps =
     QUESTION_FLOW_BY_TYPE[form.problem_type] || QUESTION_FLOW_BY_TYPE["other"];
   const currentStep = flowSteps[step];
+
+  // Reset wizard if current flow is shorter than current step (e.g. user changed problem type)
+  if (step >= flowSteps.length) {
+    setStep(flowSteps.length - 1);
+    return null; // render once state resets
+  }
 
   // -------------------------------------------------
   // Helpers
@@ -262,6 +270,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
                   onChange={(e) => handleChange("training_permission", e.target.value)}
                 />
                 No, do not use my data
+                </
               </label>
             </div>
           </div>
