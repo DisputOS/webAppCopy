@@ -32,7 +32,6 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     description:         "",
     service_usage:       "",
     tracking_info:       "",
-    country:             "",          // NEW
     training_permission: "no",
   });
 
@@ -112,7 +111,6 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         purchase_date:          form.purchase_date ? new Date(form.purchase_date) : null,
         problem_type:           form.problem_type,
         description:            form.description,
-        region:                 form.country,                       // NEW
         user_confirmed_input:   true,
         legal_disclaimer_shown: true,
         training_permission:    form.training_permission === "yes",
@@ -203,23 +201,6 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
             value={form.tracking_info}
             onChange={(e) => handleChange("tracking_info", e.target.value)}
           />
-        );
-      case "country":                                               // NEW
-        return (
-          <select
-            value={form.country}
-            onChange={(e) => handleChange("country", e.target.value)}
-            className="w-full bg-gray-950 border border-gray-700 rounded p-2"
-          >
-            <option value="">Select your country</option>
-            <option value="US">United States</option>
-            <option value="DE">Germany</option>
-            <option value="FR">France</option>
-            <option value="GB">United Kingdom</option>
-            <option value="CA">Canada</option>
-            <option value="AU">Australia</option>
-            {/* …extend as needed */}
-          </select>
         );
       case "description":
         return (
