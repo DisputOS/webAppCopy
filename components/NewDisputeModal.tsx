@@ -1,263 +1,269 @@
-import React, { useState } from 'react';
-import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
+"use client";
 
-const DisputeFlow: React.FC = () => {
+import { useState } from "react";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { CheckCircle, Circle, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+
+import {
+  FlowStep,
+  QUESTION_FLOW_BY_TYPE,
+} from "./dispute-flow";
+
+export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
   const session = useSession();
-  const [disputeId, setDisputeId] = useState<string | null>(null);
-  const [disputeType, setDisputeType] = useState<string>('');
-  const [proofFiles, setProofFiles] = useState<File[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [statusMessage, setStatusMessage] = useState<string>('');
+  const router = useRouter();
 
-  // 1. Create a new dispute using the authenticated user ID
-  const handleCreateDispute = async () => {
-    if (!session?.user) {
-      console.error('No authenticated user session found.');
+  const [form, setForm] = useState({
+    purchase_amount:     "",
+    currency:            "",
+    platform_name:       "",
+    purchase_date:       "",
+    problem_type:        "",
+    description:         "",
+    service_usage:       "",
+    tracking_info:       "",
+    training_permission: "no",
+  });
+  const [agreeAccuracy, setAgreeAccuracy] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0);
+
+  const flowSteps: FlowStep[] =
+    QUESTION_FLOW_BY_TYPE[form.problem_type] || QUESTION_FLOW_BY_TYPE["other"];
+  const currentStep = flowSteps[step];
+
+  if (step >= flowSteps.length) {
+    setStep(flowSteps.length - 1);
+    return null;
+  }
+
+  const handleChange = (field: string, value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
+
+  const validateStep = (): boolean => {
+    switch (currentStep) {
+      case "amount_currency":
+        return !!form.purchase_amount && parseFloat(form.purchase_amount) > 0 && !!form.currency;
+      case "platform":
+        return !!form.platform_name;
+      case "purchase_date":
+        return !!form.purchase_date && new Date(form.purchase_date) <= new Date();
+      case "problem_type":
+        return !!form.problem_type;
+      case "service_usage":
+        return form.service_usage === "yes" || form.service_usage === "no";
+      case "tracking_info":
+        return true;
+      case "description":
+        return form.description.trim().length >= 20;
+      case "disclaimer":
+        return true;
+      case "training_permission":
+        return form.training_permission === "yes" || form.training_permission === "no";
+      case "confirm":
+        return agreeAccuracy;
+      default:
+        return true;
+    }
+  };
+
+  const next = () => setStep((s) => s + 1);
+  const prev = () => setStep((s) => Math.max(0, s - 1));
+
+  const handleSubmit = async () => {
+    if (!session) return;
+    setLoading(true);
+    const { error } = await supabase
+      .from("disputes")
+      .insert([{
+        user_id:                session.user.id,
+        platform_name:          form.platform_name,
+        purchase_amount:        parseFloat(form.purchase_amount || "0"),
+        currency:               form.currency,
+        purchase_date:          form.purchase_date ? new Date(form.purchase_date) : null,
+        problem_type:           form.problem_type,
+        description:            form.description,
+        user_confirmed_input:   true,
+        legal_disclaimer_shown: true,
+        training_permission:    form.training_permission === "yes",
+        user_plan:              "free",
+        status:                 "draft",
+        archived:               false,
+        service_usage:          form.service_usage || null,
+        tracking_info:          form.tracking_info || null,
+      }])
+      .single();
+    setLoading(false);
+    if (error) {
+      console.error("Supabase insert failed:", error.message);
+      alert("Insert error: " + error.message);
       return;
     }
-    setLoading(true);
-    try {
-      // Insert dispute without specifying dispute_id (Supabase will generate it)
-      const { data: disputeData, error: disputeError } = await supabase
-        .from('disputes')
-        .insert([
-          {
-            user_id: session.user.id,
-            dispute_type: disputeType,
-            status: 'initiated',
-          },
-        ])
-        .select();  // Retrieve the inserted row
-
-      if (disputeError) {
-        throw disputeError;
-      }
-      const newDisputeId = disputeData && disputeData.length > 0 ? disputeData[0].dispute_id : null;
-      setDisputeId(newDisputeId);
-      setStatusMessage('Dispute created successfully.');
-
-      // Log the creation of the dispute
-      await supabase.from('agent_logs').insert([
-        {
-          agent_type: 'FlowWatcher',
-          action_taken: 'create_dispute',
-          case_id: newDisputeId,
-          success_flag: true,
-          fallback_used: false,
-        },
-      ]);
-    } catch (error) {
-      console.error('Error creating dispute:', error);
-      setStatusMessage('Failed to create dispute.');
-    }
-    setLoading(false);
+    router.push("/dashboard");
   };
 
-  // 2. Upload proof files and link them to the dispute
-  const handleUploadProofs = async () => {
-    if (!disputeId) return;
-    setLoading(true);
-    try {
-      for (const file of proofFiles) {
-        const filePath = `proofs/${disputeId}/${Date.now()}_${file.name}`;
-        // Upload file to Supabase storage (bucket "proofs")
-        const { data: storageData, error: storageError } = await supabase.storage
-          .from('proofs')
-          .upload(filePath, file);
-        if (storageError) {
-          console.error('Error uploading file:', storageError);
-          continue;
-        }
-        // Get public URL of the uploaded file
-        const { data: urlData } = supabase.storage.from('proofs').getPublicUrl(storageData.path);
-        const publicUrl = urlData.publicUrl;
-
-        // Insert proof metadata into proof_bundle table
-        await supabase.from('proof_bundle').insert([
-          {
-            dispute_id: disputeId,
-            proof_type: 'uploaded_proof',
-            proof_url: publicUrl,
-            uploaded_at: new Date().toISOString(),
-          },
-        ]);
-
-        // Log the proof attachment event
-        await supabase.from('agent_logs').insert([
-          {
-            agent_type: 'EvidenceAgent',
-            action_taken: 'attach_proof',
-            case_id: disputeId,
-            success_flag: true,
-            fallback_used: false,
-          },
-        ]);
-      }
-
-      // Update dispute status after adding proofs
-      await supabase
-        .from('disputes')
-        .update({ status: 'evidence_added' })
-        .eq('dispute_id', disputeId);
-
-      setStatusMessage('Proofs uploaded successfully.');
-    } catch (error) {
-      console.error('Error uploading proofs:', error);
-      setStatusMessage('Failed to upload proofs.');
+  const renderStep = () => {
+    switch (currentStep) {
+      case "amount_currency":
+        return (
+          <>
+            <Input
+              placeholder="Amount (e.g. 20)"
+              value={form.purchase_amount}
+              onChange={(e) => handleChange("purchase_amount", e.target.value)}
+            />
+            <Input
+              placeholder="Currency (e.g. EUR)"
+              value={form.currency}
+              onChange={(e) => handleChange("currency", e.target.value)}
+              className="mt-2"
+            />
+          </>
+        );
+      case "platform":
+        return (
+          <Input
+            placeholder="Platform / merchant (e.g. Notion)"
+            value={form.platform_name}
+            onChange={(e) => handleChange("platform_name", e.target.value)}
+          />
+        );
+      case "purchase_date":
+        return (
+          <Input
+            type="date"
+            value={form.purchase_date}
+            onChange={(e) => handleChange("purchase_date", e.target.value)}
+          />
+        );
+      case "problem_type":
+        return (
+          <select
+            value={form.problem_type}
+            onChange={(e) => handleChange("problem_type", e.target.value)}
+            className="w-full bg-gray-950 border border-gray-700 rounded p-2"
+          >
+            <option value="">Select problem type</option>
+            <option value="subscription_auto_renewal">Subscription auto-renewal</option>
+            <option value="item_not_delivered">Item not delivered</option>
+            <option value="other">Other</option>
+          </select>
+        );
+      case "service_usage":
+        return (
+          <select
+            value={form.service_usage}
+            onChange={(e) => handleChange("service_usage", e.target.value)}
+            className="w-full bg-gray-950 border border-gray-700 rounded p-2"
+          >
+            <option value="">Did you use the service?</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        );
+      case "tracking_info":
+        return (
+          <Input
+            placeholder="Tracking number (optional)"
+            value={form.tracking_info}
+            onChange={(e) => handleChange("tracking_info", e.target.value)}
+          />
+        );
+      case "description":
+        return (
+          <textarea
+            className="w-full bg-gray-950 border border-gray-700 rounded p-3 text-sm min-h-[120px]"
+            placeholder="Describe the issue in detail (min 20 characters)…"
+            value={form.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+          />
+        );
+      case "disclaimer":
+        return (
+          <div className="space-y-3 text-sm leading-relaxed text-gray-300">
+            <p>
+              The following document will be generated by an AI system. It is <strong className="text-white">not</strong> legal advice and may require revision by a qualified attorney.
+            </p>
+            <p>By continuing you acknowledge that you have read and understood this disclaimer.</p>
+          </div>
+        );
+      case "training_permission":
+        return (
+          <div className="space-y-4 text-sm">
+            <p className="text-gray-300">
+              May we anonymously use this dispute (without personal data) to improve Disput.ai?
+            </p>
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="yes"
+                  checked={form.training_permission === "yes"}
+                  onChange={(e) => handleChange("training_permission", e.target.value)}
+                />
+                Yes, you can use my data
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="no"
+                  checked={form.training_permission === "no"}
+                  onChange={(e) => handleChange("training_permission", e.target.value)}
+                />
+                No, do not use my data
+              </label>
+            </div>
+          </div>
+        );
+      case "confirm":
+        return (
+          <label className="flex items-center gap-3 text-sm text-gray-300">
+            <input
+              type="checkbox"
+              checked={agreeAccuracy}
+              onChange={(e) => setAgreeAccuracy(e.target.checked)}
+              className="accent-blue-500 w-4 h-4"
+            />
+            I confirm that all information I provide is accurate and complete.
+          </label>
+        );
+      default:
+        return null;
     }
-    setLoading(false);
-  };
-
-  // 3. (Placeholder) Generate a GPT-based claim/template
-  const handleGenerateClaim = async () => {
-    if (!disputeId) return;
-    setLoading(true);
-    try {
-      // TODO: Invoke GPT template generation (e.g., via a Supabase function or API)
-      // Example: await supabase.functions.invoke('generate_claim', { disputeId });
-
-      // Log the template generation event
-      await supabase.from('agent_logs').insert([
-        {
-          agent_type: 'TemplateAgent',
-          action_taken: 'generate_template',
-          case_id: disputeId,
-          success_flag: true,
-          fallback_used: false,
-        },
-      ]);
-
-      setStatusMessage('Claim generated successfully.');
-    } catch (error) {
-      console.error('Error generating claim:', error);
-      setStatusMessage('Failed to generate claim.');
-    }
-    setLoading(false);
-  };
-
-  // 4. (Placeholder) Generate a PDF for the dispute
-  const handleGeneratePDF = async () => {
-    if (!disputeId) return;
-    setLoading(true);
-    try {
-      // TODO: Invoke PDF generation logic and obtain the PDF URL
-      // Example: const pdfUrl = await generatePDF(disputeId);
-
-      // Example: Insert PDF metadata into pdf_generated_files table
-      // await supabase.from('pdf_generated_files').insert([
-      //   {
-      //     dispute_id: disputeId,
-      //     file_url: pdfUrl,
-      //     generated_at: new Date().toISOString(),
-      //     template_used: disputeType,
-      //     language: 'en',
-      //     watermark_applied: true,
-      //   },
-      // ]);
-
-      // Log the PDF generation event
-      await supabase.from('agent_logs').insert([
-        {
-          agent_type: 'PDFEngine',
-          action_taken: 'generate_pdf',
-          case_id: disputeId,
-          success_flag: true,
-          fallback_used: false,
-        },
-      ]);
-
-      // Update dispute status to 'closed'
-      await supabase
-        .from('disputes')
-        .update({ status: 'closed' })
-        .eq('dispute_id', disputeId);
-
-      // Log the closure of the dispute
-      await supabase.from('agent_logs').insert([
-        {
-          agent_type: 'FlowWatcher',
-          action_taken: 'close_case',
-          case_id: disputeId,
-          success_flag: true,
-          fallback_used: false,
-        },
-      ]);
-
-      setStatusMessage('PDF generated and dispute closed.');
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      setStatusMessage('Failed to generate PDF.');
-    }
-    setLoading(false);
   };
 
   return (
-    <div>
-      {!disputeId ? (
-        // Step 1: Create Dispute
-        <div>
-          <h2>Create New Dispute</h2>
-          <label>
-            Dispute Type:
-            <select
-              value={disputeType}
-              onChange={(e) => setDisputeType(e.target.value)}
-            >
-              <option value="">Select Type</option>
-              <option value="subscription_abuse">Subscription Abuse</option>
-              <option value="billing_error">Billing Error</option>
-              <option value="other">Other</option>
-            </select>
-          </label>
-          <br />
-          <button
-            onClick={handleCreateDispute}
-            disabled={!disputeType || loading}
-          >
-            {loading ? 'Creating...' : 'Create Dispute'}
-          </button>
-          {statusMessage && <p>{statusMessage}</p>}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="bg-gray-900 border border-gray-700 text-white rounded-2xl p-6 w-full max-w-xl shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl">
+          <X />
+        </button>
+        <h2 className="text-xl font-bold mb-4 text-center">Start a new dispute</h2>
+
+        <div className="flex gap-3 justify-center mb-6">
+          {flowSteps.map((_, i) => (
+            <span key={i}>
+              {i < step ? <CheckCircle className="w-5 h-5 text-blue-400" /> : i === step ? <Circle className="w-5 h-5 text-blue-200 animate-pulse" /> : <Circle className="w-5 h-5 text-gray-600" />}
+            </span>
+          ))}
         </div>
-      ) : (
-        // Steps after dispute creation: upload proofs, generate claim, generate PDF
-        <div>
-          <h2>Dispute ID: {disputeId}</h2>
-          <div>
-            <h3>1. Upload Proofs</h3>
-            <input
-              type="file"
-              multiple
-              onChange={(e) => {
-                if (e.target.files) {
-                  setProofFiles(Array.from(e.target.files));
-                }
-              }}
-            />
-            <button
-              onClick={handleUploadProofs}
-              disabled={proofFiles.length === 0 || loading}
-            >
-              {loading ? 'Uploading...' : 'Upload Proofs'}
-            </button>
+
+        <section className="space-y-6">
+          {renderStep()}
+          <div className="flex justify-between pt-4">
+            {step > 0 && <Button variant="outline" onClick={prev} disabled={loading}>Back</Button>}
+            {step < flowSteps.length - 1 ? (
+              <Button onClick={next} disabled={!validateStep()}>Next</Button>
+            ) : (
+              <Button onClick={handleSubmit} disabled={loading || !validateStep()}>{loading ? "Submitting…" : "Submit"}</Button>
+            )}
           </div>
-          <div>
-            <h3>2. Generate Claim (GPT Template)</h3>
-            <button onClick={handleGenerateClaim} disabled={loading}>
-              {loading ? 'Generating...' : 'Generate Claim'}
-            </button>
-          </div>
-          <div>
-            <h3>3. Generate PDF</h3>
-            <button onClick={handleGeneratePDF} disabled={loading}>
-              {loading ? 'Generating PDF...' : 'Generate PDF'}
-            </button>
-          </div>
-          {statusMessage && <p>{statusMessage}</p>}
-        </div>
-      )}
+        </section>
+      </div>
     </div>
   );
-};
-
-export default DisputeFlow;
+}
