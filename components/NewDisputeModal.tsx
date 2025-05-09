@@ -269,9 +269,8 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
                   checked={form.training_permission === "no"}
                   onChange={(e) => handleChange("training_permission", e.target.value)}
                 />
-                No, do not use my data
-                </
-              </label>
+               No, do not use my data
+      </label>
             </div>
           </div>
         );
