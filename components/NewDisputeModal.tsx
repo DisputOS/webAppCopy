@@ -1,3 +1,6 @@
+// -----------------------------------------------------------------------------
+// file: src/components/NewDisputeModal.tsx
+// -----------------------------------------------------------------------------
 "use client";
 
 import { useState } from "react";
@@ -12,12 +15,14 @@ import {
   QUESTION_FLOW_BY_TYPE,
 } from "@/lib/dispute-flow";
 
-
 export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
-  const session = useSession();
-  const router = useRouter();
+  const session   = useSession();
+  const router    = useRouter();
 
+  // -----------------------------------------------------------
+  //  Form state
+  // -----------------------------------------------------------
   const [form, setForm] = useState({
     purchase_amount:     "",
     currency:            "",
@@ -27,11 +32,13 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     description:         "",
     service_usage:       "",
     tracking_info:       "",
+    country:             "",          // NEW
     training_permission: "no",
   });
+
   const [agreeAccuracy, setAgreeAccuracy] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(0);
+  const [loading,       setLoading]       = useState(false);
+  const [step,          setStep]          = useState(0);
 
   const flowSteps: FlowStep[] =
     QUESTION_FLOW_BY_TYPE[form.problem_type] || QUESTION_FLOW_BY_TYPE["other"];
@@ -45,26 +52,39 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const handleChange = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  // -----------------------------------------------------------
+  //  Validation per step
+  // -----------------------------------------------------------
   const validateStep = (): boolean => {
     switch (currentStep) {
       case "amount_currency":
-        return !!form.purchase_amount && parseFloat(form.purchase_amount) > 0 && !!form.currency;
+        return (
+          !!form.purchase_amount &&
+          parseFloat(form.purchase_amount) > 0 &&
+          !!form.currency
+        );
       case "platform":
         return !!form.platform_name;
       case "purchase_date":
-        return !!form.purchase_date && new Date(form.purchase_date) <= new Date();
+        return (
+          !!form.purchase_date &&
+          new Date(form.purchase_date) <= new Date()
+        );
       case "problem_type":
         return !!form.problem_type;
       case "service_usage":
         return form.service_usage === "yes" || form.service_usage === "no";
       case "tracking_info":
-        return true;
+        return true; // optional
+      case "country":
+        return !!form.country;                                        // NEW
       case "description":
         return form.description.trim().length >= 20;
       case "disclaimer":
         return true;
       case "training_permission":
-        return form.training_permission === "yes" || form.training_permission === "no";
+        return form.training_permission === "yes" ||
+               form.training_permission === "no";
       case "confirm":
         return agreeAccuracy;
       default:
@@ -75,9 +95,13 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const next = () => setStep((s) => s + 1);
   const prev = () => setStep((s) => Math.max(0, s - 1));
 
+  // -----------------------------------------------------------
+  //  Submit to Supabase
+  // -----------------------------------------------------------
   const handleSubmit = async () => {
     if (!session) return;
     setLoading(true);
+
     const { error } = await supabase
       .from("disputes")
       .insert([{
@@ -88,6 +112,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         purchase_date:          form.purchase_date ? new Date(form.purchase_date) : null,
         problem_type:           form.problem_type,
         description:            form.description,
+        region:                 form.country,                       // NEW
         user_confirmed_input:   true,
         legal_disclaimer_shown: true,
         training_permission:    form.training_permission === "yes",
@@ -98,7 +123,9 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         tracking_info:          form.tracking_info || null,
       }])
       .single();
+
     setLoading(false);
+
     if (error) {
       console.error("Supabase insert failed:", error.message);
       alert("Insert error: " + error.message);
@@ -107,6 +134,9 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     router.push("/dashboard");
   };
 
+  // -----------------------------------------------------------
+  //  Render for each step
+  // -----------------------------------------------------------
   const renderStep = () => {
     switch (currentStep) {
       case "amount_currency":
@@ -128,7 +158,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
       case "platform":
         return (
           <Input
-            placeholder="Platform / merchant (e.g. Notion)"
+            placeholder="Merchant / platform name (e.g. Notion)"
             value={form.platform_name}
             onChange={(e) => handleChange("platform_name", e.target.value)}
           />
@@ -174,6 +204,23 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
             onChange={(e) => handleChange("tracking_info", e.target.value)}
           />
         );
+      case "country":                                               // NEW
+        return (
+          <select
+            value={form.country}
+            onChange={(e) => handleChange("country", e.target.value)}
+            className="w-full bg-gray-950 border border-gray-700 rounded p-2"
+          >
+            <option value="">Select your country</option>
+            <option value="US">United States</option>
+            <option value="DE">Germany</option>
+            <option value="FR">France</option>
+            <option value="GB">United Kingdom</option>
+            <option value="CA">Canada</option>
+            <option value="AU">Australia</option>
+            {/* …extend as needed */}
+          </select>
+        );
       case "description":
         return (
           <textarea
@@ -187,9 +234,9 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         return (
           <div className="space-y-3 text-sm leading-relaxed text-gray-300">
             <p>
-              The following document will be generated by an AI system. It is <strong className="text-white">not</strong> legal advice and may require revision by a qualified attorney.
+              The document we generate is created by an AI system. It is <strong className="text-white">not</strong> legal advice and may require review by a qualified attorney.
             </p>
-            <p>By continuing you acknowledge that you have read and understood this disclaimer.</p>
+            <p>By continuing, you acknowledge that you have read and understood this disclaimer.</p>
           </div>
         );
       case "training_permission":
@@ -237,18 +284,29 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  // -----------------------------------------------------------
+  //  JSX layout
+  // -----------------------------------------------------------
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="bg-gray-900 border border-gray-700 text-white rounded-2xl p-6 w-full max-w-xl shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl"
+        >
           <X />
         </button>
+
         <h2 className="text-xl font-bold mb-4 text-center">Start a new dispute</h2>
 
         <div className="flex gap-3 justify-center mb-6">
           {flowSteps.map((_, i) => (
             <span key={i}>
-              {i < step ? <CheckCircle className="w-5 h-5 text-blue-400" /> : i === step ? <Circle className="w-5 h-5 text-blue-200 animate-pulse" /> : <Circle className="w-5 h-5 text-gray-600" />}
+              {i < step
+                ? <CheckCircle className="w-5 h-5 text-blue-400" />
+                : i === step
+                ? <Circle className="w-5 h-5 text-blue-200 animate-pulse" />
+                : <Circle className="w-5 h-5 text-gray-600" />}
             </span>
           ))}
         </div>
@@ -256,11 +314,19 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         <section className="space-y-6">
           {renderStep()}
           <div className="flex justify-between pt-4">
-            {step > 0 && <Button variant="outline" onClick={prev} disabled={loading}>Back</Button>}
+            {step > 0 && (
+              <Button variant="outline" onClick={prev} disabled={loading}>
+                Back
+              </Button>
+            )}
             {step < flowSteps.length - 1 ? (
-              <Button onClick={next} disabled={!validateStep()}>Next</Button>
+              <Button onClick={next} disabled={!validateStep()}>
+                Next
+              </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={loading || !validateStep()}>{loading ? "Submitting…" : "Submit"}</Button>
+              <Button onClick={handleSubmit} disabled={loading || !validateStep()}>
+                {loading ? "Submitting…" : "Submit"}
+              </Button>
             )}
           </div>
         </section>
