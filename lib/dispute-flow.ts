@@ -11,7 +11,6 @@ export type FlowStep =
   | "problem_type"
   | "service_usage"
   | "tracking_info"
-  | "country"           // NEW
   | "description"
   | "disclaimer"
   | "training_permission"
@@ -25,7 +24,6 @@ export const BASE_FLOW: readonly FlowStep[] = [
   "problem_type",
   "service_usage",
   "tracking_info",
-  "country",           // NEW
   "description",
   "disclaimer",
   "training_permission",
