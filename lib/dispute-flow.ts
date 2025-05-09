@@ -1,11 +1,9 @@
+// -----------------------------------------------------------------------------
 // file: src/lib/dispute-flow.ts
-// (Place this in a shared “lib” or “utils” folder, e.g. <root>/src/lib)
-// Pure data and helper definitions for the dispute wizard
-// Pure data and helper definitions for the dispute wizard
+// Pure data & helper definitions for the dispute wizard
+// -----------------------------------------------------------------------------
 
-// -----------------------------------------------------------------------------
-// Step definitions -----------------------------------------------------------
-// -----------------------------------------------------------------------------
+// All possible wizard steps (add “country”)
 export type FlowStep =
   | "amount_currency"
   | "platform"
@@ -13,11 +11,13 @@ export type FlowStep =
   | "problem_type"
   | "service_usage"
   | "tracking_info"
+  | "country"           // NEW
   | "description"
   | "disclaimer"
   | "training_permission"
   | "confirm";
 
+// Base flow (array is readonly for type-safety)
 export const BASE_FLOW: readonly FlowStep[] = [
   "amount_currency",
   "platform",
@@ -25,6 +25,7 @@ export const BASE_FLOW: readonly FlowStep[] = [
   "problem_type",
   "service_usage",
   "tracking_info",
+  "country",           // NEW
   "description",
   "disclaimer",
   "training_permission",
@@ -32,7 +33,7 @@ export const BASE_FLOW: readonly FlowStep[] = [
 ] as const;
 
 /**
- * Map problem-types to bespoke flows
+ * Map problem types to bespoke flows
  *  • subscription_auto_renewal → no tracking_info
  *  • item_not_delivered       → no service_usage
  */
