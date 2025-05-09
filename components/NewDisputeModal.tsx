@@ -10,7 +10,8 @@ import { useRouter } from "next/navigation";
 import {
   FlowStep,
   QUESTION_FLOW_BY_TYPE,
-} from "./dispute-flow";
+} from "@/lib/dispute-flow";
+
 
 export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
