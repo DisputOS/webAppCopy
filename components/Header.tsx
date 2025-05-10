@@ -81,8 +81,10 @@ export default function Header() {
       )
       .subscribe();
 
-    return () => channel.unsubscribe();
-  }, [supabase, session]);
+ return () => {                               // ✅ returns void
+   channel.unsubscribe().catch(() => {});     // (ignore the Promise)
+};
+}, [supabase, session]);
 
   // Mark helpers --------------------------------------------------------------
   const markRead = async (id: string) => {
