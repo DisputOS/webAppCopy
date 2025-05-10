@@ -1,9 +1,6 @@
 // -----------------------------------------------------------------------------
-// file: src/components/Header.tsx   (re‑written)
-// Adds a bell icon with unread badge. Clicking it toggles a dropdown that shows
-// the latest unread notifications pulled from – and synced with – Supabase
-// (table `user_notifications`). You can replace the entire old Header with this
-// one‑stop version.
+// file: src/components/Header.tsx   (full rewrite)
+// Desktop **and mobile** notifications with real‑time Supabase feed
 // -----------------------------------------------------------------------------
 "use client";
 
@@ -24,10 +21,10 @@ import {
   Bell,
 } from "lucide-react";
 import clsx from "clsx";
-import { Button } from "@/components/ui/button"; // if you already have this helper
+import { Button } from "@/components/ui/Button";
 
 // -----------------------------------------------------------------------------
-// Small helper type
+// Type helpers
 // -----------------------------------------------------------------------------
 interface NotificationRow {
   id: string;
@@ -37,6 +34,9 @@ interface NotificationRow {
   read_at: string | null;
 }
 
+// -----------------------------------------------------------------------------
+// Header component
+// -----------------------------------------------------------------------------
 export default function Header() {
   const supabase = useSupabaseClient();
   const session = useSession();
@@ -47,13 +47,12 @@ export default function Header() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 
-  // -----------------------------------------
-  //   Fetch & subscribe to notifications
-  // -----------------------------------------
+  // -------------------------------------------------------
+  //  Fetch + subscribe to unread notifications
+  // -------------------------------------------------------
   useEffect(() => {
     if (!session) return;
 
-    // 1) initial fetch (only unread)
     supabase
       .from("user_notifications")
       .select("id, title, body, created_at, read_at")
@@ -64,7 +63,6 @@ export default function Header() {
         if (!error && data) setNotifications(data as NotificationRow[]);
       });
 
-    // 2) realtime
     const channel = supabase
       .channel("user_notifications_header")
       .on(
@@ -75,62 +73,41 @@ export default function Header() {
           table: "user_notifications",
           filter: `user_id=eq.${session.user.id}`,
         },
-        (payload) => {
-          setNotifications((n) => [payload.new as NotificationRow, ...n]);
-        },
+        (payload) => setNotifications((prev) => [payload.new as NotificationRow, ...prev]),
       )
       .subscribe();
 
-    return () => {
-      channel.unsubscribe();
-    };
+    return () => channel.unsubscribe();
   }, [supabase, session]);
 
-  // mark single message as read locally + server
-  async function markRead(id: string) {
-    setNotifications((n) => n.filter((m) => m.id !== id));
-    await supabase
-      .from("user_notifications")
-      .update({ read_at: new Date().toISOString() })
-      .eq("id", id);
-  }
-
-  // mark all
-  async function markAllRead() {
+  // mark read helpers
+  const markRead = async (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    await supabase.from("user_notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
+  };
+  const markAllRead = async () => {
     const ids = notifications.map((n) => n.id);
     setNotifications([]);
     if (ids.length)
-      await supabase
-        .from("user_notifications")
-        .update({ read_at: new Date().toISOString() })
-        .in("id", ids);
-  }
+      await supabase.from("user_notifications").update({ read_at: new Date().toISOString() }).in("id", ids);
+  };
 
-  // -----------------------------------------
-  //   Logout
-  // -----------------------------------------
+  // logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
   };
 
-  // -----------------------------------------
-  //   Internal NavLink component
-  // -----------------------------------------
-  const NavLink = ({
-    href,
-    icon: Icon,
-    label,
-  }: {
-    href: string;
-    icon: React.ElementType;
-    label: string;
-  }) => {
+  // nav link helper
+  const NavLink = ({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) => {
     const isActive = pathname === href;
     return (
       <Link
         href={href}
-        onClick={() => setMenuOpen(false)}
+        onClick={() => {
+          setMenuOpen(false);
+          setNotifOpen(false);
+        }}
         className={clsx(
           "flex items-center gap-3 text-sm transition px-4 py-2 rounded",
           isActive ? "text-white bg-gray-800" : "text-gray-300 hover:text-white",
@@ -142,25 +119,19 @@ export default function Header() {
     );
   };
 
-  // -----------------------------------------
-  //   Render
-  // -----------------------------------------
+  // ---------------------------------------------------------------------------
+  //  JSX
+  // ---------------------------------------------------------------------------
   return (
     <header className="w-full bg-gray-900 border-b border-gray-800 p-4 z-50 relative">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* Mobile menu button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="sm:hidden text-white"
-        >
+        <button onClick={() => setMenuOpen(!menuOpen)} className="sm:hidden text-white">
           {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
 
         {/* Logo */}
-        <Link
-          href="/cases"
-          className="text-xl font-bold text-white tracking-tight ml-auto sm:ml-0"
-        >
+        <Link href="/cases" className="text-xl font-bold text-white tracking-tight ml-auto sm:ml-0">
           Disput<span className="text-blue-500">.ai</span>
         </Link>
 
@@ -171,12 +142,9 @@ export default function Header() {
             <NavLink href="/profile" icon={User} label="Profile" />
             <NavLink href="/settings" icon={Settings} label="Settings" />
 
-            {/* Bell icon with badge */}
+            {/* Notification bell (desktop) */}
             <div className="relative">
-              <button
-                onClick={() => setNotifOpen(!notifOpen)}
-                className="text-gray-300 hover:text-white p-2"
-              >
+              <button onClick={() => setNotifOpen(!notifOpen)} className="text-gray-300 hover:text-white p-2">
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-600 text-xs rounded-full px-1">
@@ -185,7 +153,6 @@ export default function Header() {
                 )}
               </button>
 
-              {/* Dropdown */}
               {notifOpen && (
                 <div className="absolute right-0 mt-2 w-72 bg-gray-900 border border-gray-700 rounded-xl shadow-lg z-50 animate-fade-in-down">
                   <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
@@ -201,11 +168,7 @@ export default function Header() {
                   ) : (
                     <ul className="max-h-80 overflow-y-auto divide-y divide-gray-800">
                       {notifications.map((n) => (
-                        <li
-                          key={n.id}
-                          onClick={() => markRead(n.id)}
-                          className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
-                        >
+                        <li key={n.id} onClick={() => markRead(n.id)} className="px-4 py-3 hover:bg-gray-800 cursor-pointer">
                           <p className="text-sm font-medium text-white">{n.title}</p>
                           <p className="text-xs text-gray-400 mt-1 line-clamp-2">{n.body}</p>
                         </li>
@@ -217,10 +180,7 @@ export default function Header() {
             </div>
 
             {/* Logout */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-red-500 hover:text-red-400 px-2 py-1 transition"
-            >
+            <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-500 hover:text-red-400 px-2 py-1 transition">
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
             </button>
@@ -228,23 +188,30 @@ export default function Header() {
         )}
       </div>
 
-      {/* Mobile nav */}
+      {/* Mobile nav (slide‑out) */}
       {menuOpen && session && (
         <div className="sm:hidden absolute top-full left-0 w-full bg-gray-900 border-t border-gray-800 shadow-md animate-fade-in-down">
           <div className="flex flex-col py-2">
-            <NavLink href="/cases" icon={Folder} label="Cases" />
-            <NavLink href="/profile" icon={User} label="Profile" />
-            <NavLink href="/settings" icon={Settings} label="Settings" />
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 text-sm text-red-500 hover:text-red-400 px-4 py-2 transition"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
+            {/* Notification bell inside mobile list */}
+            <button onClick={() => {
+              setNotifOpen(!notifOpen);
+            }} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white px-4 py-2 transition">
+              <Bell className="w-4 h-4" />
+              <span>Notifications</span>
+              {notifications.length > 0 && (
+                <span className="ml-auto bg-red-600 text-xs rounded-full px-2 py-0.5">
+                  {notifications.length}
+                </span>
+              )}
             </button>
-          </div>
-        </div>
-      )}
-    </header>
-  );
-}
+            {notifOpen && (
+              <div className="bg-gray-900 border-t border-gray-800 max-h-96 overflow-y-auto divide-y divide-gray-800">
+                {notifications.length === 0 ? (
+                  <p className="text-center py-6 text-sm text-gray-400">No unread messages</p>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <span className="text-sm font-medium text-white">Unread</span>
+                      {notifications.length > 0 && (
+                        <Button size="xs" variant="ghost" onClick={markAllRead}>
+                          Mark all
