@@ -188,30 +188,73 @@ export default function Header() {
         )}
       </div>
 
-      {/* Mobile nav (slide‑out) */}
-      {menuOpen && session && (
-        <div className="sm:hidden absolute top-full left-0 w-full bg-gray-900 border-t border-gray-800 shadow-md animate-fade-in-down">
-          <div className="flex flex-col py-2">
-            {/* Notification bell inside mobile list */}
-            <button onClick={() => {
-              setNotifOpen(!notifOpen);
-            }} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white px-4 py-2 transition">
-              <Bell className="w-4 h-4" />
-              <span>Notifications</span>
-              {notifications.length > 0 && (
-                <span className="ml-auto bg-red-600 text-xs rounded-full px-2 py-0.5">
-                  {notifications.length}
-                </span>
-              )}
-            </button>
-            {notifOpen && (
-              <div className="bg-gray-900 border-t border-gray-800 max-h-96 overflow-y-auto divide-y divide-gray-800">
-                {notifications.length === 0 ? (
-                  <p className="text-center py-6 text-sm text-gray-400">No unread messages</p>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between px-4 py-2">
-                      <span className="text-sm font-medium text-white">Unread</span>
-                      {notifications.length > 0 && (
-                        <Button size="xs" variant="ghost" onClick={markAllRead}>
-                          Mark all
+     {/* Mobile nav (slide-out) */}
+{menuOpen && session && (
+  <div className="sm:hidden absolute top-full left-0 w-full bg-gray-900 border-t border-gray-800 shadow-md animate-fade-in-down">
+    <div className="flex flex-col py-2">
+      {/* Notification bell inside mobile list */}
+      <button
+        onClick={() => setNotifOpen(!notifOpen)}
+        className="flex items-center gap-3 text-sm text-gray-300 hover:text-white px-4 py-2 transition"
+      >
+        <Bell className="w-4 h-4" />
+        <span>Notifications</span>
+        {notifications.length > 0 && (
+          <span className="ml-auto bg-red-600 text-xs rounded-full px-2 py-0.5">
+            {notifications.length}
+          </span>
+        )}
+      </button>
+
+      {/* ───────────────────────────────────── */}
+      {/* Mobile notifications dropdown panel  */}
+      {/* ───────────────────────────────────── */}
+      {notifOpen && (
+        <div className="bg-gray-900 border-t border-gray-800">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+            <span className="text-sm font-medium text-white">Unread</span>
+            {notifications.length > 0 && (
+              <Button size="xs" variant="ghost" onClick={markAllRead}>
+                Mark all read
+              </Button>
+            )}
+          </div>
+
+          {notifications.length === 0 ? (
+            <p className="text-center py-6 text-sm text-gray-400">
+              No unread messages
+            </p>
+          ) : (
+            <ul className="max-h-72 overflow-y-auto divide-y divide-gray-800">
+              {notifications.map((n) => (
+                <li
+                  key={n.id}
+                  onClick={() => markRead(n.id)}
+                  className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
+                >
+                  <p className="text-sm font-medium text-white">{n.title}</p>
+                  <p className="text-xs text-gray-400 mt-1 line-clamp-2">
+                    {n.body}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      {/* ───────────────────────────────────── */}
+
+      {/* Regular mobile links */}
+      <NavLink href="/cases" icon={Folder} label="Cases" />
+      <NavLink href="/profile" icon={User} label="Profile" />
+      <NavLink href="/settings" icon={Settings} label="Settings" />
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 text-sm text-red-500 hover:text-red-400 px-4 py-2 transition"
+      >
+        <LogOut className="w-4 h-4" />
+        Logout
+      </button>
+    </div>
+  </div>
+)}
