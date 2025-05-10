@@ -21,7 +21,7 @@ import {
   Bell,
 } from "lucide-react";
 import clsx from "clsx";
-import { Button } from "@/components/ui/Button"; // <— your custom button
+import { Button } from "@/components/ui/button";
 
 // -----------------------------------------------------------------------------
 // Types
