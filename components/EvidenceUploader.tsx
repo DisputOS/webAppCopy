@@ -1,10 +1,16 @@
-'use client';
+// -----------------------------------------------------------------------------
+// file: src/components/EvidenceUploader.tsx
+// Adds a dropdown so the user can select what *type* of evidence they are
+// uploading. The selected value is stored in the `dispute_type` column of the
+// `proof_bundle` table.
+// -----------------------------------------------------------------------------
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   caseId: string;
@@ -12,19 +18,23 @@ interface Props {
 
 export default function EvidenceUploader({ caseId }: Props) {
   const supabase = useSupabaseClient();
-  const router = useRouter();
+  const router   = useRouter();
 
-  const [files, setFiles] = useState<FileList | null>(null);
-  const [description, setDescription] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [uid, setUid] = useState<string | null>(null);
+  const [files,       setFiles]       = useState<FileList | null>(null);
+  const [description, setDescription] = useState("");
+  const [evidenceType, setEvidenceType] = useState("");            // NEW 👈
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
+  const [uid,         setUid]         = useState<string | null>(null);
 
+  // -----------------------------------------------------------
+  //  Get current user's ID once on mount
+  // -----------------------------------------------------------
   useEffect(() => {
     const getUid = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error || !data?.user?.id) {
-        setError('Unable to retrieve user.');
+        setError("Unable to retrieve user.");
       } else {
         setUid(data.user.id);
       }
@@ -32,18 +42,23 @@ export default function EvidenceUploader({ caseId }: Props) {
     getUid();
   }, [supabase]);
 
+  // -----------------------------------------------------------
+  //  Upload handler
+  // -----------------------------------------------------------
   const handleUpload = async () => {
-    if (!files?.length) return setError('Please select at least one file.');
-    if (!uid) return setError('You must be logged in.');
+    if (!files?.length) return setError("Please select at least one file.");
+    if (!evidenceType)  return setError("Please choose the evidence type."); // NEW
+    if (!uid)          return setError("You must be logged in.");
 
     setError(null);
     setLoading(true);
 
     try {
       const urls: string[] = [];
-      const BUCKET = 'proofbundle';
-      const TABLE = 'proof_bundle';
+      const BUCKET = "proofbundle";
+      const TABLE  = "proof_bundle";
 
+      // 1. Upload every selected file to storage --------------------------
       for (const file of Array.from(files)) {
         const filePath = `${caseId}/${Date.now()}-${file.name}`;
         const { error: uploadErr } = await supabase.storage
@@ -55,16 +70,17 @@ export default function EvidenceUploader({ caseId }: Props) {
         urls.push(data.publicUrl);
       }
 
+      // 2. Insert record into proof_bundle -------------------------------
       const { error: insertErr } = await supabase.from(TABLE).insert([
         {
-          user_id: uid,
-          dispute_id: caseId,
-          receipt_url: urls[0] ?? null,
-          evidence_source: 'user_upload',
-          dispute_type: 'digital_good',
-          screenshot_urls: urls.slice(1),
+          user_id:          uid,
+          dispute_id:       caseId,
+          receipt_url:      urls[0] ?? null,
+          evidence_source:  "user_upload",
+          dispute_type:     evidenceType,  // NEW – dynamic value
+          screenshot_urls:  urls.slice(1),
           user_description: description,
-          policy_snapshot: null,
+          policy_snapshot:  null,
         },
       ]);
 
@@ -72,17 +88,23 @@ export default function EvidenceUploader({ caseId }: Props) {
 
       router.push(`/cases/${caseId}/generate`);
     } catch (err: any) {
-      console.error('Insert error:', err.message);
-      setError(err.message ?? 'Upload failed');
+      console.error("Insert error:", err.message);
+      setError(err.message ?? "Upload failed");
     } finally {
       setLoading(false);
     }
   };
 
+  // -----------------------------------------------------------
+  //  Render UI
+  // -----------------------------------------------------------
   return (
     <div className="space-y-6 bg-gray-900 p-6 rounded-xl border border-gray-700">
+      {/* File picker ---------------------------------------------------- */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Upload Files</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Upload files
+        </label>
         <input
           type="file"
           multiple
@@ -92,19 +114,43 @@ export default function EvidenceUploader({ caseId }: Props) {
         />
       </div>
 
+      {/* Evidence type selector ----------------------------------------- */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Evidence type
+        </label>
+        <select
+          value={evidenceType}
+          onChange={(e) => setEvidenceType(e.target.value)}
+          className="w-full border border-gray-700 bg-gray-800 text-white rounded-lg p-2 text-sm"
+        >
+          <option value="">Select evidence type</option>
+          <option value="receipt">Receipt / Invoice</option>
+          <option value="bank_statement">Bank statement</option>
+          <option value="chat_screenshot">Chat screenshot</option>
+          <option value="tracking_doc">Tracking / shipping doc</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      {/* Free‑text description ------------------------------------------ */}
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Description (optional)
+        </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full border border-gray-700 bg-gray-800 text-white rounded-lg p-3 text-sm"
           rows={4}
-          placeholder="Describe your evidence..."
+          placeholder="Describe your evidence…"
         />
       </div>
 
+      {/* Error banner ---------------------------------------------------- */}
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
+      {/* Upload button --------------------------------------------------- */}
       <Button
         onClick={handleUpload}
         disabled={loading}
