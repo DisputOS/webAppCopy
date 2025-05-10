@@ -1,8 +1,20 @@
+// -----------------------------------------------------------------------------
+// file: src/app/cases/[id]/DisputeDetail.tsx   (server component)
+// Added user‑friendly guidance messages based on Guided‑Flow docs
+// -----------------------------------------------------------------------------
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { BadgeCheck, ArrowLeft, PlusCircle, FileText, FileUp, FileCheck2, FileSignature } from 'lucide-react';
+import {
+  BadgeCheck,
+  ArrowLeft,
+  PlusCircle,
+  FileText,
+  FileUp,
+  FileCheck2,
+  FileSignature,
+} from 'lucide-react';
 import { DisputeActionsMenu } from '@/components/DisputeActionsMenu';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +44,24 @@ export default async function DisputeDetail({ params }: { params: { id: string }
   const proofCount: number = rawCount ?? 0;
   const pdfReady = Boolean(dispute.pdf_url);
 
+  // ---------------------------------------------------------------------------
+  // NEW: context‑aware helper message for the user ----------------------------
+  // ---------------------------------------------------------------------------
+  let userMessage: string;
+  if (proofCount === 0) {
+    userMessage =
+      'Step 1: upload at least one proof document so we can start building your case.'; // Guided‑Flow → proof_collected
+  } else if (proofCount === 1 && !pdfReady) {
+    userMessage =
+      'Good start! Add one more document of a *different* type and we will auto‑generate your dispute letter faster.'; // need ≥2 types → proof_ready
+  } else if (!pdfReady) {
+    userMessage =
+      'Your documents look good. We are generating the dispute template now — the PDF link will appear here shortly.'; // template_ready → pdf_ready
+  } else {
+    userMessage =
+      'Your dispute PDF is ready. Download it and send it to the merchant or your bank.'; // pdf_ready
+  }
+
   const statusColor: Record<string, string> = {
     draft: 'bg-gray-200 text-gray-600',
     open: 'bg-blue-100 text-blue-700',
@@ -47,7 +77,7 @@ export default async function DisputeDetail({ params }: { params: { id: string }
       Proof: <FileCheck2 className="w-4 h-4" />,
       Template: <FileSignature className="w-4 h-4" />,
       PDF: <FileText className="w-4 h-4" />,
-    };
+    } as const;
     return icons[step];
   };
 
@@ -82,24 +112,31 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         </div>
       </div>
 
+      {/* -------------------------------------------------------------------- */}
+      {/* NEW: User guidance banner                                            */}
+      {/* -------------------------------------------------------------------- */}
+      <div className="bg-indigo-950/60 border border-indigo-800 rounded-xl p-4 flex items-center gap-3 text-sm text-indigo-100">
+        <BadgeCheck className="w-4 h-4 text-indigo-400" />
+        <p>{userMessage}</p>
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 ">
           <div className="flex items-start justify-between gap-4">
-  <div>
-    <h1 className="text-2xl font-bold">
-      {dispute.problem_type || 'Untitled Dispute'}
-    </h1>
-    <span
-      className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
-        statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
-      }`}
-    >
-      {dispute.status || 'unknown'}
-    </span>
-  </div>
-  <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
-</div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                {dispute.problem_type || 'Untitled Dispute'}
+              </h1>
+              <span
+                className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
+                  statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
+                }`}
+              >
+                {dispute.status || 'unknown'}
+              </span>
+            </div>
+            <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
+          </div>
 
           <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-400">
             <div>
