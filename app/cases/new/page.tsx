@@ -71,7 +71,7 @@ export default function NewDisputePage() {
         purchase_date: form.purchase_date,
         problem_type: form.problem_type,
         description: form.description,
-        status: 'draft'
+        status: 'INITIATED'
       }
     ]);
     setLoading(false);
