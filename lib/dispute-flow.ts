@@ -3,40 +3,71 @@
 // Pure data & helper definitions for the dispute wizard
 // -----------------------------------------------------------------------------
 
-// All possible wizard steps (add “country”)
 export type FlowStep =
   | "amount_currency"
   | "platform"
   | "purchase_date"
   | "problem_type"
-  | "service_usage"
-  | "tracking_info"
   | "description"
+  | "service_usage"
+  | "user_contact_platform"      // <— NEW spelling
+  | "user_contact_description"   // <— shown only if answer == "yes"
+  | "user_upload_proof"
   | "disclaimer"
   | "training_permission"
   | "confirm";
 
-// Base flow (array is readonly for type-safety)
+// -----------------------------------------------------------------------------
+// 1) Base step order (do not put conditional logic here) -----------------------
+// -----------------------------------------------------------------------------
 export const BASE_FLOW: readonly FlowStep[] = [
   "amount_currency",
   "platform",
   "purchase_date",
   "problem_type",
-  "service_usage",
-  "tracking_info",
   "description",
+  "service_usage",
+  "user_contact_platform",
+  "user_contact_description",   // may be stripped later
+  "user_upload_proof",
   "disclaimer",
   "training_permission",
   "confirm",
 ] as const;
 
-/**
- * Map problem types to bespoke flows
- *  • subscription_auto_renewal → no tracking_info
- *  • item_not_delivered       → no service_usage
- */
-export const QUESTION_FLOW_BY_TYPE: Record<string, FlowStep[]> = {
-  subscription_auto_renewal: BASE_FLOW.filter((s) => s !== "tracking_info"),
-  item_not_delivered:       BASE_FLOW.filter((s) => s !== "service_usage"),
-  other:                    [...BASE_FLOW],
+// -----------------------------------------------------------------------------
+// 2) Problem-type shortcuts (optionally drop service_usage) --------------------
+// -----------------------------------------------------------------------------
+export const PROBLEM_TYPE_FLOW: Record<string, FlowStep[]> = {
+  subscription_auto_renewal: BASE_FLOW.filter(
+    (s) => s !== "service_usage"
+  ),
+  item_not_delivered: BASE_FLOW,          // need all steps, incl. service_usage
+  other: [...BASE_FLOW],
 };
+
+// -----------------------------------------------------------------------------
+// 3) Runtime helper: build the real flow for *this* form state -----------------
+// -----------------------------------------------------------------------------
+export interface FlowBuildArgs {
+  problem_type?: string;
+  user_contact_platform?: "yes" | "no" | "";
+}
+
+/**
+ * Returns the wizard steps that should be presented right now,
+ * based on current answers in the form.
+ */
+export function buildFlow(
+  { problem_type = "other", user_contact_platform = "" }: FlowBuildArgs
+): FlowStep[] {
+  // Start from the static mapping for the selected dispute type
+  let steps = PROBLEM_TYPE_FLOW[problem_type] || PROBLEM_TYPE_FLOW["other"];
+
+  // If the user *did not* contact the platform, drop the follow-up question
+  if (user_contact_platform === "no") {
+    steps = steps.filter((s) => s !== "user_contact_description");
+  }
+
+  return steps;
+}
