@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // file: src/components/Header.tsx
-// Responsive header with notification bell (desktop & mobile)
+// Responsive header with notification bell in both desktop & mobile
 // -----------------------------------------------------------------------------
 "use client";
 
@@ -39,11 +39,11 @@ interface NotificationRow {
 // -----------------------------------------------------------------------------
 export default function Header() {
   const supabase = useSupabaseClient();
-  const session  = useSession();
-  const router   = useRouter();
+  const session = useSession();
+  const router = useRouter();
   const pathname = usePathname();
 
-  const [menuOpen,  setMenuOpen]  = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 
@@ -82,8 +82,7 @@ export default function Header() {
       .subscribe();
 
     return () => {
-      // ✅ returns void
-      channel.unsubscribe().catch(() => {}); // (ignore the Promise)
+      channel.unsubscribe().catch(() => {});
     };
   }, [supabase, session]);
 
@@ -109,8 +108,14 @@ export default function Header() {
 
   // Logout --------------------------------------------------------------------
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
+    // Sign out first
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout error:", error.message);
+      return;
+    }
+    // Ensure we navigate away even if Supabase state is slow to update
+    router.replace("/login");
   };
 
   // Reusable link -------------------------------------------------------------
@@ -144,85 +149,53 @@ export default function Header() {
   // ---------------------------------------------------------------------------
   return (
     <header className="w-full border-gray-800 p-4 z-50 relative">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
         {/* Mobile menu button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="sm:hidden text-white"
+          type="button"
         >
           {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
 
-        {/* Logo */}
+        {/* Brand / Logo */}
         <Link
           href="/cases"
-          className="text-xl font-bold text-white tracking-tight ml-4 sm:ml-0"
+          className="text-xl font-bold text-white tracking-tight ml-auto sm:ml-0"
         >
           Disput<span className="text-blue-500">.ai</span>
         </Link>
 
-        {/* Mobile notification bell (always visible in header) */}
+        {/* Stand‑alone bell for mobile (always visible, hides on ≥sm screens) */}
         {session && (
-          <div className="relative sm:hidden ml-auto">
-            <button
-              onClick={() => setNotifOpen(!notifOpen)}
-              className="text-gray-300 hover:text-white p-2"
-            >
-              <Bell className="w-6 h-6" />
-              {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-xs rounded-full px-1">
-                  {notifications.length}
-                </span>
-              )}
-            </button>
-
-            {/* Mobile notifications dropdown */}
-            {notifOpen && (
-              <div className="absolute right-0 mt-2 w-72 backdrop-blur px-6 py-4 border border-gray-700 rounded-xl shadow-lg z-50">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
-                  <span className="text-sm font-medium text-white">Notifications</span>
-                  {notifications.length > 0 && (
-                    <Button size="xs" variant="ghost" onClick={markAllRead}>
-                      Mark all read
-                    </Button>
-                  )}
-                </div>
-
-                {notifications.length === 0 ? (
-                  <p className="text-center py-6 text-sm text-gray-400">
-                    No unread messages
-                  </p>
-                ) : (
-                  <ul className="max-h-80 overflow-y-auto divide-y divide-gray-800">
-                    {notifications.map((n) => (
-                      <li
-                        key={n.id}
-                        onClick={() => markRead(n.id)}
-                        className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
-                      >
-                        <p className="text-sm font-medium text-white">{n.title}</p>
-                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{n.body}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+          <button
+            onClick={() => setNotifOpen(!notifOpen)}
+            className="sm:hidden relative text-gray-300 hover:text-white"
+            type="button"
+          >
+            <Bell className="w-6 h-6" />
+            {notifications.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-600 text-xs rounded-full px-1">
+                {notifications.length}
+              </span>
             )}
-          </div>
+          </button>
         )}
 
         {/* Desktop navigation */}
         {session && (
           <nav className="hidden sm:flex items-center gap-4 ml-auto">
-            <NavLink href="/cases"   icon={Folder}  label="Cases"   />
-            <NavLink href="/profile" icon={User}    label="Profile" />
+            <NavLink href="/cases" icon={Folder} label="Cases" />
+            <NavLink href="/profile" icon={User} label="Profile" />
             <NavLink href="/settings" icon={Settings} label="Settings" />
 
-            {/* Notification bell for desktop */}
+            {/* Notification bell (desktop) */}
             <div className="relative">
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="text-gray-300 hover:text-white p-2"
+                className="relative text-gray-300 hover:text-white p-2"
+                type="button"
               >
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
@@ -269,6 +242,7 @@ export default function Header() {
             {/* Logout */}
             <button
               onClick={handleLogout}
+              type="button"
               className="flex items-center gap-2 text-sm text-red-500 hover:text-red-400 px-2 py-1 transition"
             >
               <LogOut className="w-4 h-4" />
@@ -278,7 +252,7 @@ export default function Header() {
         )}
       </div>
 
-      {/* Mobile slide‑out nav (links only, notifications removed) */}
+      {/* Mobile slide‑out nav */}
       {menuOpen && session && (
         <div className="sm:hidden absolute top-full left-0 w-full backdrop-blur px-6 py-4 border-t border-gray-800 shadow-md animate-fade-in-down">
           <div className="flex flex-col py-2">
@@ -287,9 +261,62 @@ export default function Header() {
             <NavLink href="/profile" icon={User} label="Profile" />
             <NavLink href="/settings" icon={Settings} label="Settings" />
 
+            {/* Notifications row in mobile list (uses same dropdown logic) */}
             <button
-              onClick={handleLogout}
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="flex items-center gap-3 text-sm text-gray-300 hover:text-white px-4 py-2 transition"
+              type="button"
+            >
+              <Bell className="w-4 h-4" />
+              <span>Notifications</span>
+              {notifications.length > 0 && (
+                <span className="ml-auto bg-red-600 text-xs rounded-full px-2 py-0.5">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile dropdown panel */}
+            {notifOpen && (
+              <div className="bg-gray-900 border-t border-gray-800">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+                  <span className="text-sm font-medium text-white">Unread</span>
+                  {notifications.length > 0 && (
+                    <Button size="xs" variant="ghost" onClick={markAllRead}>
+                      Mark all read
+                    </Button>
+                  )}
+                </div>
+
+                {notifications.length === 0 ? (
+                  <p className="text-center py-6 text-sm text-gray-400">
+                    No unread messages
+                  </p>
+                ) : (
+                  <ul className="max-h-72 overflow-y-auto divide-y divide-gray-800">
+                    {notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        onClick={() => markRead(n.id)}
+                        className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
+                      >
+                        <p className="text-sm font-medium text-white">{n.title}</p>
+                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{n.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {/* Logout (mobile) */}
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                handleLogout();
+              }}
               className="flex items-center gap-3 text-sm text-red-500 hover:text-red-400 px-4 py-2 transition"
+              type="button"
             >
               <LogOut className="w-4 h-4" />
               Logout
