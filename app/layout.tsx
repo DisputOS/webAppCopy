@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
 
       {/* bg-gray-50 ⟶ change to your dark color if you want the whole page dark */}
-      <body className="min-h-screen bg-gray-50 relative">
+      <body className="min-h-screen relative">
         <GlowingBorder />
         <Providers>{children}</Providers>
       </body>
