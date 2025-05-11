@@ -46,7 +46,7 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   /* ---------------------------------------------------------------------- */
   const flowSteps: FlowStep[] = buildFlow({
     problem_type:          form.problem_type,
-    user_contact_platform: form.user_contact_platform,
+    user_contact_platform: form.user_contact_platform as "" | "yes" | "no",
   });
   const currentStep = flowSteps[step];
 
