@@ -142,9 +142,9 @@ export default function Header() {
   // JSX
   // ---------------------------------------------------------------------------
   return (
-    <header className="fixed inset-x-0 top-0 z-50 backdrop-blur border-b border-gray-800
-+              bg-gradient-to-b from-gray-900 via-gray-950 to-black/90
-+              pt-safe px-6 pb-4 flex items-center justify-between">
+    <header className="fixed inset-x-0 top-0 z-50
+             bg-gray-900/90 backdrop-blur border-b border-gray-800
+             pt-safe h-header px-6 flex items-center justify-between">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* Mobile menu button */}
         <button
