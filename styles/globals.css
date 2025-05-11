@@ -3,7 +3,7 @@
   /* Dark canvas + no-pinch scroll */
   html,
   body {
-    background: bg-gray-900;
+    background: #1a202c;
     color-scheme: dark light;
     touch-action: pan-x pan-y;   /* prevents pinch, keeps scrolling */
   }
