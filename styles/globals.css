@@ -1,4 +1,13 @@
 @tailwind base;
+@layer base {
+  html,
+  body {
+    /* same value you use in manifest & <meta name="theme-color"> */
+    background: #1a202c;
+    color-scheme: dark light;   /* keeps icons/text light on dark bg */
+  }
+}
+
 @tailwind components;
 @tailwind utilities;
 
