@@ -142,7 +142,7 @@ export default function Header() {
   // JSX
   // ---------------------------------------------------------------------------
   return (
-    <header className="w-full bg-gray-900 border-b border-gray-800 p-4 z-50 relative">
+    <header className="w-full border-gray-800 p-4 z-50 relative">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* Mobile menu button */}
         <button
