@@ -168,85 +168,150 @@ const handleSubmit = async () => {
 };
 
 
-  /* ---------------------------------------------------------------------- */
-  /* 5) RENDER PER STEP                                                     */
-  /* ---------------------------------------------------------------------- */
-  const renderStep = () => {
-    switch (currentStep) {
-      /* –– existing steps omitted for brevity –– */
+  /* ------------------------------------------------------------------ */
+/* 5) RENDER PER STEP                                                 */
+/* ------------------------------------------------------------------ */
+const renderStep = () => {
+  switch (currentStep) {
+    /* ---------- 1. amount & currency -------------------------------- */
+    case "amount_currency":
+      return (
+        <>
+          <Input
+            placeholder="Amount (e.g. 20)"
+            className="w-full"                              // 👈 visible width
+            value={form.purchase_amount}
+            onChange={(e) => handleChange("purchase_amount", e.target.value)}
+          />
+          <Input
+            placeholder="Currency (e.g. EUR)"
+            className="w-full mt-2"                         // 👈 visible width
+            value={form.currency}
+            onChange={(e) => handleChange("currency", e.target.value)}
+          />
+        </>
+      );
 
-      /* ---------- proof step (from EvidenceUploader) ------------------- */
-      case "user_upload_proof":
-        return (
-          <>
-            {/* File picker */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Upload files
-              </label>
-              <input
-                type="file"
-                multiple
-                accept="image/*,application/pdf"
-                onChange={(e) => {
-                  if (e.target.files) setProofFiles(Array.from(e.target.files));
-                }}
-                className="w-full border border-gray-700 bg-gray-800
-                           text-sm text-white rounded-lg px-4 py-2
-                           file:mr-4 file:py-1 file:px-3 file:rounded
-                           file:border-0 file:text-sm file:font-medium
-                           file:bg-blue-600 hover:file:bg-blue-500"
-              />
-              {proofFiles.length > 0 && (
-                <ul className="mt-2 text-xs max-h-28 overflow-auto text-gray-400 space-y-1">
-                  {proofFiles.map((f) => (
-                    <li key={f.name}>{f.name}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
+    /* ---------- 2. platform ----------------------------------------- */
+    case "platform":
+      return (
+        <Input
+          placeholder="Merchant / platform name (e.g. Notion)"
+          className="w-full"
+          value={form.platform_name}
+          onChange={(e) => handleChange("platform_name", e.target.value)}
+        />
+      );
 
-            {/* Evidence type */}
-            <div className="pt-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Evidence type
-              </label>
-              <select
-                value={form.evidence_type}
-                onChange={(e) => handleChange("evidence_type", e.target.value)}
-                className="w-full border border-gray-700 bg-gray-800 text-white rounded-lg p-2 text-sm"
-              >
-                <option value="">Select evidence type</option>
-                <option value="receipt">Receipt / Invoice</option>
-                <option value="bank_statement">Bank statement</option>
-                <option value="chat_screenshot">Chat screenshot</option>
-                <option value="tracking_doc">Tracking / shipping doc</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+    /* ---------- 3. purchase_date ------------------------------------ */
+    case "purchase_date":
+      return (
+        <Input
+          type="date"
+          className="w-full"
+          value={form.purchase_date}
+          onChange={(e) => handleChange("purchase_date", e.target.value)}
+        />
+      );
 
-            {/* Optional description */}
-            <div className="pt-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Description (optional)
-              </label>
-              <textarea
-                value={form.proof_description}
-                onChange={(e) => handleChange("proof_description", e.target.value)}
-                className="w-full border border-gray-700 bg-gray-800 text-white rounded-lg p-3 text-sm"
-                rows={4}
-                placeholder="Describe your evidence…"
-              />
-            </div>
-          </>
-        );
+    /* ---------- 4. problem_type ------------------------------------- */
+    case "problem_type":
+      return (
+        <select
+          value={form.problem_type}
+          onChange={(e) => handleChange("problem_type", e.target.value)}
+          className="w-full bg-gray-950 border border-gray-700 rounded p-2"
+        >
+          <option value="">Select problem type</option>
+          <option value="subscription_auto_renewal">Subscription auto-renewal</option>
+          <option value="item_not_delivered">Item not delivered</option>
+          <option value="other">Other</option>
+        </select>
+      );
 
-      /* --------------------------------------------------------------- */
+    /* ---------- 5. service_usage ------------------------------------ */
+    case "service_usage":
+      return (
+        <select
+          value={form.service_usage}
+          onChange={(e) => handleChange("service_usage", e.target.value)}
+          className="w-full bg-gray-950 border border-gray-700 rounded p-2"
+        >
+          <option value="">Did you use the service?</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      );
 
-      default:
-        return null;
-    }
-  };
+    /* ---------- 6. user_contact_platform ---------------------------- */
+    case "user_contact_platform":
+      return (
+        <select
+          value={form.user_contact_platform}
+          onChange={(e) => handleChange("user_contact_platform", e.target.value)}
+          className="w-full bg-gray-950 border border-gray-700 rounded p-2"
+        >
+          <option value="">Did you already contact the merchant/platform?</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      );
+
+    /* ---------- 7. user_contact_description ------------------------- */
+    case "user_contact_description":
+      return (
+        <textarea
+          className="w-full bg-gray-950 border border-gray-700 rounded p-3 text-sm min-h-[120px]"
+          placeholder="Describe when and how you contacted the merchant…"
+          value={form.user_contact_description}
+          onChange={(e) => handleChange("user_contact_description", e.target.value)}
+        />
+      );
+
+    /* ---------- 8. description (issue details) ---------------------- */
+    case "description":
+      return (
+        <textarea
+          className="w-full bg-gray-950 border border-gray-700 rounded p-3 text-sm min-h-[120px]"
+          placeholder="Describe the issue in detail (min 20 characters)…"
+          value={form.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+        />
+      );
+
+    /* ---------- 9. user_upload_proof (already present) -------------- */
+    case "user_upload_proof":
+      /* … keep the code you already have for file picker + evidence type … */
+      return ( /* EXISTING JSX FROM YOUR CURRENT FILE */ );
+
+    /* ---------- 10. disclaimer -------------------------------------- */
+    case "disclaimer":
+      return (
+        <div className="space-y-3 text-sm leading-relaxed text-gray-300">
+          <p>
+            The document we generate is created by an AI system. It is <strong className="text-white">not</strong> legal advice and may require review by a qualified attorney.
+          </p>
+          <p>By continuing, you acknowledge that you have read and understood this disclaimer.</p>
+        </div>
+      );
+
+    /* ---------- 11. training_permission ----------------------------- */
+    case "training_permission":
+      return (
+        /* … keep existing radio buttons … */
+      );
+
+    /* ---------- 12. confirm ----------------------------------------- */
+    case "confirm":
+      return (
+        /* … keep existing confirm checkbox … */
+      );
+
+    default:
+      return null;
+  }
+};
+
 
   /* ---------------------------------------------------------------------- */
   /* 6) UI LAYOUT                                                           */
