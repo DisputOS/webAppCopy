@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // file: src/app/cases/[id]/DisputeDetail.tsx   (server component)
-// Added min‑width & break‑all so very long titles don't overflow
+// Added user‑friendly guidance messages based on Guided‑Flow docs
 // -----------------------------------------------------------------------------
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
@@ -45,21 +45,21 @@ export default async function DisputeDetail({ params }: { params: { id: string }
   const pdfReady = Boolean(dispute.pdf_url);
 
   // ---------------------------------------------------------------------------
-  // context‑aware helper message for the user ---------------------------------
+  // NEW: context‑aware helper message for the user ----------------------------
   // ---------------------------------------------------------------------------
   let userMessage: string;
   if (proofCount === 0) {
     userMessage =
-      'Step 1: upload at least one proof document so we can start building your case.';
+      'Step 1: upload at least one proof document so we can start building your case.'; // Guided‑Flow → proof_collected
   } else if (proofCount === 1 && !pdfReady) {
     userMessage =
-      'Good start! Add one more document of a *different* type and we will auto‑generate your dispute letter faster.';
+      'Good start! Add one more document of a *different* type and we will auto‑generate your dispute letter faster.'; // need ≥2 types → proof_ready
   } else if (!pdfReady) {
     userMessage =
-      'Your documents look good. We are generating the dispute template now — the PDF link will appear here shortly.';
+      'Your documents look good. We are generating the dispute template now — the PDF link will appear here shortly.'; // template_ready → pdf_ready
   } else {
     userMessage =
-      'Your dispute PDF is ready. Download it and send it to the merchant or your bank.';
+      'Your dispute PDF is ready. Download it and send it to the merchant or your bank.'; // pdf_ready
   }
 
   const statusColor: Record<string, string> = {
@@ -87,7 +87,6 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
 
-      {/* progress bar */}
       <div className="w-full mb-6">
         <div className="relative w-full bg-gray-800 rounded-full h-2.5">
           <div
@@ -113,7 +112,9 @@ export default async function DisputeDetail({ params }: { params: { id: string }
         </div>
       </div>
 
-      {/* guidance banner */}
+      {/* -------------------------------------------------------------------- */}
+      {/* NEW: User guidance banner                                            */}
+      {/* -------------------------------------------------------------------- */}
       <div className="bg-indigo-950/60 border border-indigo-800 rounded-xl p-4 flex items-center gap-3 text-sm text-indigo-100">
         <BadgeCheck className="w-4 h-4 text-indigo-400" />
         <p>{userMessage}</p>
@@ -121,13 +122,12 @@ export default async function DisputeDetail({ params }: { params: { id: string }
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 ">
-          {/* title & actions */}
           <div className="flex items-start justify-between gap-4">
-            {/* allow shrink & word‑break inside */}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold break-all">
-                {dispute.problem_type || 'Untitled Dispute'}
-              </h1>
+        {/* let the text block shrink & wrap */}
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold break-all">
+             {dispute.problem_type || 'Untitled Dispute'}
+           </h1>
               <span
                 className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
                   statusColor[dispute.status] || 'bg-gray-700 text-gray-300'
@@ -139,7 +139,6 @@ export default async function DisputeDetail({ params }: { params: { id: string }
             <DisputeActionsMenu disputeId={dispute.id} isArchived={dispute.archived} />
           </div>
 
-          {/* meta grid */}
           <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-400">
             <div>
               <p className="font-medium text-gray-500">Platform</p>
@@ -161,7 +160,6 @@ export default async function DisputeDetail({ params }: { params: { id: string }
             </div>
           </div>
 
-          {/* description */}
           <div>
             <p className="font-medium text-gray-500 mb-1">Description</p>
             <p className="whitespace-pre-line text-gray-100 leading-relaxed">
@@ -170,7 +168,6 @@ export default async function DisputeDetail({ params }: { params: { id: string }
           </div>
         </div>
 
-        {/* proofs */}
         {proofCount > 0 && (
           <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-6 overflow-y-auto max-h-[80vh]">
             <h2 className="text-lg font-semibold mb-4 text-white">Uploaded Proofs</h2>
@@ -185,4 +182,58 @@ export default async function DisputeDetail({ params }: { params: { id: string }
                     />
                     <div className="p-2 text-xs text-gray-400 truncate">
                       {proof.receipt_url.split('/').pop()}
-                    </
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
+        <div className="space-y-1 text-sm text-gray-400">
+          {proofCount === 0 ? (
+            <p>Please upload at least one proof to proceed.</p>
+          ) : (
+            <p>Proof files uploaded: <strong>{proofCount}</strong></p>
+          )}
+          {!pdfReady && proofCount > 0 && (
+            <p className="text-xs text-gray-500">PDF will be available after generation.</p>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/cases/${params.id}/evidence`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            <FileUp className="w-4 h-4" /> Add Proof
+          </Link>
+
+          <Link
+            href={proofCount > 0 ? `/cases/${params.id}/generate` : '#'}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              proofCount > 0
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <PlusCircle className="w-4 h-4" /> Generate Template
+          </Link>
+
+          <Link
+            href={pdfReady ? `/cases/${params.id}/review?pdf=${encodeURIComponent(dispute.pdf_url)}` : '#'}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              pdfReady
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <FileText className="w-4 h-4" /> View PDF
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
