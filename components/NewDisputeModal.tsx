@@ -415,7 +415,7 @@ case "confirm":
   /* ---------------------------------------------------------------------- */
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="bg-gray-900 border border-gray-700 text-white rounded-2xl p-6 w-full max-w-xl shadow-2xl relative">
+      <div className="text-white rounded-2xl p-6 w-full max-w-xl shadow-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-gray-400 hover:text-white text-xl"
