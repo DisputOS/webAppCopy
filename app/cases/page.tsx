@@ -65,7 +65,9 @@ export default function CasesPage() {
     return (
      <>
         <Header />
-        <main className="flex flex-col">
+        <main className="pt-[calc(56px+env(safe-area-inset-top))]   /* ⬅  exact header height */
+             h-[100svh] flex flex-col bg-gradient-to-b
+             from-gray-900 via-gray-950 to-black text-white">
  
           <p className="text-center mt-8 text-gray-400">
             Please log in to view your disputes.
@@ -80,8 +82,7 @@ export default function CasesPage() {
       <Header />
 
       {/* full-height flex column */}
-      <main className="h-[100svh] flex flex-col bg-gradient-to-b
-                       from-gray-900 via-gray-950 to-black text-white">
+      <main className=" flex flex-col">
 
         {/* ── sticky title bar ─────────────────────────────────────── */}
         <div className="sticky top-0 z-20 flex items-center justify-between to-black/90 backdrop-blur px-6 py-4">
