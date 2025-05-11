@@ -2,6 +2,8 @@ import '@/styles/globals.css'
 import { ReactNode } from 'react'
 import Providers from './providers'
 import GlowingBorder from '@/components/GlowingBorder'
+import NoZoom   from '@/components/NoZoom'   // <-- layer B/C
+
 
 // If you want to keep <title> and other static SEO meta separate,
 // you can also move them to app/head.tsx instead.
@@ -38,6 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
       {/* bg-gray-50 ⟶ change to your dark color if you want the whole page dark */}
       <body className="min-h-screen relative">
+         <NoZoom/>    
         <GlowingBorder />
         <Providers>{children}</Providers>
       </body>
