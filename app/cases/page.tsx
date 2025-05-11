@@ -90,8 +90,7 @@ export default function CasesPage() {
 
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600
-                       rounded-md hover:bg-blue-500 transition"
+            className="flex items-center gap-2 px-4 py-2 cursor-pointer border border-gray-800 rounded-xl p-5 bg-gray-900 hover:border-blue-600 transition"
           >
             <PlusCircle className="w-5 h-5" />
             New Dispute
