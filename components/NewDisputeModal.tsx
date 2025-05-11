@@ -122,7 +122,8 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
         status:                 "draft",
         archived:               false,
       }])
-      .single();
+      .select("id")        // 👉 tell Supabase we only need the `id`
+     .single();
 
     if (disputeErr) {
       setLoading(false);
