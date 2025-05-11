@@ -1,12 +1,21 @@
 @tailwind base;
 @layer base {
-  html,body{
-    background:#1a202c;
-    color-scheme:dark light;
-    touch-action:pan-x pan-y;   /* layer A */
+  /* Dark canvas + no-pinch scroll */
+  html,
+  body {
+    background: #1a202c;
+    color-scheme: dark light;
+    touch-action: pan-x pan-y;   /* prevents pinch, keeps scrolling */
+  }
+
+  /* Force 16 px so iOS won’t auto-zoom on focus */
+  input,
+  textarea,
+  select,
+  input::file-selector-button {   /* file-input “Browse…” button too */
+    font-size: 16px !important;
   }
 }
-
 
 @tailwind components;
 @tailwind utilities;
