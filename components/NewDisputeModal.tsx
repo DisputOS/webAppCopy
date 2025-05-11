@@ -279,10 +279,72 @@ const renderStep = () => {
         />
       );
 
-    /* ---------- 9. user_upload_proof (already present) -------------- */
-    case "user_upload_proof":
-      /* … keep the code you already have for file picker + evidence type … */
-      return ( /* EXISTING JSX FROM YOUR CURRENT FILE */ );
+    /* ---------- 9. user_upload_proof ----------------------------------- */
+case "user_upload_proof":
+  return (
+    <>
+      {/* File picker */}
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Upload files
+        </label>
+        <input
+          type="file"
+          multiple
+          accept="image/*,application/pdf"
+          onChange={(e) => {
+            if (e.target.files) setProofFiles(Array.from(e.target.files));
+          }}
+          className="w-full border border-gray-700 bg-gray-800
+                     text-sm text-white rounded-lg px-4 py-2
+                     file:mr-4 file:py-1 file:px-3 file:rounded
+                     file:border-0 file:text-sm file:font-medium
+                     file:bg-blue-600 hover:file:bg-blue-500"
+        />
+        {proofFiles.length > 0 && (
+          <ul className="mt-2 text-xs max-h-28 overflow-auto text-gray-400 space-y-1">
+            {proofFiles.map((f) => (
+              <li key={f.name}>{f.name}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Evidence type */}
+      <div className="pt-4">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Evidence type
+        </label>
+        <select
+          value={form.evidence_type}
+          onChange={(e) => handleChange("evidence_type", e.target.value)}
+          className="w-full border border-gray-700 bg-gray-800 text-white rounded-lg p-2 text-sm"
+        >
+          <option value="">Select evidence type</option>
+          <option value="receipt">Receipt / Invoice</option>
+          <option value="bank_statement">Bank statement</option>
+          <option value="chat_screenshot">Chat screenshot</option>
+          <option value="tracking_doc">Tracking / shipping doc</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      {/* Optional description */}
+      <div className="pt-4">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Description (optional)
+        </label>
+        <textarea
+          value={form.proof_description}
+          onChange={(e) => handleChange("proof_description", e.target.value)}
+          className="w-full border border-gray-700 bg-gray-800 text-white rounded-lg p-3 text-sm"
+          rows={4}
+          placeholder="Describe your evidence…"
+        />
+      </div>
+    </>
+  );
+
 
     /* ---------- 10. disclaimer -------------------------------------- */
     case "disclaimer":
