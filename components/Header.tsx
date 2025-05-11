@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // file: src/components/Header.tsx
-// Responsive header with notification bell + unread dropdown (desktop & mobile)
+// Responsive header with notification bell (desktop & mobile)
 // -----------------------------------------------------------------------------
 "use client";
 
@@ -64,7 +64,7 @@ export default function Header() {
         if (!error && data) setNotifications(data as NotificationRow[]);
       });
 
-    // Real-time inserts
+    // Real‑time inserts
     const channel = supabase
       .channel("user_notifications_header")
       .on(
@@ -81,10 +81,11 @@ export default function Header() {
       )
       .subscribe();
 
- return () => {                               // ✅ returns void
-   channel.unsubscribe().catch(() => {});     // (ignore the Promise)
-};
-}, [supabase, session]);
+    return () => {
+      // ✅ returns void
+      channel.unsubscribe().catch(() => {}); // (ignore the Promise)
+    };
+  }, [supabase, session]);
 
   // Mark helpers --------------------------------------------------------------
   const markRead = async (id: string) => {
@@ -155,19 +156,69 @@ export default function Header() {
         {/* Logo */}
         <Link
           href="/cases"
-          className="text-xl font-bold text-white tracking-tight ml-auto sm:ml-0"
+          className="text-xl font-bold text-white tracking-tight ml-4 sm:ml-0"
         >
           Disput<span className="text-blue-500">.ai</span>
         </Link>
 
+        {/* Mobile notification bell (always visible in header) */}
+        {session && (
+          <div className="relative sm:hidden ml-auto">
+            <button
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="text-gray-300 hover:text-white p-2"
+            >
+              <Bell className="w-6 h-6" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-xs rounded-full px-1">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile notifications dropdown */}
+            {notifOpen && (
+              <div className="absolute right-0 mt-2 w-72 backdrop-blur px-6 py-4 border border-gray-700 rounded-xl shadow-lg z-50">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+                  <span className="text-sm font-medium text-white">Notifications</span>
+                  {notifications.length > 0 && (
+                    <Button size="xs" variant="ghost" onClick={markAllRead}>
+                      Mark all read
+                    </Button>
+                  )}
+                </div>
+
+                {notifications.length === 0 ? (
+                  <p className="text-center py-6 text-sm text-gray-400">
+                    No unread messages
+                  </p>
+                ) : (
+                  <ul className="max-h-80 overflow-y-auto divide-y divide-gray-800">
+                    {notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        onClick={() => markRead(n.id)}
+                        className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
+                      >
+                        <p className="text-sm font-medium text-white">{n.title}</p>
+                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{n.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Desktop navigation */}
         {session && (
-          <nav className="hidden sm:flex items-center gap-4">
+          <nav className="hidden sm:flex items-center gap-4 ml-auto">
             <NavLink href="/cases"   icon={Folder}  label="Cases"   />
             <NavLink href="/profile" icon={User}    label="Profile" />
             <NavLink href="/settings" icon={Settings} label="Settings" />
 
-            {/* Notification bell */}
+            {/* Notification bell for desktop */}
             <div className="relative">
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
@@ -227,57 +278,10 @@ export default function Header() {
         )}
       </div>
 
-      {/* Mobile slide-out nav */}
+      {/* Mobile slide‑out nav (links only, notifications removed) */}
       {menuOpen && session && (
         <div className="sm:hidden absolute top-full left-0 w-full backdrop-blur px-6 py-4 border-t border-gray-800 shadow-md animate-fade-in-down">
           <div className="flex flex-col py-2">
-            {/* Notifications row in mobile list */}
-            <button
-              onClick={() => setNotifOpen(!notifOpen)}
-              className="flex items-center gap-3 text-sm text-gray-300 hover:text-white px-4 py-2 transition"
-            >
-              <Bell className="w-4 h-4" />
-              <span>Notifications</span>
-              {notifications.length > 0 && (
-                <span className="ml-auto bg-red-600 text-xs rounded-full px-2 py-0.5">
-                  {notifications.length}
-                </span>
-              )}
-            </button>
-
-            {/* Mobile dropdown panel */}
-            {notifOpen && (
-              <div className="bg-gray-900 border-t border-gray-800">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
-                  <span className="text-sm font-medium text-white">Unread</span>
-                  {notifications.length > 0 && (
-                    <Button size="xs" variant="ghost" onClick={markAllRead}>
-                      Mark all read
-                    </Button>
-                  )}
-                </div>
-
-                {notifications.length === 0 ? (
-                  <p className="text-center py-6 text-sm text-gray-400">
-                    No unread messages
-                  </p>
-                ) : (
-                  <ul className="max-h-72 overflow-y-auto divide-y divide-gray-800">
-                    {notifications.map((n) => (
-                      <li
-                        key={n.id}
-                        onClick={() => markRead(n.id)}
-                        className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
-                      >
-                        <p className="text-sm font-medium text-white">{n.title}</p>
-                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{n.body}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-
             {/* Regular links */}
             <NavLink href="/cases" icon={Folder} label="Cases" />
             <NavLink href="/profile" icon={User} label="Profile" />
