@@ -166,7 +166,7 @@ const handleLogout = async () => {
         {/* Brand / Logo */}
         <Link
           href="/cases"
-          className="text-xl font-bold text-white tracking-tight ml-auto sm:ml-0"
+          className="text-xl font-bold text-white tracking-tight sm:ml-0"
         >
           Disput<span className="text-blue-500">.ai</span>
         </Link>
