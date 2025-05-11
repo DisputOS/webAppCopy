@@ -183,7 +183,7 @@ export default function Header() {
 
               {/* Desktop dropdown */}
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-gray-900 border border-gray-700 rounded-xl shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-72 backdrop-blur px-6 py-4 border border-gray-700 rounded-xl shadow-lg z-50">
                   <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
                     <span className="text-sm font-medium text-white">Notifications</span>
                     {notifications.length > 0 && (
