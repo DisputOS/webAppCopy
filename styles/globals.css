@@ -1,18 +1,22 @@
+/* ------------------------------------------------------------------
+   styles/globals.css
+------------------------------------------------------------------ */
 @tailwind base;
+
+/* --- dark canvas + no-zoom + iOS focus fix ---------------------- */
 @layer base {
-  /* Dark canvas + no-pinch scroll */
   html,
   body {
     background: #1a202c;
     color-scheme: dark light;
-    touch-action: pan-x pan-y;   /* prevents pinch, keeps scrolling */
+    touch-action: pan-x pan-y;      /* block pinch, keep scroll */
   }
 
-  /* Force 16 px so iOS won’t auto-zoom on focus */
+  /* stop iOS auto-zoom when an input gets focus */
   input,
   textarea,
   select,
-  input::file-selector-button {   /* file-input “Browse…” button too */
+  input::file-selector-button {
     font-size: 16px !important;
   }
 }
@@ -20,76 +24,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------- little fade util ----------------------------------- */
 @keyframes fade-in-down {
-  from {
-    opacity: 0;
-    transform: translateY(-0.5rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-0.5rem); }
+  to   { opacity: 1; transform: translateY(0);       }
 }
+.animate-fade-in-down { animation: fade-in-down 0.2s ease-out forwards; }
 
-.animate-fade-in-down {
-  animation: fade-in-down 0.2s ease-out forwards;
-}
-
+/* ---------- custom utilities ----------------------------------- */
 @layer utilities {
-  .glow-corner {
-    position: fixed;
-    width: 300px;
-    height: 300px;
-    pointer-events: none;
-    z-index: 0;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.5;
-    animation: glowPulse 10s ease-in-out infinite;
-    mix-blend-mode: screen;
-  }
-
-  .top-left {
-    top: -100px;
-    left: -100px;
-    background: radial-gradient(circle, rgba(255,0,255,0.4), transparent);
-  }
-
-  .top-right {
-    top: -100px;
-    right: -100px;
-    background: radial-gradient(circle, rgba(0,255,255,0.4), transparent);
-  }
-
-  .bottom-left {
-    bottom: -100px;
-    left: -100px;
-    background: radial-gradient(circle, rgba(255,255,0,0.4), transparent);
-  }
-
-  .bottom-right {
-    bottom: -100px;
-    right: -100px;
-    background: radial-gradient(circle, rgba(255,136,0,0.4), transparent);
-  }
+  /* glowing blobs ------------------------------------------------ */
+  .glow-corner            { position: fixed; width:300px; height:300px;
+                            pointer-events:none; z-index:0; border-radius:50%;
+                            filter: blur(100px); opacity:.5;
+                            animation: glowPulse 10s ease-in-out infinite;
+                            mix-blend-mode: screen; }
+  .top-left     { top:-100px; left:-100px;
+                  background: radial-gradient(circle, rgba(255,0,255,.4), transparent); }
+  .top-right    { top:-100px; right:-100px;
+                  background: radial-gradient(circle, rgba(0,255,255,.4), transparent); }
+  .bottom-left  { bottom:-100px; left:-100px;
+                  background: radial-gradient(circle, rgba(255,255,0,.4), transparent); }
+  .bottom-right { bottom:-100px; right:-100px;
+                  background: radial-gradient(circle, rgba(255,136,0,.4), transparent); }
 
   @keyframes glowPulse {
-    0%, 100% {
-      opacity: 0.3;
-      filter: blur(80px);
-    }
-    50% {
-      opacity: 0.6;
-      filter: blur(120px);
-    }
+    0%,100% { opacity:.3; filter:blur(80px); }
+    50%     { opacity:.6; filter:blur(120px); }
   }
 
-   /* safe-area helpers */
-  .pt-safe        { padding-top:    env(safe-area-inset-top); }
-  .pl-safe        { padding-left:   env(safe-area-inset-left); }
-  .pr-safe        { padding-right:  env(safe-area-inset-right); }
-  /* pushes content down but lets bgcolor fill the notch */
-  .pt-safe   { padding-top: env(safe-area-inset-top);     }
-  .h-header  { height: calc(56px + env(safe-area-inset-top)); } /* 56 = normal bar */
-}
+  /* safe-area helpers ------------------------------------------- */
+  .pt-safe   { padding-top: env(safe-area-inset-top); }
+  .pl-safe   { padding-left:  env(safe-area-inset-left); }
+  .pr-safe   { padding-right: env(safe-area-inset-right); }
+  .h-header  { height: calc(56px + env(safe-area-inset-top)); } /* 56 px = normal bar */
 }
