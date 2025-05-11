@@ -171,20 +171,55 @@ const handleLogout = async () => {
           Disput<span className="text-blue-500">.ai</span>
         </Link>
 
-        {/* Stand‑alone bell for mobile (always visible, hides on ≥sm screens) */}
+        {/* ─── Stand-alone bell (mobile only) ───────────────────── */}
         {session && (
-          <button
-            onClick={() => setNotifOpen(!notifOpen)}
-            className="sm:hidden relative text-gray-300 hover:text-white"
-            type="button"
-          >
-            <Bell className="w-6 h-6" />
-            {notifications.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-xs rounded-full px-1">
-                {notifications.length}
-              </span>
+          <div className="sm:hidden relative">
+            <button
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="relative text-gray-300 hover:text-white"
+              type="button"
+            >
+              <Bell className="w-6 h-6" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-xs rounded-full px-1">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile dropdown (anchors to the bell) */}
+            {notifOpen && (
+              <div className="absolute right-0 mt-2 w-72 backdrop-blur px-6 py-4 border border-gray-700 rounded-xl shadow-lg z-50">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+                  <span className="text-sm font-medium text-white">Notifications</span>
+                  {notifications.length > 0 && (
+                    <Button size="xs" variant="ghost" onClick={markAllRead}>
+                      Mark all read
+                    </Button>
+                  )}
+                </div>
+
+                {notifications.length === 0 ? (
+                  <p className="text-center py-6 text-sm text-gray-400">
+                    No unread messages
+                  </p>
+                ) : (
+                  <ul className="max-h-80 overflow-y-auto divide-y divide-gray-800">
+                    {notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        onClick={() => markRead(n.id)}
+                        className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
+                      >
+                        <p className="text-sm font-medium text-white">{n.title}</p>
+                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{n.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             )}
-          </button>
+          </div>
         )}
 
         {/* Desktop navigation */}
