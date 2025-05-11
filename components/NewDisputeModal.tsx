@@ -94,75 +94,79 @@ export default function NewDisputeModal({ onClose }: { onClose: () => void }) {
   const prev = () => setStep((s) => Math.max(0, s - 1));
 
   /* ---------------------------------------------------------------------- */
-  /* 4) SUBMIT: dispute row + proofs                                        */
-  /* ---------------------------------------------------------------------- */
-  const handleSubmit = async () => {
-    if (!session) return;
-    setErrorBanner(null);
-    setLoading(true);
+/* 4) SUBMIT: create dispute → upload files → insert proof_bundle         */
+/* ---------------------------------------------------------------------- */
+const handleSubmit = async () => {
+  if (!session) return;
+  setErrorBanner(null);
+  setLoading(true);
 
-    /* 4-A) Insert dispute ------------------------------------------------- */
-    const { data: dispute, error: disputeErr } = await supabase
-      .from("disputes")
-      .insert([{
-        user_id:                session.user.id,
-        platform_name:          form.platform_name,
-        purchase_amount:        parseFloat(form.purchase_amount),
-        currency:               form.currency,
-        purchase_date:          new Date(form.purchase_date),
-        problem_type:           form.problem_type,
-        description:            form.description,
-        service_usage:          form.service_usage || null,
-        user_contact_platform:  form.user_contact_platform || null,
-        user_contact_desc:      form.user_contact_description || null,
-        user_confirmed_input:   true,
-        legal_disclaimer_shown: true,
-        training_permission:    form.training_permission === "yes",
-        user_plan:              "free",
-        status:                 "draft",
-        archived:               false,
-      }])
-      .select("id")        // 👉 tell Supabase we only need the `id`
-     .single();
+  /* 4-A) Insert dispute -------------------------------------------------- */
+  const { data: dispute, error: disputeErr } = await supabase
+    .from("disputes")
+    .insert([{
+      user_id:                session.user.id,
+      platform_name:          form.platform_name,
+      purchase_amount:        parseFloat(form.purchase_amount),
+      currency:               form.currency,
+      purchase_date:          new Date(form.purchase_date),
+      problem_type:           form.problem_type,
+      description:            form.description,
+      service_usage:          form.service_usage || null,
+      user_contact_platform:  form.user_contact_platform || null,
+      user_contact_desc:      form.user_contact_description || null,
+      user_confirmed_input:   true,
+      legal_disclaimer_shown: true,
+      training_permission:    form.training_permission === "yes",
+      user_plan:              "free",
+      status:                 "draft",
+      archived:               false,
+    }])
+    .select("id")          // ask Supabase to return only the id
+    .single();
 
-    if (disputeErr) {
-      setLoading(false);
-      return setErrorBanner(disputeErr.message);
-    }
-
-    /* 4-B) Upload proofs + insert proof_bundle --------------------------- */
-    const BUCKET = "proofbundle";
-    const urls: string[] = [];
-
-    for (const file of proofFiles) {
-      const path = `${dispute.id}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, file);
-      if (upErr) {
-        console.error("Upload error:", upErr.message);
-        continue;
-      }
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      urls.push(data.publicUrl);
-    }
-
-    if (urls.length) {
-      await supabase.from("proof_bundle").insert([{
-        user_id:          session.user.id,
-        dispute_id:       dispute.id,
-        receipt_url:      urls[0] ?? null,
-        screenshot_urls:  urls.slice(1),
-        evidence_source:  "user_upload",
-        dispute_type:     form.evidence_type,      // e.g. receipt, chat_screenshot
-        user_description: form.proof_description,
-        policy_snapshot:  null,
-      }]);
-    }
-
+  if (disputeErr) {
     setLoading(false);
-    router.push(`/cases/${dispute.id}`);
-  };
+    return setErrorBanner(disputeErr.message);
+  }
+
+  /* Make TS happy – dispute.id is guaranteed here */
+  const disputeId = dispute.id!;          // <-- non-nullable string
+
+  /* 4-B) Upload proofs + insert proof_bundle ----------------------------- */
+  const BUCKET = "proofbundle";
+  const urls: string[] = [];
+
+  for (const file of proofFiles) {
+    const path = `${disputeId}/${Date.now()}-${file.name}`;
+    const { error: upErr } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, file);
+    if (upErr) {
+      console.error("Upload error:", upErr.message);
+      continue;
+    }
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+
+  if (urls.length) {
+    await supabase.from("proof_bundle").insert([{
+      user_id:          session.user.id,
+      dispute_id:       disputeId,               // references the dispute
+      receipt_url:      urls[0] ?? null,
+      screenshot_urls:  urls.slice(1),
+      evidence_source:  "user_upload",
+      dispute_type:     form.evidence_type,
+      user_description: form.proof_description,
+      policy_snapshot:  null,
+    }]);
+  }
+
+  setLoading(false);
+  router.push(`/cases/${disputeId}`);
+};
+
 
   /* ---------------------------------------------------------------------- */
   /* 5) RENDER PER STEP                                                     */
