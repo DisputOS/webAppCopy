@@ -39,10 +39,10 @@ export const BASE_FLOW: readonly FlowStep[] = [
 // 2) Problem-type shortcuts (optionally drop service_usage) --------------------
 // -----------------------------------------------------------------------------
 export const PROBLEM_TYPE_FLOW: Record<string, FlowStep[]> = {
-  subscription_auto_renewal: BASE_FLOW.filter(
+ subscription_auto_renewal: BASE_FLOW.filter(
     (s) => s !== "service_usage"
-  ),
-  item_not_delivered: BASE_FLOW,          // need all steps, incl. service_usage
+  ) as FlowStep[],             // cast → mutable
+  item_not_delivered: [...BASE_FLOW],   // spread → mutable
   other: [...BASE_FLOW],
 };
 
