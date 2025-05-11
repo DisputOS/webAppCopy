@@ -65,9 +65,7 @@ export default function CasesPage() {
     return (
      <>
         <Header />
-        <main className="pt-[calc(56px+env(safe-area-inset-top))]   /* ⬅  exact header height */
-             h-[100svh] flex flex-col bg-gradient-to-b
-             from-gray-900 via-gray-950 to-black text-white">
+        <main className="flex flex-col">
  
           <p className="text-center mt-8 text-gray-400">
             Please log in to view your disputes.
