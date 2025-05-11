@@ -357,17 +357,52 @@ case "user_upload_proof":
         </div>
       );
 
-    /* ---------- 11. training_permission ----------------------------- */
-    case "training_permission":
-      return (
-        /* … keep existing radio buttons … */
-      );
+   /* ---------- 11. training_permission ----------------------------- */
+case "training_permission":
+  return (
+    <div className="space-y-4 text-sm">
+      <p className="text-gray-300">
+        May we anonymously use this dispute (without personal data) to improve Disput.ai?
+      </p>
 
-    /* ---------- 12. confirm ----------------------------------------- */
-    case "confirm":
-      return (
-        /* … keep existing confirm checkbox … */
-      );
+      <div className="flex gap-6">
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            value="yes"
+            checked={form.training_permission === "yes"}
+            onChange={(e) => handleChange("training_permission", e.target.value)}
+          />
+          Yes, you can use my data
+        </label>
+
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            value="no"
+            checked={form.training_permission === "no"}
+            onChange={(e) => handleChange("training_permission", e.target.value)}
+          />
+          No, do not use my data
+        </label>
+      </div>
+    </div>
+  );
+
+/* ---------- 12. confirm ----------------------------------------- */
+case "confirm":
+  return (
+    <label className="flex items-center gap-3 text-sm text-gray-300">
+      <input
+        type="checkbox"
+        checked={agreeAcc}
+        onChange={(e) => setAgreeAcc(e.target.checked)}
+        className="accent-blue-500 w-4 h-4"
+      />
+      I confirm that all information I provide is accurate and complete.
+    </label>
+  );
+
 
     default:
       return null;
