@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         {/* Manifest & icons */}
         <link rel="manifest"            href="/manifest.json" />
-        <link rel="icon" type="image/png" href="/mainicon.png" />
+        <link rel="icon" type="image/png" href="/icons/icon-57x57.png" />
         <link rel="apple-touch-icon" sizes="57x57"  href="/icons/icon-57x57.png"  />
         <link rel="apple-touch-icon" sizes="72x72"  href="/icons/icon-72x72.png"  />
         <link rel="apple-touch-icon" sizes="76x76"  href="/icons/icon-76x76.png"  />
