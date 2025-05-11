@@ -83,9 +83,7 @@ export default function CasesPage() {
                        from-gray-900 via-gray-950 to-black text-white">
 
         {/* ── sticky title bar ─────────────────────────────────────── */}
-        <div className="sticky top-0 z-20 flex items-center justify-between
-                        bg-gradient-to-b from-gray-900 via-gray-950 to-black/90
-                        backdrop-blur px-6 py-4 border-b border-gray-800">
+        <div className="sticky top-0 z-20 flex items-center justify-between to-black/90 backdrop-blur px-6 py-4">
           <h1 className="text-3xl font-bold">My Disputes</h1>
 
           <button
