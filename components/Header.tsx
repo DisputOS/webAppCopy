@@ -107,16 +107,20 @@ export default function Header() {
   };
 
   // Logout --------------------------------------------------------------------
-  const handleLogout = async () => {
-    // Sign out first
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Logout error:", error.message);
-      return;
+ // Logout --------------------------------------------------------------------
+const handleLogout = async () => {
+  try {
+    await supabase.auth.signOut();
+  } catch (err: any) {
+    // Ignore “Auth session missing!” & log the rest
+    if (!err?.message?.includes("session missing")) {
+      console.error("Logout error:", err.message);
     }
-    // Ensure we navigate away even if Supabase state is slow to update
-    router.replace("/login");
-  };
+  } finally {
+    router.replace("/login");        // always navigate away
+  }
+};
+
 
   // Reusable link -------------------------------------------------------------
   const NavLink = ({
