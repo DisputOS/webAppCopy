@@ -20,13 +20,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  /* safe-area helpers */
-  .pt-safe        { padding-top:    env(safe-area-inset-top); }
-  .pl-safe        { padding-left:   env(safe-area-inset-left); }
-  .pr-safe        { padding-right:  env(safe-area-inset-right); }
-}
-
 @keyframes fade-in-down {
   from {
     opacity: 0;
@@ -90,4 +83,13 @@
       filter: blur(120px);
     }
   }
+
+   /* safe-area helpers */
+  .pt-safe        { padding-top:    env(safe-area-inset-top); }
+  .pl-safe        { padding-left:   env(safe-area-inset-left); }
+  .pr-safe        { padding-right:  env(safe-area-inset-right); }
+  /* pushes content down but lets bgcolor fill the notch */
+  .pt-safe   { padding-top: env(safe-area-inset-top);     }
+  .h-header  { height: calc(56px + env(safe-area-inset-top)); } /* 56 = normal bar */
+}
 }
