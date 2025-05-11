@@ -229,7 +229,7 @@ export default function Header() {
 
       {/* Mobile slide-out nav */}
       {menuOpen && session && (
-        <div className="sm:hidden absolute top-full left-0 w-full bg-gray-900 border-t border-gray-800 shadow-md animate-fade-in-down">
+        <div className="sm:hidden absolute top-full left-0 w-full backdrop-blur px-6 py-4 border-t border-gray-800 shadow-md animate-fade-in-down">
           <div className="flex flex-col py-2">
             {/* Notifications row in mobile list */}
             <button
