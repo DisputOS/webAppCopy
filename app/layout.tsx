@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
 
       {/* keep body dark; scrolling sections supply their own bg */}
-      <body className="min-h-screen relative text-white">
+      <body className="min-h-screen relative text-white flex flex-col bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white">
         <NoZoom />          {/* disables user zoom on iOS/Android */}
         <GlowingBorder />   {/* decorative blobs */}
         <Providers>{children}</Providers>
