@@ -1,4 +1,5 @@
 // src/components/GlowyBackground.tsx
+"use client";
 
 export default function GlowyBackground() {
   return (
@@ -19,7 +20,7 @@ export default function GlowyBackground() {
             rgba(0, 200, 255, 0.4)
           );
 
-          /* blur + brighten whatever is behind this overlay */
+          /* blur & brighten whatever’s behind this overlay */
           backdrop-filter: blur(30px) brightness(1.1);
 
           /* prepare for animation */
