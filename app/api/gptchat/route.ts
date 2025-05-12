@@ -5,7 +5,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const disputeSchema = {
   name: "create_dispute",
- description: "Collect dispute information from the user understanding the context and by explicitly asking for each required field needed. Never assume or guess values unless it can be understood from a context. Ask the user directly if a value is missing.",
+ description: "Collect dispute information from the user understanding the context and by explicitly asking for each required field needed. Never assume or guess values unless it can be understood from a context. Ask the user directly if a value is missing. Ask no more then 2-3 questions each time, provide questions in a table format.",
   parameters: {
     type: "object",
     properties: {
