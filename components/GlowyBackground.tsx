@@ -1,23 +1,24 @@
-/**
- * A full-screen, softly zooming & blurred background layer.
- * Drop <GlowyBackground /> anywhere near the top of your layout.
- */
+// src/components/GlowyBackground.tsx
+
 export default function GlowyBackground() {
   return (
     <>
-      {/* background layer */}
-      <div
-        className="glowy-bg fixed inset-0 -z-10 pointer-events-none"
-        style={{
-          backgroundImage: "url('/icons/GPT.png')", // change to your image
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
+      <div className="glowy-bg" />
 
-      {/* local styles only for this component */}
       <style jsx>{`
         .glowy-bg {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: url('/icons/GPT.png') center/cover no-repeat;
+          pointer-events: none;
+          
+          /* 🟢 Ensure transform is present and hint the browser */
+          transform: scale(1);
+          will-change: transform, opacity;
+
           opacity: 0.65;
           filter: blur(28px) brightness(1.15);
           animation: fadeZoom 18s ease-in-out infinite alternate;
