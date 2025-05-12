@@ -1,8 +1,7 @@
 "use client";
-// src/components/GlowyBackground.tsx
 
 export default function GlowyBackground() {
- return (
+  return (
     <>
       <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden>
         <filter id="wavy">
@@ -20,10 +19,20 @@ export default function GlowyBackground() {
               repeatCount="indefinite"
             />
           </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="turb" scale="25" xChannelSelector="R" yChannelSelector="G" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="turb"
+            scale="25"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
         </filter>
       </svg>
-      <div className="animated-bg" />
+
+      <div
+        className="animated-bg"
+        style={{ filter: "url(#wavy) blur(22px) brightness(1.2)" }}
+      />
     </>
   );
 }

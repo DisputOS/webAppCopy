@@ -42,7 +42,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-screen relative flex flex-col bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white">
         <NoZoom />             {/* disables pinch-/double-tap zoom */}
         <GlowingBorder />      {/* decorative blobs */}
-        <GlowyBackground />    {/* animated glowy blur/zoom background */}
         <Providers>
           {children}
         </Providers>
