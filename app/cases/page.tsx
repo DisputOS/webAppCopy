@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // file: src/app/cases/page.tsx
-// Responsive disputes list + full-screen spinner while navigating
+// Responsive disputes list + GPT-Powered Chat Dispute Modal
 // -----------------------------------------------------------------------------
 'use client';
 
@@ -10,11 +10,7 @@ import { Loader2, PlusCircle, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
-
-const NewDisputeModal = dynamic(
-  () => import('@/components/NewDisputeModal'),
-  { ssr: false },
-);
+import ChatDisputeModal from '@/components/ChatDisputeModal';
 
 interface DisputeWithProof extends Record<string, any> {
   hasProof: boolean;
@@ -26,13 +22,13 @@ export default function CasesPage() {
   const router   = useRouter();
 
   const [disputes, setDisputes] = useState<DisputeWithProof[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showChatModal, setShowChatModal] = useState(false);
 
-  /* ────────────────────────────── NEW: route transition hook ── */
+  /* ─────────────────────────── route transition hook ──────────────────── */
   const [isPending, startTransition] = useTransition();
 
-  /* ─────────────────────────────────────────── fetch disputes ── */
+  /* ─────────────────────────── fetch disputes ─────────────────────────── */
   const fetchData = async () => {
     if (!session?.user) return;
     setLoading(true);
@@ -64,14 +60,11 @@ export default function CasesPage() {
     if (session) fetchData();
   }, [session]);
 
-  /* ─────────────────────────── UI ────────────────────────────── */
   if (!session) {
     return (
       <>
         <Header />
-        <main className="pt-[calc(56px+env(safe-area-inset-top))]
-                         h-[100svh] flex flex-col bg-gradient-to-b
-                         from-gray-900 via-gray-950 to-black text-white">
+        <main className="pt-[calc(56px+env(safe-area-inset-top))] h-[100svh] flex flex-col bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white">
           <p className="text-center mt-8 text-gray-400">
             Please log in to view your disputes.
           </p>
@@ -84,19 +77,14 @@ export default function CasesPage() {
     <>
       <Header />
 
-      {/* full-height flex column */}
       <main className="flex flex-col">
-
         {/* ── sticky title bar ───────────────────────────────────── */}
-        <div className="sticky top-0 z-20 flex items-center justify-between
-                        backdrop-blur to-black/90 px-6 py-4">
+        <div className="sticky top-0 z-20 flex items-center justify-between backdrop-blur to-black/90 px-6 py-4">
           <h1 className="text-3xl font-bold">My Disputes</h1>
 
           <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 cursor-pointer
-                       border border-gray-800 rounded-xl hover:border-blue-600
-                       transition"
+            onClick={() => setShowChatModal(true)}
+            className="flex items-center gap-2 px-4 py-2 cursor-pointer border border-gray-800 rounded-xl hover:border-blue-600 transition"
             type="button"
           >
             <PlusCircle className="w-5 h-5" />
@@ -122,15 +110,13 @@ export default function CasesPage() {
                   onClick={() => {
                     startTransition(() => router.push(`/cases/${d.id}`));
                   }}
-                  className="cursor-pointer border border-gray-800 rounded-xl
-                             p-5 bg-gray-900 hover:border-blue-600 transition"
+                  className="cursor-pointer border border-gray-800 rounded-xl p-5 bg-gray-900 hover:border-blue-600 transition"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
                       <h2 className="text-lg font-semibold break-all">
                         {d.problem_type || 'Untitled'}
                       </h2>
-
                       {!d.hasProof && (
                         <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                           <AlertTriangle className="w-4 h-4" />
@@ -141,8 +127,7 @@ export default function CasesPage() {
 
                     {d.created_at &&
                       Date.now() - new Date(d.created_at).getTime() < 86_400_000 && (
-                        <span className="text-xs text-green-500 border
-                                         border-green-500 rounded px-2 py-0.5 ml-2">
+                        <span className="text-xs text-green-500 border border-green-500 rounded px-2 py-0.5 ml-2">
                           NEW
                         </span>
                       )}
@@ -167,20 +152,19 @@ export default function CasesPage() {
           )}
         </section>
 
-        {showModal && (
-          <NewDisputeModal
+        {/* ── GPT-powered Chat Modal ───────────────────────────────────── */}
+        {showChatModal && (
+          <ChatDisputeModal
             onClose={() => {
-              setShowModal(false);
-              fetchData(); // refresh list after creation
+              setShowChatModal(false);
+              fetchData(); // refresh list after dispute creation
             }}
           />
         )}
       </main>
 
-      {/* ── full-screen overlay spinner while route is pending ─── */}
       {isPending && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center
-                        bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
         </div>
       )}
