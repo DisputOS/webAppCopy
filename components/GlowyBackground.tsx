@@ -1,49 +1,60 @@
-// src/components/GlowyBackground.tsx
 "use client";
+// src/components/GlowyBackground.tsx
 
 export default function GlowyBackground() {
   return (
     <>
-      <div className="glowy-bg" />
+      <div className="blob-bg">
+        <div className="blob blob--orange" />
+        <div className="blob blob--blue" />
+        <div className="blob blob--cyan" />
+      </div>
 
       <style jsx>{`
-        .glowy-bg {
+        .blob-bg {
           position: fixed;
           inset: 0;
-          z-index: -10;
           pointer-events: none;
-
-          /* translucent multi-color glow */
-          background: linear-gradient(
-            135deg,
-            rgba(255, 0, 150, 0.4),
-            rgba(0, 200, 255, 0.4)
-          );
-
-          /* blur & brighten whatever’s behind this overlay */
-          backdrop-filter: blur(30px) brightness(1.1);
-
-          /* prepare for animation */
-          transform: scale(1);
-          will-change: transform, opacity;
-
-          /* gentle zoom + fade loop */
-          animation: fadeZoom 18s ease-in-out infinite alternate;
+          z-index: -10;
+          overflow: hidden;
         }
 
-        @keyframes fadeZoom {
-          0% {
-            transform: scale(1);
-            opacity: 0.6;
-          }
-          50% {
-            transform: scale(1.02);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scale(1.04);
-            opacity: 0.6;
-          }
+        .blob {
+          position: absolute;
+          width: 500px;
+          height: 500px;
+          border-radius: 50%;
+          filter: blur(200px);
+          opacity: 0.6;
+          animation: blobFloat 20s ease-in-out infinite alternate;
+          will-change: transform;
+        }
+
+        .blob--orange {
+          background: radial-gradient(circle, rgba(255,155,0,1) 0%, rgba(255,155,0,0) 70%);
+          top: 30%;
+          left: 40%;
+          animation-delay: 0s;
+        }
+
+        .blob--blue {
+          background: radial-gradient(circle, rgba(0,125,255,1) 0%, rgba(0,125,255,0) 70%);
+          top: 35%;
+          left: 55%;
+          animation-delay: 5s;
+        }
+
+        .blob--cyan {
+          background: radial-gradient(circle, rgba(0,200,150,1) 0%, rgba(0,200,150,0) 70%);
+          top: 45%;
+          left: 50%;
+          animation-delay: 10s;
+        }
+
+        @keyframes blobFloat {
+          0%   { transform: translate(0, 0)     scale(1);   }
+          50%  { transform: translate(20px,-10px) scale(1.05); }
+          100% { transform: translate(-10px,20px) scale(0.95); }
         }
       `}</style>
     </>
