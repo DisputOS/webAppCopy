@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,28 +23,36 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   const session = useSession();
   const router = useRouter();
 
+  // Message history with initial system prompt
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
-      content: "Your goal is to collect all required dispute fields. Ask for each one explicitly. Do not guess values. Ask for proof upload and mark 'proof_uploaded: true' only after user confirms completion.",
+      content:
+        "Your goal is to collect all required dispute fields. Ask for each explicitly. Do not guess values. Require proof upload and set 'proof_uploaded: true' only after confirmation.",
     },
     {
       role: "assistant",
-      content: "I'm here to help you create your dispute. Could you please describe your issue briefly?",
+      content:
+        "I'm here to help you create your dispute. Could you please describe your issue briefly?",
     },
   ]);
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [currentStep, setCurrentStep] = useState<"chat" | "upload_proof">("chat");
 
+  // Proof upload state
   const [proofFiles, setProofFiles] = useState<UploadedFile[]>([]);
   const [evidenceType, setEvidenceType] = useState("");
   const [proofDescription, setProofDescription] = useState("");
 
+  // Upload helper
   const uploadFileToSupabase = async (file: File): Promise<UploadedFile | null> => {
     const path = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("proofbundle").upload(path, file);
+    const { error: uploadError } = await supabase.storage
+      .from("proofbundle")
+      .upload(path, file);
     if (uploadError) {
       console.error("Upload error:", uploadError.message);
       return null;
@@ -53,34 +61,37 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     return { name: file.name, url: data.publicUrl };
   };
 
+  // Handle file input change
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const uploaded: UploadedFile[] = [];
     for (const file of Array.from(e.target.files)) {
-      const uploadedFile = await uploadFileToSupabase(file);
-      if (uploadedFile) uploaded.push(uploadedFile);
+      const uf = await uploadFileToSupabase(file);
+      if (uf) uploaded.push(uf);
     }
     setProofFiles((prev) => [...prev, ...uploaded]);
   };
 
+  // Central send & function_call handler
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = { role: "user", content: input };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    const updated = [...messages, userMessage];
+    setMessages(updated);
     setInput("");
     setLoading(true);
 
     const res = await fetch("/api/gptchat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: updatedMessages }),
+      body: JSON.stringify({ messages: updated }),
     });
     const data = await res.json();
 
-    if (data.function_call && typeof data.function_call.name === "string") {
-      const { name, arguments: args } = data.function_call;
+    // Handle function calls
+    if (data.function_call?.name) {
+      const { name, arguments: args = "{}" } = data.function_call;
 
       if (name === "user_upload_proof") {
         setMessages((prev) => [
@@ -95,25 +106,23 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
       if (name === "create_dispute") {
         let fields = {};
         try {
-          fields = JSON.parse(args || "{}");
+          fields = JSON.parse(args);
         } catch {
           setMessages((prev) => [
             ...prev,
-            { role: "assistant", content: "❌ Error parsing data from assistant." },
+            { role: "assistant", content: "❌ Error parsing response." },
           ]);
           setLoading(false);
           return;
         }
-
         if (!session?.user) {
           setMessages((prev) => [
             ...prev,
-            { role: "assistant", content: "❌ You must be logged in to submit a dispute." },
+            { role: "assistant", content: "❌ Please log in." },
           ]);
           setLoading(false);
           return;
         }
-
         const { data: dispute, error } = await supabase
           .from("disputes")
           .insert({
@@ -125,17 +134,16 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
           })
           .select("id")
           .single();
-
         if (error || !dispute?.id) {
           setMessages((prev) => [
             ...prev,
-            { role: "assistant", content: `❌ Error: ${error?.message || "Unknown error"}` },
+            { role: "assistant", content: `❌ ${error?.message || "Error"}` },
           ]);
           setLoading(false);
           return;
         }
-
-        if (proofFiles.length > 0) {
+        // Insert proof bundle
+        if (proofFiles.length) {
           await supabase.from("proof_bundle").insert({
             user_id: session.user.id,
             dispute_id: dispute.id,
@@ -147,10 +155,9 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
             policy_snapshot: null,
           });
         }
-
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "✅ Your dispute was successfully created!" },
+          { role: "assistant", content: "✅ Dispute created!" },
         ]);
         setTimeout(() => router.push(`/cases/${dispute.id}`), 1500);
         setLoading(false);
@@ -158,6 +165,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
       }
     }
 
+    // Fallback reply
     if (data.reply) {
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     }
@@ -165,6 +173,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     setLoading(false);
   };
 
+  // Render UI
   return (
     <div className="animate-fade-in-down backdrop-blur-xl fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
       <GlowyBackground />
@@ -173,14 +182,16 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         <div className="bg-white/10 text-white backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl max-w-md w-full p-6 text-center z-10">
           <h2 className="text-xl font-semibold mb-4">Disclaimer</h2>
           <p>
-            The document we generate is created by an AI system. It is <strong className="text-white">not</strong> legal advice and may require review by a qualified attorney.
+            The document is generated by AI. It is <strong className="text-white">not</strong> legal advice.
           </p>
-          <p className="mt-2">By continuing, you acknowledge that you have read and understood this disclaimer.</p>
-          <Button onClick={() => setShowDisclaimer(false)} className="mt-6">ok!</Button>
+          <p className="mt-2">By continuing, you agree.</p>
+          <Button onClick={() => setShowDisclaimer(false)} className="mt-6">
+            ok!
+          </Button>
         </div>
       ) : currentStep === "upload_proof" ? (
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 text-white">
-          <h2 className="text-xl font-semibold mb-4">Upload your proof</h2>
+          <h2 className="text-xl font-semibold mb-4">Upload Proof</h2>
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Upload files</label>
@@ -189,12 +200,14 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
               multiple
               accept="image/*,application/pdf"
               onChange={handleFileChange}
-              className="w-full bg-gray-800 text-white text-sm rounded px-3 py-2"
+              className="w-full bg-gray-800 text-white rounded px-3 py-2"
             />
-            <ul className="mt-2 text-xs max-h-28 overflow-auto text-gray-300 space-y-1">
+            <ul className="mt-2 text-xs text-gray-300 space-y-1">
               {proofFiles.map((f, i) => (
                 <li key={i}>
-                  <a href={f.url} target="_blank" rel="noopener noreferrer" className="underline">{f.name}</a>
+                  <a href={f.url} target="_blank" rel="noopener noreferrer" className="underline">
+                    {f.name}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -205,7 +218,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
             <select
               value={evidenceType}
               onChange={(e) => setEvidenceType(e.target.value)}
-              className="w-full bg-gray-800 text-white text-sm rounded px-3 py-2"
+              className="w-full bg-gray-800 text-white rounded px-3 py-2"
             >
               <option value="">Select evidence type</option>
               <option value="receipt">Receipt / Invoice</option>
@@ -221,53 +234,49 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
             <textarea
               value={proofDescription}
               onChange={(e) => setProofDescription(e.target.value)}
-              className="w-full bg-gray-800 text-white text-sm rounded px-3 py-2"
+              className="w-full bg-gray-800 text-white rounded px-3 py-2"
               rows={3}
               placeholder="Describe your evidence…"
             />
           </div>
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setCurrentStep("chat")}>Back to chat</Button>
+            <Button variant="outline" onClick={() => setCurrentStep("chat")}>
+              Back
+            </Button>
             <Button
               onClick={async () => {
-                const m: Message = { role: "user", content: "Proof upload complete. Please now finalize the dispute creation based on all provided details." };
+                const m: Message = {
+                  role: "user",
+                  content: "Proof upload complete. Please finalize dispute.",
+                };
                 const next = [...messages, m];
                 setMessages(next);
                 setCurrentStep("chat");
-                setLoading(true);
                 setInput("");
-                // send final message to GPT
-                const res2 = await fetch("/api/gptchat", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ messages: next }),
-                });
-                const dt2 = await res2.json();
-                // reuse handleSend logic for function_call or reply
-                if (dt2.function_call?.name === "create_dispute") {
-                  const { arguments: args2 } = dt2.function_call;
-                  setLoading(false);
-                  // trigger same logic as in handleSendMessage
-                  await handleSendMessage();
-                } else if (dt2.reply) {
-                  setMessages((prev) => [...prev, { role: "assistant", content: dt2.reply }]);
-                  setLoading(false);
-                }
+                await handleSendMessage();
               }}
-            >Continue</Button>
+            >
+              Continue
+            </Button>
           </div>
         </div>
       ) : (
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
-          <button onClick={onClose} className="absolute top-3 right-3 text-gray-200 hover:text-white transition">
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 text-gray-200 hover:text-white transition"
+          >
             <X className="w-5 h-5" />
           </button>
 
           <div className="max-h-96 overflow-auto space-y-2 mb-4 pr-2">
             {messages.map((m, i) => (
-              <div key={i} className={
-                `p-3 rounded-xl backdrop-blur-sm ${m.role === "user" ? "bg-white/20 ml-auto" : "bg-black/30 mr-auto"}"
+              <div
+                key={i}
+                className={`p-3 rounded-xl backdrop-blur-sm ${
+                  m.role === "user" ? "bg-white/20 ml-auto" : "bg-black/30 mr-auto"
+                }`}
               >
                 {m.content}
               </div>
@@ -276,11 +285,11 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
           <div className="flex gap-2">
             <Input
-              className="backdrop-blur-md bg-white/20 placeholder-gray-300 text-white"
+              className="backdrop-blur-md bg-white/20 text-white"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-              placeholder="Type your message..."
+              placeholder="Type message…"
               disabled={loading}
             />
             <Button onClick={handleSendMessage} disabled={loading}>
