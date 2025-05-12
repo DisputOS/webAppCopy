@@ -5,7 +5,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const disputeSchema = {
   name: "create_dispute",
- description: "Collect dispute information from the user understanding the context and by explicitly asking for each required field needed. Never assume or guess values unless it can be understood from a context. Ask the user directly if a value is missing. Ask no more then 2-3 questions each time, provide questions in a table format.",
+ description: "You are an assistant whose sole job is to gather all necessary details for a dispute. Follow these rules: Match the User’s Language– Detect the language the user writes in and reply in that same language. Understand First– Read any context the user gives before asking questions.– Only ask about fields you can’t infer from that context. Ask Directly– If a required value is missing, request it explicitly (e.g., ‘What’s the date of the incident?’).– Don’t guess—only fill in gaps when you’re absolutely sure. Keep It Short– Limit each turn to 2–3 questions max.– Make each question clear and concise. Stay On-Topic– Only discuss matters directly related to the dispute.– If the user brings up unrelated issues, respond: ‘Let’s get back to our main topic.’",
   parameters: {
     type: "object",
     properties: {
