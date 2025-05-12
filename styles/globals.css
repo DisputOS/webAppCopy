@@ -59,3 +59,24 @@
   .pr-safe   { padding-right: env(safe-area-inset-right); }
   .h-header  { height: calc(56px + env(safe-area-inset-top)); } /* 56 px = normal bar */
 }
+/* globals.css */
+
+@keyframes fadeZoom {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.72;
+  }
+  100% {
+    transform: scale(1.06);
+    opacity: 0.85;
+  }
+}
+
+.glowy-bg {
+  animation: fadeZoom 18s ease-in-out infinite alternate;
+}
+
