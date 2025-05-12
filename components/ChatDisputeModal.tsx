@@ -23,29 +23,34 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   const session = useSession();
   const router = useRouter();
 
-  const [messages, setMessages] = useState<Message[]>([{
-    role: "system",
-    content: "Your goal is to collect all required dispute fields. Ask for each one explicitly. Do not guess values. Ask for proof upload and mark 'proof_uploaded: true' only after user confirms completion."
-  }, {
-    role: "assistant",
-    content: "I'm here to help you create your dispute. Could you please describe your issue briefly?"
-  }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "system",
+      content:
+        "I'm here to help you create your dispute. Could you please describe your issue briefly?",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [currentStep, setCurrentStep] = useState<"chat" | "upload_proof">("chat");
 
+  // proof state
   const [proofFiles, setProofFiles] = useState<UploadedFile[]>([]);
   const [evidenceType, setEvidenceType] = useState("");
   const [proofDescription, setProofDescription] = useState("");
 
   const uploadFileToSupabase = async (file: File): Promise<UploadedFile | null> => {
     const path = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("proofbundle").upload(path, file);
+    const { error: uploadError } = await supabase.storage
+      .from("proofbundle")
+      .upload(path, file);
+
     if (uploadError) {
       console.error("Upload error:", uploadError.message);
       return null;
     }
+
     const { data } = supabase.storage.from("proofbundle").getPublicUrl(path);
     return { name: file.name, url: data.publicUrl };
   };
@@ -53,117 +58,119 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const uploaded: UploadedFile[] = [];
+
     for (const file of Array.from(e.target.files)) {
       const uploadedFile = await uploadFileToSupabase(file);
       if (uploadedFile) uploaded.push(uploadedFile);
     }
+
     setProofFiles((prev) => [...prev, ...uploaded]);
   };
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+const handleSendMessage = async () => {
+  if (!input.trim()) return;
 
-    const userMessage: Message = { role: "user", content: input };
-    const nextMessages = [...messages, userMessage];
-    setMessages(nextMessages);
-    setInput("");
-    setLoading(true);
+  const userMessage: Message = { role: "user", content: input };
+  setMessages((prev) => [...prev, userMessage]);
+  setInput("");
+  setLoading(true);
 
-    const res = await fetch("/api/gptchat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: nextMessages }),
-    });
+  const res = await fetch("/api/gptchat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [...messages, userMessage] }),
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (data.function_call && typeof data.function_call.name === "string") {
-      const { name, arguments: args } = data.function_call;
+  // ⬇️ Обрабатываем GPT function_call (если есть)
+  if (data.function_call && typeof data.function_call.name === "string") {
+    const { name, arguments: args } = data.function_call;
 
-      if (name === "user_upload_proof") {
+    if (name === "user_upload_proof") {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "📎 Please upload your proof files now." },
+      ]);
+      setCurrentStep("upload_proof");
+      setLoading(false);
+      return;
+    }
+
+    if (name === "create_dispute") {
+      let fields = {};
+      try {
+        fields = JSON.parse(args || "{}");
+      } catch (err) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "📎 Please upload your proof files now." },
+          { role: "assistant", content: "❌ Error parsing data from assistant." },
         ]);
-        setCurrentStep("upload_proof");
         setLoading(false);
         return;
       }
 
-      if (name === "create_dispute") {
-        let fields = {};
-        try {
-          fields = JSON.parse(args || "{}");
-        } catch (err) {
-          setMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: "❌ Error parsing data from assistant." },
-          ]);
-          setLoading(false);
-          return;
-        }
-
-        if (!session?.user) {
-          setMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: "❌ You must be logged in to submit a dispute." },
-          ]);
-          setLoading(false);
-          return;
-        }
-
-        const { data: dispute, error } = await supabase
-          .from("disputes")
-          .insert({
-            user_id: session.user.id,
-            ...fields,
-            user_confirmed_input: true,
-            status: "draft",
-            archived: false,
-          })
-          .select("id")
-          .single();
-
-        if (error || !dispute?.id) {
-          setMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: `❌ Error: ${error?.message || "Unknown error"}` },
-          ]);
-          setLoading(false);
-          return;
-        }
-
-        if (proofFiles.length > 0) {
-          await supabase.from("proof_bundle").insert({
-            user_id: session.user.id,
-            dispute_id: dispute.id,
-            receipt_url: proofFiles[0]?.url ?? null,
-            screenshot_urls: proofFiles.slice(1).map((f) => f.url),
-            evidence_source: "user_upload",
-            dispute_type: evidenceType,
-            user_description: proofDescription,
-            policy_snapshot: null,
-          });
-        }
-
+      if (!session?.user) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "✅ Your dispute was successfully created!" },
+          { role: "assistant", content: "❌ You must be logged in to submit a dispute." },
         ]);
-        setTimeout(() => router.push(`/cases/${dispute.id}`), 1500);
         setLoading(false);
         return;
       }
+
+      const { data: dispute, error } = await supabase
+        .from("disputes")
+        .insert({
+          user_id: session.user.id,
+          ...fields,
+          user_confirmed_input: true,
+          status: "draft",
+          archived: false,
+        })
+        .select("id")
+        .single();
+
+      if (error || !dispute?.id) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: `❌ Error: ${error?.message || "Unknown error"}` },
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // ⬇️ Добавляем доказательства, если есть
+      if (proofFiles.length > 0) {
+        await supabase.from("proof_bundle").insert({
+          user_id: session.user.id,
+          dispute_id: dispute.id,
+          receipt_url: proofFiles[0]?.url ?? null,
+          screenshot_urls: proofFiles.slice(1).map((f) => f.url),
+          evidence_source: "user_upload",
+          dispute_type: evidenceType,
+          user_description: proofDescription,
+          policy_snapshot: null,
+        });
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "✅ Your dispute was successfully created!" },
+      ]);
+      setTimeout(() => router.push(`/cases/${dispute.id}`), 1500);
+      setLoading(false);
+      return;
     }
+  }
 
-    if (data.reply) {
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
-    }
+  // ⬇️ Fallback (если нет function_call) — обычный текстовый ответ
+  if (data.reply) {
+    setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+  }
 
-    setLoading(false);
-  };
-}
-
+  setLoading(false);
+};
 
 
 
