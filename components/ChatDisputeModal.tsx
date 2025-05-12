@@ -67,7 +67,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     setProofFiles((prev) => [...prev, ...uploaded]);
   };
 
- const handleSendMessage = async () => {
+const handleSendMessage = async () => {
   if (!input.trim()) return;
 
   const userMessage: Message = { role: "user", content: input };
@@ -83,15 +83,9 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
   const data = await res.json();
 
- if (name === "user_upload_proof") {
-  return NextResponse.json({
-    function_call: {
-      name: "user_upload_proof",
-      arguments: "{}"
-    }
-  });
-}
-
+  // ⬇️ Обрабатываем GPT function_call (если есть)
+  if (data.function_call && typeof data.function_call.name === "string") {
+    const { name, arguments: args } = data.function_call;
 
     if (name === "user_upload_proof") {
       setMessages((prev) => [
@@ -104,7 +98,17 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     }
 
     if (name === "create_dispute") {
-      const fields = JSON.parse(args);
+      let fields = {};
+      try {
+        fields = JSON.parse(args || "{}");
+      } catch (err) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "❌ Error parsing data from assistant." },
+        ]);
+        setLoading(false);
+        return;
+      }
 
       if (!session?.user) {
         setMessages((prev) => [
@@ -127,16 +131,16 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         .select("id")
         .single();
 
-      if (error) {
+      if (error || !dispute?.id) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: `❌ Error: ${error.message}` },
+          { role: "assistant", content: `❌ Error: ${error?.message || "Unknown error"}` },
         ]);
         setLoading(false);
         return;
       }
 
-      // upload proof_bundle if any
+      // ⬇️ Добавляем доказательства, если есть
       if (proofFiles.length > 0) {
         await supabase.from("proof_bundle").insert({
           user_id: session.user.id,
@@ -160,13 +164,14 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     }
   }
 
-  // fallback if no function_call — обычный ответ
+  // ⬇️ Fallback (если нет function_call) — обычный текстовый ответ
   if (data.reply) {
     setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
   }
 
   setLoading(false);
 };
+
 
 
   return (
