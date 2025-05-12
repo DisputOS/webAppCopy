@@ -32,32 +32,30 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     setLoading(true);
 
     const res = await fetch("/api/gptchat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ messages: [...messages, userMessage] }),
-});
-
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: [...messages, userMessage] }),
+    });
 
     const data = await res.json();
 
-   if (data.fields) {
-  if (!session?.user) {
-    setMessages(prev => [
-      ...prev, 
-      { role: 'assistant', content: '❌ You must be logged in to submit a dispute.' }
-    ]);
-    setLoading(false);
-    return;
-  }
+    if (data.fields) {
+      if (!session?.user) {
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: '❌ You must be logged in to submit a dispute.' }
+        ]);
+        setLoading(false);
+        return;
+      }
 
-  const { error } = await supabase.from('disputes').insert({
-    user_id: session.user.id,
-    ...data.fields,
-    user_confirmed_input: true,
-    status: 'draft',
-    archived: false,
-  });
-
+      const { error } = await supabase.from('disputes').insert({
+        user_id: session.user.id,
+        ...data.fields,
+        user_confirmed_input: true,
+        status: 'draft',
+        archived: false,
+      });
 
       if (!error) {
         setMessages(prev => [...prev, { role: 'assistant', content: "✅ Your dispute was successfully created!" }]);
@@ -73,15 +71,27 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="bg-gray-900 p-6 rounded-lg max-w-xl w-full relative">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-white">
-          <X />
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
+      {/* SVG Background */}
+      <svg style={{ display: 'none' }}>
+        <filter id="wavy">
+          <feTurbulence type="turbulence" baseFrequency="0.005 0.01" numOctaves="2" seed="4" result="turb">
+            <animate attributeName="baseFrequency" values="0.005 0.01; 0.007 0.012; 0.005 0.01" dur="12s" repeatCount="indefinite" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="turb" scale="25" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
+
+      <div className="animated-bg"></div>
+
+      <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-200 hover:text-white transition">
+          <X className="w-5 h-5" />
         </button>
 
-        <div className="max-h-96 overflow-auto space-y-2 mb-4">
+        <div className="max-h-96 overflow-auto space-y-2 mb-4 pr-2">
           {messages.map((m, i) => (
-            <div key={i} className={`text-sm p-2 rounded ${m.role === 'user' ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-700 text-white'}`}>
+            <div key={i} className={`p-3 rounded-xl backdrop-blur-sm ${m.role === 'user' ? 'bg-white/20 ml-auto' : 'bg-black/30 mr-auto'}`}>
               {m.content}
             </div>
           ))}
@@ -89,6 +99,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
         <div className="flex gap-2">
           <Input
+            className="backdrop-blur-md bg-white/20 placeholder-gray-300 text-white"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -100,6 +111,36 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
       </div>
+
+      <style jsx>{`
+        .animated-bg {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: url('/public/icons/2.png') no-repeat center/cover;
+          z-index: -1;
+          opacity: 0.8;
+          filter: url(#wavy) blur(22px) brightness(1.2);
+          animation: softZoom 16s ease-in-out infinite alternate;
+        }
+
+        @keyframes softZoom {
+          0% {
+            transform: scale(1) translateY(5px);
+            opacity: 0.75;
+          }
+          50% {
+            transform: scale(1.015) translateY(0);
+            opacity: 0.85;
+          }
+          100% {
+            transform: scale(1.03) translateY(-5px);
+            opacity: 0.95;
+          }
+        }
+      `}</style>
     </div>
   );
 }
