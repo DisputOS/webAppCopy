@@ -4,9 +4,10 @@
 import '@/styles/globals.css';
 import { ReactNode } from 'react';
 
-import Providers     from './providers';
-import GlowingBorder from '@/components/GlowingBorder';
-import NoZoom        from '@/components/NoZoom';   // pinch-/double-tap blocker
+import Providers       from './providers';
+import GlowingBorder   from '@/components/GlowingBorder';
+import NoZoom          from '@/components/NoZoom';         // pinch-/double-tap blocker
+import GlowyBackground from '@/components/GlowyBackground'; // animated blur/zoom bg
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -16,7 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         {/* Manifest & icons */}
         <link rel="manifest"            href="/manifest.json" />
-        <link rel="icon" type="image/png" href="/icons/icon-57x57.png" />
+        <link rel="icon"     type="image/png" href="/icons/icon-57x57.png" />
         <link rel="apple-touch-icon" sizes="57x57"  href="/icons/icon-57x57.png"  />
         <link rel="apple-touch-icon" sizes="72x72"  href="/icons/icon-72x72.png"  />
         <link rel="apple-touch-icon" sizes="76x76"  href="/icons/icon-76x76.png"  />
@@ -38,11 +39,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <style>{`html,body{background:#1a202c;}`}</style>
       </head>
 
-      {/* keep body dark; scrolling sections supply their own bg */}
-      <body className="min-h-screen relative text-white flex flex-col bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white">
-        <NoZoom />          {/* disables user zoom on iOS/Android */}
-        <GlowingBorder />   {/* decorative blobs */}
-        <Providers>{children}</Providers>
+      <body className="min-h-screen relative flex flex-col bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white">
+        <NoZoom />             {/* disables pinch-/double-tap zoom */}
+        <GlowingBorder />      {/* decorative blobs */}
+        <GlowyBackground />    {/* animated glowy blur/zoom background */}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
