@@ -247,13 +247,17 @@ const handleSendMessage = async () => {
             <Button variant="outline" onClick={() => setCurrentStep("chat")}>
               Back to chat
             </Button>
-            <Button onClick={() => {
-              setMessages((prev) => [
-                ...prev,
-                { role: "user", content: "I've uploaded my proof files and filled details." }
-              ]);
-              setCurrentStep("chat");
-            }}>
+            <Button onClick={async () => {
+  const m = {
+    role: "user",
+    content: "I've uploaded my proof files and filled out the evidence type and description.",
+  };
+  setMessages((prev) => [...prev, m]);
+  setCurrentStep("chat");
+  setInput("");
+  await handleSendMessage(); // 💡 вызовет GPT и продолжит
+}}
+>
               Continue
             </Button>
           </div>
