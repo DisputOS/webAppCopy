@@ -84,7 +84,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="backdrop-blur-xl fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
+    <div className="animate-fade-in-down backdrop-blur-xl fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
       <GlowyBackground />
 
       {showDisclaimer ? (
