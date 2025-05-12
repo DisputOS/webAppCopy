@@ -40,14 +40,24 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
     const data = await res.json();
 
-    if (data.fields) {
-      const { error } = await supabase.from('disputes').insert({
-        user_id: session.user.id,
-        ...data.fields,
-        user_confirmed_input: true,
-        status: 'draft',
-        archived: false,
-      });
+   if (data.fields) {
+  if (!session?.user) {
+    setMessages(prev => [
+      ...prev, 
+      { role: 'assistant', content: '❌ You must be logged in to submit a dispute.' }
+    ]);
+    setLoading(false);
+    return;
+  }
+
+  const { error } = await supabase.from('disputes').insert({
+    user_id: session.user.id,
+    ...data.fields,
+    user_confirmed_input: true,
+    status: 'draft',
+    archived: false,
+  });
+
 
       if (!error) {
         setMessages(prev => [...prev, { role: 'assistant', content: "✅ Your dispute was successfully created!" }]);
