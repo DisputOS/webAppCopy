@@ -20,7 +20,7 @@ const disputeSchema = {
       user_contact_description: { type: "string" },
       training_permission: { type: "string", enum: ["yes", "no"] },
     },
-    required: ["platform_name", "purchase_amount", "currency", "purchase_date", "problem_type", "description"]
+    required: ["platform_name", "purchase_amount", "currency", "purchase_date", "problem_type", "description", "training_permission"]
   }
 };
 
