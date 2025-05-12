@@ -63,9 +63,17 @@ export async function POST(req: NextRequest) {
   const response = completion.choices[0].message;
 
   if (response.function_call) {
-    const fields = JSON.parse(response.function_call.arguments);
-    return NextResponse.json({ fields });
-  } else {
-    return NextResponse.json({ reply: response.content });
+    const { name, arguments: args } = response.function_call;
+
+    if (name === "create_dispute") {
+      const fields = JSON.parse(args);
+      return NextResponse.json({ fields });
+    }
+
+    if (name === "user_upload_proof") {
+      return NextResponse.json({ step: "user_upload_proof" });
+    }
   }
+
+  return NextResponse.json({ reply: response.content });
 }
