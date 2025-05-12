@@ -16,6 +16,9 @@ const disputeSchema = {
       problem_type: { type: "string", description: "Type of problem encountered" },
       description: { type: "string", description: "Description of the dispute" },
       service_usage: { type: "string", enum: ["yes", "no"] },
+      evidence_type: { type: "string" },
+proof_description: { type: "string" },
+proof_uploaded: { type: "boolean" },
       user_contact_platform: {
         type: "string",
         enum: ["yes", "no"],
@@ -37,6 +40,7 @@ const disputeSchema = {
       "problem_type",
       "description",
       "training_permission",
+      "proof_uploaded"
     ],
   },
 };
