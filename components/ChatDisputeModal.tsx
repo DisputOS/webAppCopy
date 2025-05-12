@@ -83,9 +83,15 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
   const data = await res.json();
 
-  // ⬇️ обрабатываем GPT function_call
-  if (data.function_call) {
-    const { name, arguments: args } = data.function_call;
+ if (name === "user_upload_proof") {
+  return NextResponse.json({
+    function_call: {
+      name: "user_upload_proof",
+      arguments: "{}"
+    }
+  });
+}
+
 
     if (name === "user_upload_proof") {
       setMessages((prev) => [
