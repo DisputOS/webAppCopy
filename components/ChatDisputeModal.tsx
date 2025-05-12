@@ -119,7 +119,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
           left: 0;
           width: 100vw;
           height: 100vh;
-          background: url('/public/icons/2.png') no-repeat center/cover;
+          background: url('public/icons/2.png') no-repeat center/cover;
           z-index: -1;
           opacity: 0.8;
           filter: url(#wavy) blur(22px) brightness(1.2);
