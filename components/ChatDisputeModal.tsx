@@ -246,6 +246,7 @@ const handleSendMessage = async () => {
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setCurrentStep("chat")}>
               Back to chat
+               </Button>
           <Button
   onClick={async () => {
     const m: Message = {
