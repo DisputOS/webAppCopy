@@ -28,11 +28,20 @@ export async function POST(req: NextRequest) {
   const { messages } = await req.json();
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4-turbo",
-    messages,
-    functions: [disputeSchema],
-    function_call: "auto"
-  });
+  model: "gpt-4-turbo",
+  messages,
+  functions: [disputeSchema, uploadProofFunction], 
+  function_call: "auto"
+});
+
+  const uploadProofFunction = {
+    name: "user_upload_proof",
+    description: "Ask the user to upload proof files and specify the evidence type",
+    parameters: {
+      type: "object",
+      properties: {},
+    },
+  };
 
   const response = completion.choices[0].message;
 
