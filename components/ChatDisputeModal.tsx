@@ -67,29 +67,39 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     setProofFiles((prev) => [...prev, ...uploaded]);
   };
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+ const handleSendMessage = async () => {
+  if (!input.trim()) return;
 
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setLoading(true);
+  const userMessage: Message = { role: "user", content: input };
+  setMessages((prev) => [...prev, userMessage]);
+  setInput("");
+  setLoading(true);
 
-    const res = await fetch("/api/gptchat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: [...messages, userMessage] }),
-    });
+  const res = await fetch("/api/gptchat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [...messages, userMessage] }),
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (data.function_call?.name === "user_upload_proof") {
+  // ⬇️ обрабатываем GPT function_call
+  if (data.function_call) {
+    const { name, arguments: args } = data.function_call;
+
+    if (name === "user_upload_proof") {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "📎 Please upload your proof files now." },
+      ]);
       setCurrentStep("upload_proof");
       setLoading(false);
       return;
     }
 
-    if (data.fields) {
+    if (name === "create_dispute") {
+      const fields = JSON.parse(args);
+
       if (!session?.user) {
         setMessages((prev) => [
           ...prev,
@@ -103,7 +113,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         .from("disputes")
         .insert({
           user_id: session.user.id,
-          ...data.fields,
+          ...fields,
           user_confirmed_input: true,
           status: "draft",
           archived: false,
@@ -139,12 +149,19 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         { role: "assistant", content: "✅ Your dispute was successfully created!" },
       ]);
       setTimeout(() => router.push(`/cases/${dispute.id}`), 1500);
-    } else {
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      setLoading(false);
+      return;
     }
+  }
 
-    setLoading(false);
-  };
+  // fallback if no function_call — обычный ответ
+  if (data.reply) {
+    setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+  }
+
+  setLoading(false);
+};
+
 
   return (
     <div className="animate-fade-in-down backdrop-blur-xl fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
