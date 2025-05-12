@@ -63,16 +63,8 @@ export async function POST(req: NextRequest) {
   const response = completion.choices[0].message;
 
   if (response.function_call) {
-    const { name, arguments: args } = response.function_call;
-
-    if (name === "create_dispute") {
-      const fields = JSON.parse(args);
-      return NextResponse.json({ fields });
-    }
-
-    if (name === "user_upload_proof") {
-      return NextResponse.json({ step: "user_upload_proof" });
-    }
+    // просто возвращаем то, что есть → клиент сам решит, что делать
+    return NextResponse.json({ function_call: response.function_call });
   }
 
   return NextResponse.json({ reply: response.content });
