@@ -246,20 +246,21 @@ const handleSendMessage = async () => {
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setCurrentStep("chat")}>
               Back to chat
-            </Button>
-            <Button onClick={async () => {
-  const m = {
-    role: "user",
-    content: "I've uploaded my proof files and filled out the evidence type and description.",
-  };
-  setMessages((prev) => [...prev, m]);
-  setCurrentStep("chat");
-  setInput("");
-  await handleSendMessage(); // 💡 вызовет GPT и продолжит
-}}
+          <Button
+  onClick={async () => {
+    const m: Message = {
+      role: "user",
+      content: "I've uploaded my proof files and filled out the evidence type and description.",
+    };
+    setMessages((prev) => [...prev, m]);
+    setCurrentStep("chat");
+    setInput("");
+    await handleSendMessage(); // 💡 вызовет GPT и продолжит
+  }}
 >
-              Continue
-            </Button>
+  Continue
+</Button>
+
           </div>
         </div>
       ) : (
