@@ -241,20 +241,47 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setCurrentStep("chat")}>
-              Back
-            </Button>
-            <Button
+          <Button
               onClick={async () => {
                 const m: Message = {
                   role: "user",
                   content: "Proof upload complete. Please finalize dispute.",
                 };
-                const next = [...messages, m];
-                setMessages(next);
+                const nextMessages = [...messages, m];
+                setMessages(nextMessages);
                 setCurrentStep("chat");
                 setInput("");
-                await handleSendMessage();
+                setLoading(true);
+                // Directly call GPT with updated messages
+                const res2 = await fetch("/api/gptchat", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ messages: nextMessages }),
+                });
+                const data2 = await res2.json();
+                // Handle reply or function_call
+                if (data2.function_call?.name === "create_dispute") {
+                  // parse and insert dispute without waiting for handleSendMessage
+                  const args = data2.function_call.arguments || "{}";
+                  let fields = {};
+                  try { fields = JSON.parse(args); } catch {}
+                  if (session?.user) {
+                    const { data: dispute, error } = await supabase
+                      .from("disputes")
+                      .insert({ user_id: session.user.id, ...fields, user_confirmed_input: true, status: "draft", archived: false })
+                      .select("id").single();
+                    if (dispute?.id) {
+                      if (proofFiles.length) {
+                        await supabase.from("proof_bundle").insert({ user_id: session.user.id, dispute_id: dispute.id, receipt_url: proofFiles[0].url, screenshot_urls: proofFiles.slice(1).map(f=>f.url), evidence_source: "user_upload", dispute_type: evidenceType, user_description: proofDescription, policy_snapshot: null });
+                      }
+                      setMessages(prev=>[...prev, { role: "assistant", content: "✅ Dispute created!" }]);
+                      setTimeout(()=>router.push(`/cases/${dispute.id}`),1500);
+                    }
+                  }
+                } else if (data2.reply) {
+                  setMessages(prev => [...prev, { role: "assistant", content: data2.reply }]);
+                }
+                setLoading(false);
               }}
             >
               Continue
