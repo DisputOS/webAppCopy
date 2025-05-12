@@ -17,10 +17,10 @@ const disputeSchema = {
       description: { type: "string", description: "Description of the dispute" },
       service_usage: { type: "string", enum: ["yes", "no"] },
       user_contact_platform: { type: "string", enum: ["yes", "no"] },
-      user_contact_description: { type: "string" },
+      user_contact_desc: { type: "string" },
       training_permission: { type: "string", enum: ["yes", "no"] },
     },
-    required: ["platform_name", "purchase_amount", "currency", "purchase_date", "problem_type", "description", "training_permission"]
+    required: ["platform_name", "purchase_amount", "currency", "user_contact_platform","purchase_date", "problem_type", "description", "training_permission"]
   }
 };
 
