@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import GlowyBackground from "@/components/GlowyBackground";   // ⬅️ NEW
+import GlowyBackground from "@/components/GlowyBackground";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -25,10 +25,9 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         "I'm here to help you create your dispute. Could you please describe your issue briefly?",
     },
   ]);
-  const [input, setInput]   = useState("");
+  const [input, setInput]     = useState("");
   const [loading, setLoading] = useState(false);
 
-  /* ─────────────────────────── send message ────────────────────────── */
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
@@ -82,12 +81,12 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     setLoading(false);
   };
 
-  /* ─────────────────────────── UI ──────────────────────────────────── */
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
-      {/* Re-usable animated background */}
+      {/* full-screen animated background */}
       <GlowyBackground />
 
+      {/* chat container */}
       <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
         <button
           onClick={onClose}
