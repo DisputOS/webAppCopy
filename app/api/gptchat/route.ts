@@ -16,7 +16,7 @@ const disputeSchema = {
       problem_type: { type: "string", description: "Type of problem encountered" },
       description: { type: "string", description: "Description of the dispute" },
       service_usage: { type: "string", enum: ["yes", "no"] },
-      user_contact_platform: { type: "string", enum: ["yes", "no"] },
+      user_contact_platform: { type: "string", enum: ["yes", "no"], description: "if selected yes,'user_contact_desc' should be 100% in the database, if selected no, you should not ask it " },
       user_contact_desc: { type: "string" },
       training_permission: { type: "string", enum: ["yes", "no"] },
     },
