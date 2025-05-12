@@ -14,8 +14,8 @@ interface Message {
 
 export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
-  const session = useSession();
-  const router = useRouter();
+  const session  = useSession();
+  const router   = useRouter();
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -47,10 +47,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
       if (!session?.user) {
         setMessages((prev) => [
           ...prev,
-          {
-            role: "assistant",
-            content: "❌ You must be logged in to submit a dispute.",
-          },
+          { role: "assistant", content: "❌ You must be logged in to submit a dispute." },
         ]);
         setLoading(false);
         return;
@@ -67,10 +64,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
       if (!error) {
         setMessages((prev) => [
           ...prev,
-          {
-            role: "assistant",
-            content: "✅ Your dispute was successfully created!",
-          },
+          { role: "assistant", content: "✅ Your dispute was successfully created!" },
         ]);
         router.push("/cases");
       } else {
@@ -80,10 +74,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         ]);
       }
     } else {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.reply },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     }
 
     setLoading(false);
@@ -91,7 +82,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
-      {/* SVG Background (keep rendered so animation runs) */}
+      {/* 🟢 keep SVG rendered so SMIL animation runs */}
       <svg
         width="0"
         height="0"
@@ -123,7 +114,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         </filter>
       </svg>
 
-      <div className="animated-bg"></div>
+      <div className="animated-bg" />
 
       <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
         <button
@@ -168,12 +159,12 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
           left: 0;
           width: 100vw;
           height: 100vh;
-          background: url("/icons/GPT.png") no-repeat center / cover;
+          background: url("/icons/GPT.png") no-repeat center/cover;
           z-index: -1;
           opacity: 0.8;
           filter: url(#wavy) blur(22px) brightness(1.2);
           animation: softZoom 16s ease-in-out infinite alternate;
-          will-change: transform, opacity;
+          will-change: transform, opacity; /* 🟢 */
         }
 
         @keyframes softZoom {
