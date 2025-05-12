@@ -5,14 +5,14 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const disputeSchema = {
   name: "create_dispute",
- description: "Collect dispute information from the user by explicitly asking for each required field. Never assume or guess values. Ask the user directly if a value is missing, you can also get from kontext, but you should always ask date!.",
+ description: "Collect dispute information from the user understanding the context and by explicitly asking for each required field needed. Never assume or guess values unless it can be understood from a context. Ask the user directly if a value is missing.",
   parameters: {
     type: "object",
     properties: {
       platform_name: { type: "string", description: "Platform name (e.g., Amazon)" },
       purchase_amount: { type: "number", description: "Amount spent" },
       currency: { type: "string", description: "Currency used (e.g., USD, EUR)" },
-      purchase_date: { type: "string", description: "Date of purchase (YYYY-MM-DD)" },
+      purchase_date: { type: "string", description: "Date of purchase (YYYY-MM-DD)" description: "REMEMBER, today is 12 may 2025, ALWAYS ask for a date!" },
       problem_type: { type: "string", description: "Type of problem encountered" },
       description: { type: "string", description: "Description of the dispute" },
       service_usage: { type: "string", enum: ["yes", "no"] },
