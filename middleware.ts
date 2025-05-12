@@ -9,11 +9,11 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
   const pathname = req.nextUrl.pathname;
 
-  // ✅ 1. Allow only /public/* and root / without auth
+  //  1. Allow only /public/* and root / without auth
   const isPublicPath =
     pathname === '/' || pathname.startsWith('/public');
 
-  // ✅ 2. Block access to everything else if not authenticated
+  //  2. Block access to everything else if not authenticated
   if (!isPublicPath && !session) {
     return NextResponse.redirect(new URL('/public/login', req.url));
   }
@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-// ✅ 3. Apply middleware to all routes except static files
+//  3. Apply middleware to all routes except static files
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.json|icons/).*)'],
 };
