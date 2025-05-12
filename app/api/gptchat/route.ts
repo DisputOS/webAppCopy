@@ -12,7 +12,7 @@ const disputeSchema = {
       platform_name: { type: "string", description: "Platform name (e.g., Amazon)" },
       purchase_amount: { type: "number", description: "Amount spent" },
       currency: { type: "string", description: "Currency used (e.g., USD, EUR)" },
-      purchase_date: { type: "string", description: "Date of purchase (YYYY-MM-DD)", description: "REMEMBER, today is 12 may 2025, ALWAYS ask for a date!" },
+      purchase_date: { type: "string", description: "Date of purchase (YYYY-MM-DD), REMEMBER, today is 12 may 2025, ALWAYS ask for a date!" },
       problem_type: { type: "string", description: "Type of problem encountered" },
       description: { type: "string", description: "Description of the dispute" },
       service_usage: { type: "string", enum: ["yes", "no"] },
