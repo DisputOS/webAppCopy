@@ -13,6 +13,11 @@ interface Message {
   content: string;
 }
 
+interface UploadedFile {
+  name: string;
+  url: string;
+}
+
 export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
   const session = useSession();
@@ -25,10 +30,42 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         "I'm here to help you create your dispute. Could you please describe your issue briefly?",
     },
   ]);
-
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [currentStep, setCurrentStep] = useState<"chat" | "upload_proof">("chat");
+
+  // proof state
+  const [proofFiles, setProofFiles] = useState<UploadedFile[]>([]);
+  const [evidenceType, setEvidenceType] = useState("");
+  const [proofDescription, setProofDescription] = useState("");
+
+  const uploadFileToSupabase = async (file: File): Promise<UploadedFile | null> => {
+    const path = `${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from("proofbundle")
+      .upload(path, file);
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError.message);
+      return null;
+    }
+
+    const { data } = supabase.storage.from("proofbundle").getPublicUrl(path);
+    return { name: file.name, url: data.publicUrl };
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const uploaded: UploadedFile[] = [];
+
+    for (const file of Array.from(e.target.files)) {
+      const uploadedFile = await uploadFileToSupabase(file);
+      if (uploadedFile) uploaded.push(uploadedFile);
+    }
+
+    setProofFiles((prev) => [...prev, ...uploaded]);
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -46,6 +83,12 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
     const data = await res.json();
 
+    if (data.function_call?.name === "user_upload_proof") {
+      setCurrentStep("upload_proof");
+      setLoading(false);
+      return;
+    }
+
     if (data.fields) {
       if (!session?.user) {
         setMessages((prev) => [
@@ -56,26 +99,46 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         return;
       }
 
-      const { error } = await supabase.from("disputes").insert({
-        user_id: session.user.id,
-        ...data.fields,
-        user_confirmed_input: true,
-        status: "draft",
-        archived: false,
-      });
+      const { data: dispute, error } = await supabase
+        .from("disputes")
+        .insert({
+          user_id: session.user.id,
+          ...data.fields,
+          user_confirmed_input: true,
+          status: "draft",
+          archived: false,
+        })
+        .select("id")
+        .single();
 
-      if (!error) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: "✅ Your dispute was successfully created!" },
-        ]);
-        setTimeout(() => router.push("/cases"), 1500); // ⟵ редирект после задержки
-      } else {
+      if (error) {
         setMessages((prev) => [
           ...prev,
           { role: "assistant", content: `❌ Error: ${error.message}` },
         ]);
+        setLoading(false);
+        return;
       }
+
+      // upload proof_bundle if any
+      if (proofFiles.length > 0) {
+        await supabase.from("proof_bundle").insert({
+          user_id: session.user.id,
+          dispute_id: dispute.id,
+          receipt_url: proofFiles[0]?.url ?? null,
+          screenshot_urls: proofFiles.slice(1).map((f) => f.url),
+          evidence_source: "user_upload",
+          dispute_type: evidenceType,
+          user_description: proofDescription,
+          policy_snapshot: null,
+        });
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "✅ Your dispute was successfully created!" },
+      ]);
+      setTimeout(() => router.push(`/cases/${dispute.id}`), 1500);
     } else {
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     }
@@ -94,10 +157,78 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
             The document we generate is created by an AI system. It is{" "}
             <strong className="text-white">not</strong> legal advice and may require review by a qualified attorney.
           </p>
-          <p className="mt-2">By continuing, you acknowledge that you have read and understood this disclaimer.</p>
+          <p className="mt-2">
+            By continuing, you acknowledge that you have read and understood this disclaimer.
+          </p>
           <Button onClick={() => setShowDisclaimer(false)} className="mt-6">
             ok!
           </Button>
+        </div>
+      ) : currentStep === "upload_proof" ? (
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 text-white">
+          <h2 className="text-xl font-semibold mb-4">Upload your proof</h2>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Upload files</label>
+            <input
+              type="file"
+              multiple
+              accept="image/*,application/pdf"
+              onChange={handleFileChange}
+              className="w-full bg-gray-800 text-white text-sm rounded px-3 py-2"
+            />
+            <ul className="mt-2 text-xs max-h-28 overflow-auto text-gray-300 space-y-1">
+              {proofFiles.map((f, i) => (
+                <li key={i}>
+                  <a href={f.url} target="_blank" rel="noopener noreferrer" className="underline">
+                    {f.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Evidence type</label>
+            <select
+              value={evidenceType}
+              onChange={(e) => setEvidenceType(e.target.value)}
+              className="w-full bg-gray-800 text-white text-sm rounded px-3 py-2"
+            >
+              <option value="">Select evidence type</option>
+              <option value="receipt">Receipt / Invoice</option>
+              <option value="bank_statement">Bank statement</option>
+              <option value="chat_screenshot">Chat screenshot</option>
+              <option value="tracking_doc">Tracking / shipping doc</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-1">Description (optional)</label>
+            <textarea
+              value={proofDescription}
+              onChange={(e) => setProofDescription(e.target.value)}
+              className="w-full bg-gray-800 text-white text-sm rounded px-3 py-2"
+              rows={3}
+              placeholder="Describe your evidence…"
+            />
+          </div>
+
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={() => setCurrentStep("chat")}>
+              Back to chat
+            </Button>
+            <Button onClick={() => {
+              setMessages((prev) => [
+                ...prev,
+                { role: "user", content: "I've uploaded my proof files and filled details." }
+              ]);
+              setCurrentStep("chat");
+            }}>
+              Continue
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
