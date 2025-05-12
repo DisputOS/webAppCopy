@@ -15,8 +15,8 @@ interface Message {
 
 export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
   const supabase = useSupabaseClient();
-  const session  = useSession();
-  const router   = useRouter();
+  const session = useSession();
+  const router = useRouter();
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -25,8 +25,10 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         "I'm here to help you create your dispute. Could you please describe your issue briefly?",
     },
   ]);
-  const [input, setInput]     = useState("");
+
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -37,9 +39,9 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
     setLoading(true);
 
     const res = await fetch("/api/gptchat", {
-      method : "POST",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body   : JSON.stringify({ messages: [...messages, userMessage] }),
+      body: JSON.stringify({ messages: [...messages, userMessage] }),
     });
 
     const data = await res.json();
@@ -58,7 +60,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
         user_id: session.user.id,
         ...data.fields,
         user_confirmed_input: true,
-        status : "draft",
+        status: "draft",
         archived: false,
       });
 
@@ -67,7 +69,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
           ...prev,
           { role: "assistant", content: "✅ Your dispute was successfully created!" },
         ]);
-        router.push("/cases");
+        setTimeout(() => router.push("/cases"), 1500); // ⟵ редирект после задержки
       } else {
         setMessages((prev) => [
           ...prev,
@@ -83,45 +85,57 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="backdrop-blur-xl fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
-      {/* full-screen animated background */}
       <GlowyBackground />
 
-      {/* chat container */}
-      <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-200 hover:text-white transition"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="max-h-96 overflow-auto space-y-2 mb-4 pr-2">
-          {messages.map((m, i) => (
-            <div
-              key={i}
-              className={`p-3 rounded-xl backdrop-blur-sm ${
-                m.role === "user" ? "bg-white/20 ml-auto" : "bg-black/30 mr-auto"
-              }`}
-            >
-              {m.content}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          <Input
-            className="backdrop-blur-md bg-white/20 placeholder-gray-300 text-white"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-            placeholder="Type your message..."
-            disabled={loading}
-          />
-          <Button onClick={handleSendMessage} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : "Send"}
+      {showDisclaimer ? (
+        <div className="bg-white/10 text-white backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl max-w-md w-full p-6 text-center z-10">
+          <h2 className="text-xl font-semibold mb-4">Disclaimer</h2>
+          <p>
+            The document we generate is created by an AI system. It is{" "}
+            <strong className="text-white">not</strong> legal advice and may require review by a qualified attorney.
+          </p>
+          <p className="mt-2">By continuing, you acknowledge that you have read and understood this disclaimer.</p>
+          <Button onClick={() => setShowDisclaimer(false)} className="mt-6">
+            ok!
           </Button>
         </div>
-      </div>
+      ) : (
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 text-gray-200 hover:text-white transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="max-h-96 overflow-auto space-y-2 mb-4 pr-2">
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                className={`p-3 rounded-xl backdrop-blur-sm ${
+                  m.role === "user" ? "bg-white/20 ml-auto" : "bg-black/30 mr-auto"
+                }`}
+              >
+                {m.content}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <Input
+              className="backdrop-blur-md bg-white/20 placeholder-gray-300 text-white"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+              placeholder="Type your message..."
+              disabled={loading}
+            />
+            <Button onClick={handleSendMessage} disabled={loading}>
+              {loading ? <Loader2 className="animate-spin" /> : "Send"}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
