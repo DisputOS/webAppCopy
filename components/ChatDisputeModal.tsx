@@ -87,7 +87,7 @@ export default function ChatDisputeModal({ onClose }: { onClose: () => void }) {
       <GlowyBackground />
 
       {/* chat container */}
-      <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
+      <div className="bg-gray-900/80  bg-white/10 border border-white/20 shadow-2xl rounded-3xl max-w-xl w-full p-6 relative z-10 text-white">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-200 hover:text-white transition"
