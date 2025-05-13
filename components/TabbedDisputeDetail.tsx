@@ -56,6 +56,8 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
     trackMouse: true,
     trackTouch: true,
     delta: 10,
+    preventDefaultTouchmoveEvent: true,
+    preventScrollOnSwipe: true,
   });
 
   const statusColor: Record<string, string> = {
@@ -114,7 +116,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         {...handlers}
         ref={containerRef}
         className="relative overflow-hidden"
-        style={{ touchAction: 'pan-x pan-y' }}
+        style={{ touchAction: 'pan-x pan-y', overscrollBehavior: 'none' }}
       >
         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
 
