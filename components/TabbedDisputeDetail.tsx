@@ -1,10 +1,11 @@
 // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // file: src/components/TabbedDisputeDetail.tsx   (client component with swipe)
 // NOTE: Requires `react-swipeable`. Install via: `npm install react-swipeable`
 // -----------------------------------------------------------------------------
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import {
   BadgeCheck,
@@ -49,6 +50,13 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   const pdfReady = Boolean(dispute.pdf_url);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Ensure horizontal swipes enabled: remove any global no-zoom or touch-action restrictions
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.touchAction = 'pan-y';
+    }
+  }, []);
+
   const handlers = useSwipeable({
     onSwipedLeft: () => setActiveIdx(idx => Math.min(idx + 1, TABS.length - 1)),
     onSwipedRight: () => setActiveIdx(idx => Math.max(idx - 1, 0)),
@@ -75,6 +83,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       case 'details': return <FileText className="w-5 h-5" />;
       case 'proofs': return <FileCheck2 className="w-5 h-5" />;
       case 'upload': return <PlusCircle className="w-5 h-5" />;
+      default: return null;
     }
   };
 
