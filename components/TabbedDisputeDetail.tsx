@@ -55,9 +55,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
     onSwipedRight: () => setActiveIdx(idx => Math.max(idx - 1, 0)),
     trackMouse: true,
     trackTouch: true,
-    delta: 10,
-    preventDefaultTouchmoveEvent: true,
-    preventScrollOnSwipe: true,
+    delta: 10,    preventScrollOnSwipe: true,
   });
 
   const statusColor: Record<string, string> = {
