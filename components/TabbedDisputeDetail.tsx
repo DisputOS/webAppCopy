@@ -2,7 +2,6 @@
 // -----------------------------------------------------------------------------
 // file: src/components/TabbedDisputeDetail.tsx
 // NOTE: Requires `react-swipeable`. Install via: `npm install react-swipeable`
-   (client component with swipe)
 // -----------------------------------------------------------------------------
 "use client";
 
