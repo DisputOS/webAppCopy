@@ -11,6 +11,7 @@ import { useSwipeable } from 'react-swipeable';
 import {
   BadgeCheck,
   ArrowLeft,
+  ArrowRight,
   FileText,
   FileCheck2,
   PlusCircle,
@@ -81,9 +82,9 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 relative">
       <Link href="/cases" className="inline-flex items-center text-gray-400 hover:text-white mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4" /> Back
       </Link>
 
       {/* Tabs */}
@@ -106,6 +107,22 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         <BadgeCheck className="w-4 h-4 text-gray-400" />
         <p>{userMessage}</p>
       </div>
+
+      {/* Corner touch areas with light overlays */}
+      <div
+        onClick={() => setActiveIdx(i => Math.max(i - 1, 0))}
+        className="absolute left-0 top-0 h-full w-1/4 pointer-events-auto"
+        style={{
+          background: 'linear-gradient(to right, rgba(255,255,255,0.1), transparent)',
+        }}
+      />
+      <div
+        onClick={() => setActiveIdx(i => Math.min(i + 1, TABS.length - 1))}
+        className="absolute right-0 top-0 h-full w-1/4 pointer-events-auto"
+        style={{
+          background: 'linear-gradient(to left, rgba(255,255,255,0.1), transparent)',
+        }}
+      />
 
       {/* Swipeable Panels */}
       <div
@@ -197,5 +214,4 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       </div>
     </main>
   );
-  
 }
