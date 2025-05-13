@@ -197,4 +197,5 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       </div>
     </main>
   );
+  
 }
