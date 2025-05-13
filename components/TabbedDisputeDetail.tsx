@@ -1,5 +1,4 @@
 // -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
 // file: src/components/TabbedDisputeDetail.tsx   (client component with swipe)
 // NOTE: Requires `react-swipeable`. Install via: `npm install react-swipeable`
 // -----------------------------------------------------------------------------
@@ -50,18 +49,20 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   const pdfReady = Boolean(dispute.pdf_url);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Ensure horizontal swipes enabled: remove any global no-zoom or touch-action restrictions
+  // Enable horizontal swipe by allowing pan-x
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.style.touchAction = 'pan-y';
+    const el = containerRef.current;
+    if (el) {
+      el.style.touchAction = 'pan-x';
     }
   }, []);
 
   const handlers = useSwipeable({
     onSwipedLeft: () => setActiveIdx(idx => Math.min(idx + 1, TABS.length - 1)),
     onSwipedRight: () => setActiveIdx(idx => Math.max(idx - 1, 0)),
-    trackMouse: true,
     trackTouch: true,
+    trackMouse: false,
+    preventDefaultTouchmoveEvent: true,
     delta: 10,
   });
 
