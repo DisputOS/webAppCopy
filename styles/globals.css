@@ -9,12 +9,14 @@
   body {
     background: #1a202c;
     color-scheme: dark light;
-    touch-action: pan-x pan-y;      /* block pinch, keep scroll */
+    /* Remove touch-action here so the browser doesn’t swallow all gestures */
   }
-.swipe-container {
-  touch-action: pan-y;        /* block vertical scroll on this element */
-  overscroll-behavior: none;  /* stop iOS/Android bounce */
-}
+
+  /* swipe container settings */
+  .swipe-container {
+    touch-action: pan-y;        /* block vertical scroll inside the container, let horizontal swipes through */
+    overscroll-behavior: none;  /* disable rubber-band bounce */
+  }
 
   /* stop iOS auto-zoom when an input gets focus */
   input,

@@ -42,7 +42,7 @@ export default function ProfilePage() {
       <Header />
 
       <main className="min-h-screen  p-6 space-y-6">
-        <h1 className="text-2xl font-bold mb-6">My Profile</h1>
+        <h1 className="text-3xl font-bold">My Profile</h1>
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 max-w-lg">
           {!userData ? (
