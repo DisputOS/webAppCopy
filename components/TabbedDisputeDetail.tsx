@@ -62,7 +62,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
     onSwipedRight: () => setActiveIdx(idx => Math.max(idx - 1, 0)),
     trackTouch: true,
     trackMouse: false,
-    preventDefaultTouchmoveEvent: true,
+    
     delta: 10,
   });
 
