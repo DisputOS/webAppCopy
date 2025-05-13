@@ -1,3 +1,9 @@
+
+// -----------------------------------------------------------------------------
+// file: src/components/TabbedDisputeDetail.tsx
+// NOTE: Requires `react-swipeable`. Install via: `npm install react-swipeable`
+   (client component with swipe)
+// -----------------------------------------------------------------------------
 "use client";
 
 import { useState, useRef } from 'react';
@@ -47,6 +53,12 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handlers = useSwipeable({
+    onSwipedLeft: () => setActiveIdx((idx) => Math.min(idx + 1, TABS.length - 1)),
+    onSwipedRight: () => setActiveIdx((idx) => Math.max(idx - 1, 0)),
+    trackMouse: true,
+    trackTouch: true,
+    delta: 10, // minimum distance(px) traveled before swipe
+  });
     onSwipedLeft: () => setActiveIdx((idx) => Math.min(idx + 1, TABS.length - 1)),
     onSwipedRight: () => setActiveIdx((idx) => Math.max(idx - 1, 0)),
     trackMouse: true,
