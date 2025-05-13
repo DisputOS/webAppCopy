@@ -109,15 +109,14 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       </div>
 
       {/* Corner touch areas with light overlays */}
-      <div
-        onClick={() => setActiveIdx(i => Math.max(i - 1, 0))}
-        className="absolute left-0 top-1/2 -translate-y-1/2 h-1/3 w-1/5 rounded-l-2xl pointer-events-auto z-10 bg-[radial-gradient(circle_at_80%_50%25,_rgba(255,255,255,0.5),_rgba(255,255,255,0.2),_transparent)] animate-[rgbFade_8s_ease-in-out_infinite_alternate]"
-      />
-      <div
-        onClick={() => setActiveIdx(i => Math.min(i + 1, TABS.length - 1))}
-         className="absolute right-0 top-1/2 -translate-y-1/2 h-1/3 w-1/5 rounded-l-2xl pointer-events-auto z-10 bg-[radial-gradient(circle_at_80%_50%25,_rgba(255,255,255,0.5),_rgba(255,255,255,0.2),_transparent)] animate-[rgbFade_8s_ease-in-out_infinite_alternate]"
- 
-      />
+           <div
+  onClick={() => setActiveIdx(i => Math.max(i - 1, 0))}
+  className="absolute left-0 top-1/2 -translate-y-1/2 h-[33%] w-[20%] rounded-r-2xl pointer-events-auto z-10 bg-[radial-gradient(circle_at_20%_50%25,_rgba(255,255,255,0.5),_rgba(255,255,255,0.2),_transparent)] animate-[rgbFade_8s_ease-in-out_infinite_alternate]"
+/>
+<div
+  onClick={() => setActiveIdx(i => Math.min(i + 1, TABS.length - 1))}
+  className="absolute right-0 top-1/2 -translate-y-1/2 h-[33%] w-[20%] rounded-l-2xl pointer-events-auto z-10 bg-[radial-gradient(circle_at_80%_50%25,_rgba(255,255,255,0.5),_rgba(255,255,255,0.2),_transparent)] animate-[rgbFade_8s_ease-in-out_infinite_alternate]"
+/>
 
       {/* Swipeable Panels */}
       <div
@@ -194,6 +193,8 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
           </section>
         </div>
       </div>
+
+
 
       {/* Carousel Indicators */}
       <div className="flex justify-center space-x-2 mt-4">
