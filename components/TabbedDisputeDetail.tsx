@@ -113,14 +113,14 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         onClick={() => setActiveIdx(i => Math.max(i - 1, 0))}
         className="absolute left-0 top-0 h-full w-[40px] pointer-events-auto animate-pulse animate-infinite animate-normal"
         style={{
-          background: 'linear-gradient(to right, rgba(255,255,255,0.1), transparent)',
+          background: 'linear-gradient(to right, rgba(255, 255, 255, 0.06), transparent)',
         }}
       />
       <div
         onClick={() => setActiveIdx(i => Math.min(i + 1, TABS.length - 1))}
         className="absolute right-0 top-0 h-full w-[40px] pointer-events-auto animate-pulse animate-infinite animate-normal"
         style={{
-          background: 'linear-gradient(to left, rgba(255,255,255,0.1), transparent)',
+          background: 'linear-gradient(to left, rgba(255,255,255,0.06), transparent)',
         }}
       />
 
@@ -133,7 +133,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
 
           {/* Details Panel */}
-          <section className="min-w-full p-4">
+          <section className="min-w-full">
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
               <h1 className="text-2xl font-bold break-all">{dispute.problem_type || 'Untitled Dispute'}</h1>
               <span className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${statusColor[dispute.status || '']}`}>{dispute.status}</span>
@@ -176,7 +176,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
           </section>
 
           {/* Proofs Panel */}
-          <section className="min-w-full p-4">
+          <section className="min-w-full">
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
               {proofCount > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -194,7 +194,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
           </section>
 
           {/* Upload Panel */}
-          <section className="min-w-full p-4">
+          <section className="min-w-full">
             <EvidenceUploader caseId={dispute.id} />
           </section>
         </div>

@@ -30,7 +30,7 @@ export default function GlowyBackground() {
       </svg>
 
       <div
-        className="animated-bg"
+        className="animated-bg animate-pulse animate-infinite"
         style={{ filter: "url(#wavy) blur(22px) brightness(1.2)" }}
       />
     </>
