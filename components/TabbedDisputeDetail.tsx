@@ -3,7 +3,6 @@
 // NOTE: Requires `react-swipeable`. Install via: `npm install react-swipeable`
 // Also ensure you have in globals.css:
 // .swipe-container { touch-action: pan-y; overscroll-behavior: none; }
-// And define @keyframes rgbFade in global CSS.
 // -----------------------------------------------------------------------------
 "use client";
 
@@ -82,9 +81,9 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 relative">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6">
       <Link href="/cases" className="inline-flex items-center text-gray-400 hover:text-white mb-4">
-        <ArrowLeft className="w-4 h-4" /> Back
+        <ArrowLeft className="w-4 h-4" />
       </Link>
 
       {/* Tabs */}
@@ -108,21 +107,14 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         <p>{userMessage}</p>
       </div>
 
-      {/* Swipeable Panels with corner highlights */}
-      <div {...handlers} ref={containerRef} className="swipe-container relative overflow-hidden">
-        {/* Corner highlights */}
-        <div
-  onClick={() => setActiveIdx(i => Math.max(i - 1, 0))}
-  className="highlight-left"
-/>
-
-        <div
-          onClick={() => setActiveIdx(i => Math.min(i + 1, TABS.length - 1))}
-          className="absolute right-0 top-1/2 -translate-y-1/2 h-[33%] w-[20%] rounded-l-2xl pointer-events-auto z-10 bg-[radial-gradient(circle_at_80%_50%25,_rgba(255,255,255,0.5),_rgba(255,255,255,0.2),_transparent)] animate-[rgbFade_8s_ease-in-out_infinite_alternate]"
-        />
-
-        {/* Panels */}
+      {/* Swipeable Panels */}
+      <div
+        {...handlers}
+        ref={containerRef}
+        className="swipe-container relative overflow-hidden"
+      >
         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
+
           {/* Details Panel */}
           <section className="min-w-full p-4">
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
@@ -165,6 +157,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
               </div>
             </div>
           </section>
+
           {/* Proofs Panel */}
           <section className="min-w-full p-4">
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -182,6 +175,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
               )}
             </div>
           </section>
+
           {/* Upload Panel */}
           <section className="min-w-full p-4">
             <EvidenceUploader caseId={dispute.id} />
