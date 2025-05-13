@@ -11,6 +11,7 @@ import { useSwipeable } from 'react-swipeable';
 import {
   BadgeCheck,
   ArrowLeft,
+  ArrowRight,
   FileText,
   FileCheck2,
   PlusCircle,
@@ -81,9 +82,9 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-6 relative">
       <Link href="/cases" className="inline-flex items-center text-gray-400 hover:text-white mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4" /> Back
       </Link>
 
       {/* Tabs */}
@@ -107,11 +108,27 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         <p>{userMessage}</p>
       </div>
 
+      {/* Navigation Arrows */}
+      <button
+        onClick={() => setActiveIdx(i => Math.max(i - 1, 0))}
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-gray-800 bg-opacity-50 rounded-full hover:bg-opacity-75"
+        aria-label="Previous tab"
+      >
+        <ArrowLeft className="w-5 h-5 text-gray-200" />
+      </button>
+      <button
+        onClick={() => setActiveIdx(i => Math.min(i + 1, TABS.length - 1))}
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-gray-800 bg-opacity-50 rounded-full hover:bg-opacity-75"
+        aria-label="Next tab"
+      >
+        <ArrowRight className="w-5 h-5 text-gray-200" />
+      </button>
+
       {/* Swipeable Panels */}
       <div
         {...handlers}
         ref={containerRef}
-        className="swipe-container relative overflow-hidden" style={{ touchAction: 'none' }}
+        className="swipe-container relative overflow-hidden"
       >
         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
 
