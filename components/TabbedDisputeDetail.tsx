@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import {
   BadgeCheck,
@@ -49,13 +49,6 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   const [activeIdx, setActiveIdx] = useState(0);
   const pdfReady = Boolean(dispute.pdf_url);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Ensure horizontal swipes enabled: remove any global no-zoom or touch-action restrictions
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.style.touchAction = 'pan-y';
-    }
-  }, []);
 
   const handlers = useSwipeable({
     onSwipedLeft: () => setActiveIdx(idx => Math.min(idx + 1, TABS.length - 1)),
@@ -117,7 +110,12 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       </div>
 
       {/* Swipeable Panels */}
-      <div {...handlers} ref={containerRef} className="relative overflow-hidden">
+      <div
+        {...handlers}
+        ref={containerRef}
+        className="relative overflow-hidden"
+        style={{ touchAction: 'pan-x pan-y' }}
+      >
         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
 
           {/* Details Panel */}
