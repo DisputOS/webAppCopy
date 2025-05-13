@@ -82,47 +82,12 @@
   50%  { transform: scale(1.015) translateY(0);   opacity: .85; }
   100% { transform: scale(1.03)  translateY(-5px);opacity: .95; }
 }
-.highlight-left,
-.highlight-right {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 33%;
-  width: 20%;
-  pointer-events: auto;
-  z-index: 10;
-}
-
-.highlight-left {
-  left: 0;
-  border-top-right-radius: 1rem;
-  border-bottom-right-radius: 1rem;
-  background-image: radial-gradient(
-    circle at 20% 50%,
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-}
-
-.highlight-right {
-  right: 0;
-  border-top-left-radius: 1rem;
-  border-bottom-left-radius: 1rem;
-  background-image: radial-gradient(
-    circle at 80% 50%,
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-}
-
-/* Make sure you have this keyframes in your global CSS */
-@keyframes rgbFade {
-  0%   { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
-}
-.highlight-left,
-.highlight-right {
-  animation: rgbFade 8s ease-in-out infinite alternate;
-}
+@keyframes slide-down {
+    0%   { background-position: center top; }
+    100% { background-position: center bottom; }
+  }
+  .animate-slide-down {
+    /* make the gradient twice as tall so it can move */
+    background-size: 100% 200%;
+    animation: slide-down 3s linear infinite;
+  }
