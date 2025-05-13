@@ -1,4 +1,3 @@
-
 // -----------------------------------------------------------------------------
 // file: src/components/EvidenceUploader.tsx   (client component)
 // -----------------------------------------------------------------------------
@@ -18,7 +17,7 @@ export default function EvidenceUploader({ caseId }: Props) {
   const supabase = useSupabaseClient();
   const router   = useRouter();
 
-  const [files, fileDispatch] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<FileList | null>(null);
   const [description, setDescription] = useState("");
   const [evidenceType, setEvidenceType] = useState("");
   const [loading, setLoading]   = useState(false);
@@ -26,12 +25,11 @@ export default function EvidenceUploader({ caseId }: Props) {
   const [uid, setUid]           = useState<string | null>(null);
 
   useEffect(() => {
-    async function getUid() {
+    (async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) setError("Unable to retrieve user.");
       else setUid(data.user.id);
-    }
-    getUid();
+    })();
   }, [supabase]);
 
   const handleUpload = async () => {
@@ -52,7 +50,7 @@ export default function EvidenceUploader({ caseId }: Props) {
         const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
         urls.push(urlData.publicUrl);
       }
-      const { error: insertErr } = await supabase.from(TABLE).insert([{
+      const { error: insertErr } = await supabase.from(TABLE).insert([{  
         user_id:        uid,
         dispute_id:     caseId,
         receipt_url:    urls[0],
@@ -73,17 +71,34 @@ export default function EvidenceUploader({ caseId }: Props) {
   };
 
   return (
-    <div className="space-y-6 bg-gray-900 p-6 rounded-xl border border-gray-700">
+    <div className="space-y-6 bg-gray-900 p-6 rounded-xl border border-gray-700 w-full max-w-lg mx-auto">
       {/* File picker */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Upload files</label>
-        <input type="file" multiple accept="image/*,application/pdf" onChange={e => fileDispatch(e.target.files)} className="file-input" />
+        <label htmlFor="file-upload" className="block text-sm font-medium text-gray-300 mb-1">
+          Upload files
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          multiple
+          accept="image/*,application/pdf"
+          onChange={e => setFiles(e.target.files)}
+          className="block w-full text-sm text-gray-200 bg-gray-800 rounded-lg border border-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
       </div>
+
       {/* Evidence type selector */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Evidence type</label>
-        <select value={evidenceType} onChange={e => setEvidenceType(e.target.value)} className="select-input">
-          <option value="">Select evidence type</option>
+        <label htmlFor="evidence-type" className="block text-sm font-medium text-gray-300 mb-1">
+          Evidence type
+        </label>
+        <select
+          id="evidence-type"
+          value={evidenceType}
+          onChange={e => setEvidenceType(e.target.value)}
+          className="block w-full p-2 text-sm text-gray-200 bg-gray-800 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="" disabled>Select evidence type</option>
           <option value="receipt">Receipt / Invoice</option>
           <option value="bank_statement">Bank statement</option>
           <option value="chat_screenshot">Chat screenshot</option>
@@ -91,13 +106,28 @@ export default function EvidenceUploader({ caseId }: Props) {
           <option value="other">Other</option>
         </select>
       </div>
+
       {/* Description */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
-        <textarea value={description} onChange={e => setDescription(e.target.value)} rows={4} className="textarea-input" placeholder="Describe your evidence…" />
+        <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+          Description (optional)
+        </label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          rows={4}
+          className="block w-full p-2 text-sm text-gray-200 bg-gray-800 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          placeholder="Describe your evidence…"
+        />
       </div>
+
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-      <Button onClick={handleUpload} disabled={loading} className="w-full flex items-center justify-center gap-2">
+      <Button
+        onClick={handleUpload}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2"
+      >
         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Upload & Continue'}
       </Button>
     </div>

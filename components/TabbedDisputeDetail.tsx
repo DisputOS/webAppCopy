@@ -111,7 +111,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       <div
         {...handlers}
         ref={containerRef}
-        className="swipe-container relative overflow-hidden"
+        className="swipe-container relative overflow-hidden" style={{ touchAction: 'none' }}
       >
         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
 
