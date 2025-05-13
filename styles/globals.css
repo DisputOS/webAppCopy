@@ -11,6 +11,10 @@
     color-scheme: dark light;
     touch-action: pan-x pan-y;      /* block pinch, keep scroll */
   }
+.swipe-container {
+  touch-action: pan-y;        /* block vertical scroll on this element */
+  overscroll-behavior: none;  /* stop iOS/Android bounce */
+}
 
   /* stop iOS auto-zoom when an input gets focus */
   input,

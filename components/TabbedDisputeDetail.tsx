@@ -1,7 +1,8 @@
 // -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
 // file: src/components/TabbedDisputeDetail.tsx   (client component with swipe)
 // NOTE: Requires `react-swipeable`. Install via: `npm install react-swipeable`
+// Also ensure you have in globals.css:
+// .swipe-container { touch-action: pan-y; overscroll-behavior: none; }
 // -----------------------------------------------------------------------------
 "use client";
 
@@ -51,18 +52,17 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handlers = useSwipeable({
-    onSwipedLeft: () => setActiveIdx(idx => Math.min(idx + 1, TABS.length - 1)),
-    onSwipedRight: () => setActiveIdx(idx => Math.max(idx - 1, 0)),
-    trackMouse: true,
-    trackTouch: true,
-    delta: 10,    preventScrollOnSwipe: true,
+    onSwipedLeft:  () => setActiveIdx(i => Math.min(i + 1, TABS.length - 1)),
+    onSwipedRight: () => setActiveIdx(i => Math.max(i - 1, 0)),
+    trackTouch:    true,
+    delta:         20,
   });
 
   const statusColor: Record<string, string> = {
     draft: 'bg-gray-200 text-gray-600',
-    open: 'bg-gray-200 text-gray-600',
-    won: 'bg-gray-200 text-gray-600',
-    lost: 'bg-gray-200 text-gray-600',
+    open:  'bg-gray-200 text-gray-600',
+    won:   'bg-gray-200 text-gray-600',
+    lost:  'bg-gray-200 text-gray-600',
   };
 
   let userMessage: string;
@@ -74,9 +74,9 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
   const TabIcon = (tab: TabKey) => {
     switch (tab) {
       case 'details': return <FileText className="w-5 h-5" />;
-      case 'proofs': return <FileCheck2 className="w-5 h-5" />;
-      case 'upload': return <PlusCircle className="w-5 h-5" />;
-      default: return null;
+      case 'proofs':  return <FileCheck2 className="w-5 h-5" />;
+      case 'upload':  return <PlusCircle className="w-5 h-5" />;
+      default:        return null;
     }
   };
 
@@ -93,9 +93,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
             key={tab}
             onClick={() => setActiveIdx(idx)}
             className={`p-2 rounded-lg transition ${
-              activeIdx === idx
-                ? 'bg-gray-200 bg-opacity-20'
-                : 'text-gray-400 hover:bg-gray-200 hover:bg-opacity-10'
+              activeIdx === idx ? 'bg-gray-200 bg-opacity-20' : 'text-gray-400 hover:bg-gray-200 hover:bg-opacity-10'
             }`}
           >
             {TabIcon(tab)}
@@ -113,8 +111,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       <div
         {...handlers}
         ref={containerRef}
-        className="relative overflow-hidden"
-        style={{ touchAction: 'pan-x pan-y', overscrollBehavior: 'none' }}
+        className="swipe-container relative overflow-hidden"
       >
         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
 
