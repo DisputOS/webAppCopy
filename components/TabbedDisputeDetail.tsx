@@ -108,21 +108,21 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         <p>{userMessage}</p>
       </div>
 
-      {/* Navigation Arrows */}
-      <button
+      {/* Corner touch areas with light overlays */}
+      <div
         onClick={() => setActiveIdx(i => Math.max(i - 1, 0))}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-gray-800 bg-opacity-50 rounded-full hover:bg-opacity-75"
-        aria-label="Previous tab"
-      >
-        <ArrowLeft className="w-5 h-5 text-gray-200" />
-      </button>
-      <button
+        className="absolute left-0 top-0 h-full w-1/4 pointer-events-auto"
+        style={{
+          background: 'linear-gradient(to right, rgba(255,255,255,0.1), transparent)',
+        }}
+      />
+      <div
         onClick={() => setActiveIdx(i => Math.min(i + 1, TABS.length - 1))}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-gray-800 bg-opacity-50 rounded-full hover:bg-opacity-75"
-        aria-label="Next tab"
-      >
-        <ArrowRight className="w-5 h-5 text-gray-200" />
-      </button>
+        className="absolute right-0 top-0 h-full w-1/4 pointer-events-auto"
+        style={{
+          background: 'linear-gradient(to left, rgba(255,255,255,0.1), transparent)',
+        }}
+      />
 
       {/* Swipeable Panels */}
       <div
