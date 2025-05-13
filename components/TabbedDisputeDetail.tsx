@@ -43,7 +43,6 @@ interface Props {
 }
 
 const TABS = ['details', 'proofs', 'upload'] as const;
-
 type TabKey = typeof TABS[number];
 
 export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Props) {
@@ -57,11 +56,7 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
     onSwipedRight: () => setActiveIdx((idx) => Math.max(idx - 1, 0)),
     trackMouse: true,
     trackTouch: true,
-    delta: 10, // minimum distance(px) traveled before swipe
-  });
-    onSwipedLeft: () => setActiveIdx((idx) => Math.min(idx + 1, TABS.length - 1)),
-    onSwipedRight: () => setActiveIdx((idx) => Math.max(idx - 1, 0)),
-    trackMouse: true,
+    delta: 10,
   });
 
   const statusColor: Record<string, string> = {
@@ -83,7 +78,6 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         <ArrowLeft className="w-4 h-4" /> Back to all cases
       </Link>
 
-      {/* Tabs */}
       <div className="flex justify-center space-x-4 mb-4">
         {TABS.map((tab, idx) => (
           <button
@@ -100,23 +94,14 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
         ))}
       </div>
 
-      {/* Guidance */}
       <div className="bg-indigo-950/60 border border-indigo-800 rounded-xl p-4 flex items-center gap-3 text-sm text-indigo-100 mb-4">
         <BadgeCheck className="w-4 h-4 text-indigo-400" />
         <p>{userMessage}</p>
       </div>
 
-      {/* Swipeable Carousel */}
-      <div
-        {...handlers}
-        ref={containerRef}
-        className="relative overflow-hidden"
-      >
-        <div
-          className="flex transition-transform duration-300"
-          style={{ transform: `translateX(-${activeIdx * 100}%)` }}
-        >
-          {/* Details Panel */}
+      <div {...handlers} ref={containerRef} className="relative overflow-hidden">
+        <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
+
           <section className="min-w-full p-4">
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
               <h1 className="text-2xl font-bold break-all">{dispute.problem_type || 'Untitled Dispute'}</h1>
