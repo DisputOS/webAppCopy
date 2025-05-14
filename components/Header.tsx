@@ -293,7 +293,7 @@ const handleLogout = async () => {
 
  {/* Mobile bottom nav */}
       {menuOpen && session && (
-        <div className="sm:hidden fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around py-2 z-50">
+        <div className="fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around py-2 z-50">
           <Link
             href="/cases"
             onClick={() => setMenuOpen(false)}
