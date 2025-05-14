@@ -43,7 +43,6 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 
@@ -136,7 +135,6 @@ const handleLogout = async () => {
     return (
       <Link
         href={href}
-        onClick={() => setMenuOpen(false)}
         className={clsx(
           "flex items-center gap-3 text-sm transition px-4 py-2 rounded",
           isActive ? "text-white bg-gray-800" : "text-gray-300 hover:text-white",
@@ -164,7 +162,7 @@ const handleLogout = async () => {
 
         {/* ─── Stand-alone bell (mobile only) ───────────────────── */}
         {session && (
-          <div className="relative">
+          <div className="sm:hidden relative">
             <button
               onClick={() => setNotifOpen(!notifOpen)}
               className="relative text-gray-300 hover:text-white"
@@ -283,11 +281,11 @@ const handleLogout = async () => {
       </div>
 
  {/* Mobile bottom nav */}
-      {menuOpen && session && (
+      {session && (
         <div className="fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around py-2 z-50">
           <Link
             href="/cases"
-            onClick={() => setMenuOpen(false)}
+           
             className="flex flex-col items-center text-gray-400 hover:text-white transition"
           >
             <Folder className="w-6 h-6" />
@@ -296,7 +294,7 @@ const handleLogout = async () => {
 
           <Link
             href="/profile"
-            onClick={() => setMenuOpen(false)}
+         
             className="flex flex-col items-center text-gray-400 hover:text-white transition"
           >
             <User className="w-6 h-6" />
@@ -305,7 +303,7 @@ const handleLogout = async () => {
 
           <Link
             href="/settings"
-            onClick={() => setMenuOpen(false)}
+        
             className="flex flex-col items-center text-gray-400 hover:text-white transition"
           >
             <Settings className="w-6 h-6" />
