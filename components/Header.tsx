@@ -280,37 +280,55 @@ const handleLogout = async () => {
         )}
       </div>
 
- {/* Mobile bottom nav */}
-      {session && (
-        <div className="fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around py-2 z-50">
-          <Link
-            href="/cases"
-           
-            className="flex flex-col items-center text-gray-400 hover:text-white transition"
+{session && (
+  <nav
+    className="
+      sm:hidden
+      fixed bottom-4 inset-x-4
+      bg-gradient-to-r from-indigo-600 to-purple-600 bg-opacity-80
+      backdrop-blur-lg
+      rounded-xl shadow-lg
+      flex justify-between items-center
+      px-8 py-3 z-50
+    "
+  >
+    {[
+      { href: '/cases', Icon: Folder, label: 'Cases' },
+      { href: '/profile', Icon: User,  label: 'Profile' },
+      { href: '/settings', Icon: Settings, label: 'Settings' },
+    ].map(({ href, Icon, label }) => {
+      const isActive = pathname === href;
+      return (
+        <Link
+          key={href}
+          href={href}
+          className={clsx(
+            'flex flex-col items-center text-sm transition-transform',
+            isActive
+              ? 'text-white transform scale-110'
+              : 'text-gray-200 hover:text-white'
+          )}
+        >
+          <div
+            className={clsx(
+              'p-2 rounded-full',
+              isActive
+                ? 'bg-white bg-opacity-20'
+                : 'bg-transparent'
+            )}
           >
-            <Folder className="w-6 h-6" />
-            <span className="text-xs mt-1">Cases</span>
-          </Link>
+            <Icon className="w-6 h-6" />
+          </div>
+          <span className="mt-1">{label}</span>
+          {isActive && (
+            <span className="block w-2 h-2 mt-1 rounded-full bg-white" />
+          )}
+        </Link>
+      );
+    })}
+  </nav>
+)}
 
-          <Link
-            href="/profile"
-         
-            className="flex flex-col items-center text-gray-400 hover:text-white transition"
-          >
-            <User className="w-6 h-6" />
-            <span className="text-xs mt-1">Profile</span>
-          </Link>
-
-          <Link
-            href="/settings"
-        
-            className="flex flex-col items-center text-gray-400 hover:text-white transition"
-          >
-            <Settings className="w-6 h-6" />
-            <span className="text-xs mt-1">Settings</span>
-          </Link>
-        </div>
-      )}
     </header>
   );
 }
