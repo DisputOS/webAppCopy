@@ -1,11 +1,17 @@
 "use client";
-
 import { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper";
+
+// point at the real files inside each module folder
+import Navigation  from "swiper/modules/navigation/navigation";
+import Pagination  from "swiper/modules/pagination/pagination";
+
+// core CSS
 import "swiper/css";
+// module CSS
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+
 import {
   BadgeCheck,
   ArrowLeft,
@@ -119,15 +125,13 @@ export default function TabbedDisputeDetail({ dispute, proofs, proofCount }: Pro
       </div>
 
       {/* Swiper */}
-      <Swiper
-        modules={[Navigation, Pagination]}
-        onSwiper={(swiper) => (swiperRef.current = swiper)}
-        onSlideChange={(swiper) => setActiveIdx(swiper.activeIndex)}
-        initialSlide={0}
-        navigation
-        pagination={{ clickable: true }}
-        className="swipe-container"
-      >
+     <Swiper
+  onSwiper={setSwiperRef}
+  modules={[Navigation, Pagination]}
+  navigation
+  pagination={{ clickable: true }}
+  className="swipe-container"
+>
         {/* Details Slide */}
         <SwiperSlide>
           <section className="p-4">
