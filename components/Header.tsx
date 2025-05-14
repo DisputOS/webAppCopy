@@ -285,7 +285,6 @@ const handleLogout = async () => {
     className="
       sm:hidden
       fixed bottom-4 inset-x-4
-      bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500
       bg-opacity-90 backdrop-blur-md
       rounded-2xl shadow-2xl
       flex justify-between items-center
@@ -313,7 +312,7 @@ const handleLogout = async () => {
             className={clsx(
               'p-2 rounded-full transition-colors duration-300',
               isActive
-                ? 'bg-white bg-opacity-25 shadow-lg shadow-purple-500/50'
+                ? 'bg-white bg-opacity-25 shadow-lg'
                 : 'group-hover:bg-white/20'
             )}
           >
@@ -338,8 +337,6 @@ const handleLogout = async () => {
     })}
   </nav>
 )}
-
-
     </header>
   );
 }
