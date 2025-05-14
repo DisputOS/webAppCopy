@@ -206,6 +206,9 @@
   animation-timing-function: ease-in;
 }
 
+.animate-delay-1000 {
+  animation-delay: 1s;
+}
 
 
 
