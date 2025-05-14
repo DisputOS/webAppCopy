@@ -221,7 +221,7 @@
 
 /* 3) (Optional) A helper class to combine them all */
 .animate-fade-up2-all {
-  animation: fadeUp2 0.5s ease-in 1 1s both;
+  animation: fadeUp2 0.3s ease-in 1 0.3s both;
 }
 
 
