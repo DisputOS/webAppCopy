@@ -127,7 +127,7 @@ export default function TabbedDisputeDetail({
       >
         {/* Details Slide */}
         <SwiperSlide>
-          <section className="p-4">
+          <section>
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
               <h1 className="text-2xl font-bold">{dispute.problem_type || "Untitled Dispute"}</h1>
               <span className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${statusColor[dispute.status || ""]}`}>
@@ -170,7 +170,7 @@ export default function TabbedDisputeDetail({
 
         {/* Proofs Slide */}
         <SwiperSlide>
-          <section className="p-4">
+          <section>
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
               {proofCount > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -190,7 +190,7 @@ export default function TabbedDisputeDetail({
 
         {/* Upload Slide */}
         <SwiperSlide>
-          <section className="p-4">
+          <section>
             <EvidenceUploader caseId={dispute.id}/>
           </section>
         </SwiperSlide>
