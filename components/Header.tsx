@@ -154,15 +154,6 @@ const handleLogout = async () => {
   return (
     <header className="w-full border-gray-800 p-4 z-50 relative">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="sm:hidden text-white"
-          type="button"
-        >
-          {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-
         {/* Brand / Logo */}
         <Link
           href="/cases"
