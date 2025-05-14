@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
+import { DisputeActionsMenu } from "./DisputeActionsMenu";
 
 // core & module CSS
 import "swiper/css";
@@ -129,7 +130,15 @@ export default function TabbedDisputeDetail({
         <SwiperSlide>
           <section>
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-              <h1 className="text-2xl font-bold">{dispute.problem_type || "Untitled Dispute"}</h1>
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold break-all">
+                  {dispute.problem_type || "Untitled Dispute"}
+                </h1>
+                <DisputeActionsMenu
+                  disputeId={dispute.id}
+                  isArchived={dispute.status === "archived"}
+                />
+              </div>
               <span className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${statusColor[dispute.status || ""]}`}>
                 {dispute.status}
               </span>
