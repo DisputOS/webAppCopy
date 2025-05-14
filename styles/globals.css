@@ -79,15 +79,15 @@
 
 @keyframes softZoom {
   0% {
-    transform: scale(1) translateY(92px) rotate(0deg);
+    transform: scale(1) translateY(92px) ;
     opacity: 0.75;
   }
   50% {
-    transform: scale(1.015) translateY(0) rotate(90deg);
+    transform: scale(1.015) translateY(0) ;
     opacity: 0.56;
   }
   100% {
-    transform: scale(0.8) translateY(-112px) rotate(-5deg);
+    transform: scale(0.8) translateY(-112px) ;
     opacity: 0.95;
   }
 }
@@ -101,3 +101,10 @@
     background-size: 100% 200%;
     animation: slide-down 3s linear infinite;
   }
+  /* hide arrows under 640px width */
+@media (max-width: 640px) {
+  .swiper-button-prev,
+  .swiper-button-next {
+    display: none !important;
+  }
+}
