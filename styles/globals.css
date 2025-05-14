@@ -25,6 +25,21 @@
   input::file-selector-button {
     font-size: 16px !important;
   }
+  /* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge */
+body {
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar for Firefox */
+body {
+  scrollbar-width: none;
+}
+
 }
 
 @tailwind components;
@@ -107,4 +122,7 @@
   .swiper-button-next {
     display: none !important;
   }
+  .main{
+  padding-bottom: 40px
+}
 }

@@ -288,7 +288,7 @@ const handleLogout = async () => {
       bg-opacity-90 backdrop-blur-md
       rounded-2xl shadow-2xl
       flex justify-between items-center
-      px-6 py-3 z-50
+      px-6 z-50
     "
   >
     {[
