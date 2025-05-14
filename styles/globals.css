@@ -177,6 +177,45 @@
   animation-timing-function: ease-in;
 }
 
+ /* Fade-up keyframes */
+@keyframes fadeUp2 {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply fade-up animation */
+.animate-fade-up2 {
+  animation-name: fadeUp2;
+  animation-fill-mode: both;        /* keep end state */
+  animation-duration: 0.5s;         /* default duration */
+}
+
+/* Run animation only once */
+.animate-once2 {
+  animation-iteration-count: 1;
+}
+
+/* Use ease-in timing */
+.animate-ease-in2 {
+  animation-timing-function: ease-in;
+}
+
+
+
+
+
+
+
+
+
+
+
   /* hide arrows under 640px width */
 @media (max-width: 640px) {
   .swiper-button-prev,
@@ -187,3 +226,9 @@
   padding-bottom: 40px
 }
 }
+
+
+
+
+
+
