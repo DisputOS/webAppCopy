@@ -285,16 +285,16 @@ const handleLogout = async () => {
     className="
       sm:hidden
       fixed bottom-4 inset-x-4
-      bg-gradient-to-r from-indigo-600 to-purple-600 bg-opacity-80
-      backdrop-blur-lg
-      rounded-xl shadow-lg
+      bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500
+      bg-opacity-90 backdrop-blur-md
+      rounded-2xl shadow-2xl
       flex justify-between items-center
-      px-8 py-3 z-50
+      px-6 py-3 z-50
     "
   >
     {[
-      { href: '/cases', Icon: Folder, label: 'Cases' },
-      { href: '/profile', Icon: User,  label: 'Profile' },
+      { href: '/cases',    Icon: Folder,   label: 'Cases'    },
+      { href: '/profile',  Icon: User,     label: 'Profile'  },
       { href: '/settings', Icon: Settings, label: 'Settings' },
     ].map(({ href, Icon, label }) => {
       const isActive = pathname === href;
@@ -303,31 +303,42 @@ const handleLogout = async () => {
           key={href}
           href={href}
           className={clsx(
-            'flex flex-col items-center text-sm transition-transform',
+            'group flex flex-col items-center text-sm transition-transform duration-200',
             isActive
-              ? 'text-white transform scale-110'
-              : 'text-gray-200 hover:text-white'
+              ? 'text-white scale-110'
+              : 'text-gray-200 hover:scale-105'
           )}
         >
           <div
             className={clsx(
-              'p-2 rounded-full',
+              'p-2 rounded-full transition-colors duration-300',
               isActive
-                ? 'bg-white bg-opacity-20'
-                : 'bg-transparent'
+                ? 'bg-white bg-opacity-25 shadow-lg shadow-purple-500/50'
+                : 'group-hover:bg-white/20'
             )}
           >
-            <Icon className="w-6 h-6" />
+            <Icon className={clsx(
+              'w-7 h-7 transition-colors duration-300',
+              isActive
+                ? 'text-white'
+                : 'text-gray-200 group-hover:text-white'
+            )} />
           </div>
           <span className="mt-1">{label}</span>
-          {isActive && (
-            <span className="block w-2 h-2 mt-1 rounded-full bg-white" />
-          )}
+          {/* sliding underline */}
+          <span
+            className={clsx(
+              'block h-0.5 w-full mt-1 rounded-full bg-white transition-all duration-300',
+              isActive ? 'scale-x-100' : 'scale-x-0'
+            )}
+            style={{ transformOrigin: 'left' }}
+          />
         </Link>
       );
     })}
   </nav>
 )}
+
 
     </header>
   );
