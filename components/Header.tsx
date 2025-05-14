@@ -164,7 +164,7 @@ const handleLogout = async () => {
 
         {/* ─── Stand-alone bell (mobile only) ───────────────────── */}
         {session && (
-          <div className="sm:hidden relative">
+          <div className="relative">
             <button
               onClick={() => setNotifOpen(!notifOpen)}
               className="relative text-gray-300 hover:text-white"
