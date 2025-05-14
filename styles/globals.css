@@ -147,6 +147,36 @@
     background-size: 100% 200%;
     animation: slide-down 3s linear infinite;
   }
+
+  /* Fade-up keyframes */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply fade-up animation */
+.animate-fade-up {
+  animation-name: fadeUp;
+  animation-fill-mode: both;        /* keep end state */
+  animation-duration: 0.5s;         /* default duration */
+}
+
+/* Run animation only once */
+.animate-once {
+  animation-iteration-count: 1;
+}
+
+/* Use ease-in timing */
+.animate-ease-in {
+  animation-timing-function: ease-in;
+}
+
   /* hide arrows under 640px width */
 @media (max-width: 640px) {
   .swiper-button-prev,
