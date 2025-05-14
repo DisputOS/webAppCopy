@@ -302,28 +302,38 @@ const handleLogout = async () => {
 
             {/* Notifications row in mobile list (uses same dropdown logic) */}
             {/* Mobile bottom nav */}
+{/* Mobile bottom nav */}
 {menuOpen && session && (
   <div className="sm:hidden fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around py-2 z-50">
-    <NavLink
+    <Link
       href="/cases"
-      icon={Folder}
-      label="Cases"
-      className="flex-grow text-center"
-    />
-    <NavLink
+      onClick={() => setMenuOpen(false)}
+      className="flex flex-col items-center text-gray-400 hover:text-white transition"
+    >
+      <Folder className="w-6 h-6" />
+      <span className="text-xs mt-1">Cases</span>
+    </Link>
+
+    <Link
       href="/profile"
-      icon={User}
-      label="Profile"
-      className="flex-grow text-center"
-    />
-    <NavLink
+      onClick={() => setMenuOpen(false)}
+      className="flex flex-col items-center text-gray-400 hover:text-white transition"
+    >
+      <User className="w-6 h-6" />
+      <span className="text-xs mt-1">Profile</span>
+    </Link>
+
+    <Link
       href="/settings"
-      icon={Settings}
-      label="Settings"
-      className="flex-grow text-center"
-    />
+      onClick={() => setMenuOpen(false)}
+      className="flex flex-col items-center text-gray-400 hover:text-white transition"
+    >
+      <Settings className="w-6 h-6" />
+      <span className="text-xs mt-1">Settings</span>
+    </Link>
   </div>
 )}
+
 
 
             {/* Mobile dropdown panel */}
