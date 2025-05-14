@@ -291,97 +291,35 @@ const handleLogout = async () => {
         )}
       </div>
 
-      {/* Mobile slide‑out nav */}
+ {/* Mobile bottom nav */}
       {menuOpen && session && (
-        <div className="sm:hidden absolute top-full left-0 w-full backdrop-blur px-6 py-4 border-t border-gray-800 shadow-md animate-fade-in-down">
-          <div className="flex flex-col py-2">
-            {/* Regular links */}
-            <NavLink href="/cases" icon={Folder} label="Cases" />
-            <NavLink href="/profile" icon={User} label="Profile" />
-            <NavLink href="/settings" icon={Settings} label="Settings" />
+        <div className="sm:hidden fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around py-2 z-50">
+          <Link
+            href="/cases"
+            onClick={() => setMenuOpen(false)}
+            className="flex flex-col items-center text-gray-400 hover:text-white transition"
+          >
+            <Folder className="w-6 h-6" />
+            <span className="text-xs mt-1">Cases</span>
+          </Link>
 
-            {/* Notifications row in mobile list (uses same dropdown logic) */}
-            {/* Mobile bottom nav */}
-{/* Mobile bottom nav */}
-{menuOpen && session && (
-  <div className="sm:hidden fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around py-2 z-50">
-    <Link
-      href="/cases"
-      onClick={() => setMenuOpen(false)}
-      className="flex flex-col items-center text-gray-400 hover:text-white transition"
-    >
-      <Folder className="w-6 h-6" />
-      <span className="text-xs mt-1">Cases</span>
-    </Link>
+          <Link
+            href="/profile"
+            onClick={() => setMenuOpen(false)}
+            className="flex flex-col items-center text-gray-400 hover:text-white transition"
+          >
+            <User className="w-6 h-6" />
+            <span className="text-xs mt-1">Profile</span>
+          </Link>
 
-    <Link
-      href="/profile"
-      onClick={() => setMenuOpen(false)}
-      className="flex flex-col items-center text-gray-400 hover:text-white transition"
-    >
-      <User className="w-6 h-6" />
-      <span className="text-xs mt-1">Profile</span>
-    </Link>
-
-    <Link
-      href="/settings"
-      onClick={() => setMenuOpen(false)}
-      className="flex flex-col items-center text-gray-400 hover:text-white transition"
-    >
-      <Settings className="w-6 h-6" />
-      <span className="text-xs mt-1">Settings</span>
-    </Link>
-  </div>
-)}
-
-
-
-            {/* Mobile dropdown panel */}
-            {notifOpen && (
-              <div className="bg-gray-900 border-t border-gray-800">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
-                  <span className="text-sm font-medium text-white">Unread</span>
-                  {notifications.length > 0 && (
-                    <Button size="xs" variant="ghost" onClick={markAllRead}>
-                      Mark all read
-                    </Button>
-                  )}
-                </div>
-
-                {notifications.length === 0 ? (
-                  <p className="text-center py-6 text-sm text-gray-400">
-                    No unread messages
-                  </p>
-                ) : (
-                  <ul className="max-h-72 overflow-y-auto divide-y divide-gray-800">
-                    {notifications.map((n) => (
-                      <li
-                        key={n.id}
-                        onClick={() => markRead(n.id)}
-                        className="px-4 py-3 hover:bg-gray-800 cursor-pointer"
-                      >
-                        <p className="text-sm font-medium text-white">{n.title}</p>
-                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{n.body}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-
-            {/* Logout (mobile) */}
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-                handleLogout();
-              }}
-              className="flex items-center gap-3 text-sm text-red-500 hover:text-red-400 px-4 py-2 transition"
-              type="button"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
-          </div>
+          <Link
+            href="/settings"
+            onClick={() => setMenuOpen(false)}
+            className="flex flex-col items-center text-gray-400 hover:text-white transition"
+          >
+            <Settings className="w-6 h-6" />
+            <span className="text-xs mt-1">Settings</span>
+          </Link>
         </div>
       )}
     </header>
