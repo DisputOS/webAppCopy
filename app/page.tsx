@@ -1,86 +1,12 @@
-'use client';
-
-import { useEffect } from 'react';
-import * as THREE from 'three';
+"use client";
 
 export default function LandingComingSoon() {
-  useEffect(() => {
-    const canvas = document.getElementById('scene') as HTMLCanvasElement;
-    if (!canvas) return;
-
-    const gl = (
-      canvas.getContext('webgl2') ||
-      canvas.getContext('webgl') ||
-      canvas.getContext('experimental-webgl')
-    ) as WebGLRenderingContext | WebGL2RenderingContext | null;
-
-    if (!gl) {
-      alert('❌ WebGL не поддерживается вашим браузером или видеокартой.');
-      return;
-    }
-
-    const renderer = new THREE.WebGLRenderer({ canvas, context: gl, antialias: true, alpha: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0f0f0f);
-
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
-
-    const geometry = new THREE.TorusKnotGeometry(1, 0.3, 128, 32);
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ffff, metalness: 0.6, roughness: 0.2 });
-    const torus = new THREE.Mesh(geometry, material);
-    scene.add(torus);
-
-    const light = new THREE.PointLight(0xffffff, 1);
-    light.position.set(10, 10, 10);
-    scene.add(light);
-
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    scene.add(ambientLight);
-
-    let mouseX = 0;
-    let mouseY = 0;
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-      torus.rotation.x += 0.008;
-      torus.rotation.y += 0.012;
-
-      camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
-      camera.position.y += (mouseY * 2 - camera.position.y) * 0.05;
-      camera.lookAt(scene.position);
-
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gray-950 px-6 py-12 font-mono text-white text-center">
-      <canvas id="scene" className="fixed top-0 left-0 -z-50 w-screen h-screen" />
+      {/* Animated background gradient using pure CSS */}
+      <div className="absolute inset-0 -z-10 bg-[conic-gradient(at_bottom_right,theme(colors.blue.900),theme(colors.indigo.900),theme(colors.black))] bg-[length:400%_400%] animate-slowSpin opacity-25 blur-3xl" />
 
-      <div className="absolute inset-0 -z-30 bg-[conic-gradient(at_bottom_right,theme(colors.blue.900),theme(colors.indigo.900),theme(colors.black))] bg-[length:400%_400%] animate-slowSpin opacity-25 blur-3xl" />
-
+      {/* Logo & tagline */}
       <div className="mb-10 animate-fadeInUp">
         <h1 className="text-5xl font-extrabold tracking-wider">
           Disput<span className="text-blue-400">.Brain</span>
@@ -90,6 +16,7 @@ export default function LandingComingSoon() {
         </p>
       </div>
 
+      {/* Message */}
       <h2 className="mb-6 animate-fadeInUp text-4xl font-bold">We’re cooking something big.</h2>
 
       <p className="mx-auto max-w-lg animate-fadeInUp text-base leading-relaxed text-gray-300">
@@ -99,10 +26,12 @@ export default function LandingComingSoon() {
         will open later this year.
       </p>
 
+      {/* Footer */}
       <p className="animate-fadeInSlow absolute bottom-4 text-xs text-gray-500">
         © 2025 DisputBrain — All rights reserved.
       </p>
 
+      {/* Tailwind keyframes */}
       <style jsx>{`
         @keyframes slowSpin {
           0% { transform: rotate(0deg); }
