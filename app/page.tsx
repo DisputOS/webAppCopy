@@ -8,15 +8,17 @@ export default function LandingComingSoon() {
     const canvas = document.getElementById('scene') as HTMLCanvasElement;
     if (!canvas) return;
 
-    let gl =
-      canvas.getContext('webgl2') ||
-      canvas.getContext('webgl') ||
-      canvas.getContext('experimental-webgl');
+    const gl = (
+  canvas.getContext('webgl2') ||
+  canvas.getContext('webgl') ||
+  canvas.getContext('experimental-webgl')
+) as WebGLRenderingContext | WebGL2RenderingContext | null;
 
-    if (!gl) {
-      alert('❌ WebGL не поддерживается вашим браузером или видеокартой.');
-      return;
-    }
+if (!gl) {
+  alert('❌ WebGL не поддерживается вашим браузером или видеокартой.');
+  return;
+}
+
 
     const renderer = new THREE.WebGLRenderer({ canvas, context: gl, antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
