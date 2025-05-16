@@ -150,7 +150,7 @@ const handleLogout = async () => {
   // JSX
   // ---------------------------------------------------------------------------
   return (
-    <header className="w-full border-gray-800 px-6 p-4 z-50 relative">
+    <header className="w-full border-gray-800 p-4 z-50 relative">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
         {/* Brand / Logo */}
         <Link
