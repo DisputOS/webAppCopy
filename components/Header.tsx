@@ -2,7 +2,7 @@
 // file: src/components/Header.tsx
 // Responsive header with notification bell in both desktop & mobile
 // -----------------------------------------------------------------------------
-"use client";
+
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
