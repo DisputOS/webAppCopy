@@ -150,8 +150,8 @@ const handleLogout = async () => {
   // JSX
   // ---------------------------------------------------------------------------
   return (
-    <header className="w-full border-gray-800 p-4 z-50 relative">
-      <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+    <header className="w-full  border-gray-800 z-50 relative">
+      <div className="max-w-6xl ml-6px mr-6px mx-auto flex items-center justify-between gap-4">
         {/* Brand / Logo */}
         <Link
           href="/cases"
@@ -304,8 +304,8 @@ const handleLogout = async () => {
           className={clsx(
             'group flex flex-col items-center text-sm transition-transform duration-200',
             isActive
-              ? 'text-white scale-110'
-              : 'text-gray-200 hover:scale-105'
+              ? 'text-white'
+              : 'text-gray-200'
           )}
         >
           <div
