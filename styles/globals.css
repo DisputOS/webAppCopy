@@ -170,6 +170,10 @@ justify-content: center;
 gap: 100px;
 }
 
+.ml-6px{margin-left:6px;}
+
+.mr-6px{margin-right:6px;}
+
 
 /* Apply fade-up animation */
 .animate-fade-up {
