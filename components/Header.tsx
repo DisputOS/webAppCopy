@@ -150,7 +150,7 @@ const handleLogout = async () => {
   // JSX
   // ---------------------------------------------------------------------------
   return (
-    <header className="w-full border-gray-800 p-4 z-50 relative">
+    <header className="w-full border-gray-800 px-6 p-4 z-50 relative">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
         {/* Brand / Logo */}
         <Link
@@ -284,7 +284,7 @@ const handleLogout = async () => {
   <nav
     className="
       sm:hidden
-      fixed bottom-4 inset-x-4
+      fixed bottom-0 bottom-8 inset-x-4
       bg-opacity-90 backdrop-blur-md
       rounded-2xl shadow-2xl
       flex justify-between items-center
