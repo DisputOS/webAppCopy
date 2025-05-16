@@ -133,13 +133,10 @@ export default function TabbedDisputeDetail({
                 <h1 className="text-2xl font-bold break-all">
                   {dispute.problem_type || "Untitled Dispute"}
                 </h1>
-                {dispute.id && (
-  <DisputeActionsMenu
-    disputeId={dispute.id}
-    isArchived={dispute.status === "archived"}
-  />
-)}
-
+                <DisputeActionsMenu
+                  disputeId={dispute.id}
+                  isArchived={dispute.status === "archived"}
+                />
               </div>
               <span className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${statusColor[dispute.status || ""]}`}>
                 {dispute.status}

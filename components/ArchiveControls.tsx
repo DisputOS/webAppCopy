@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Archive, Undo2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-const router = useRouter();
 
 export function ArchiveControls({
   disputeId,
@@ -27,8 +25,6 @@ export function ArchiveControls({
       setUndoAvailable(!toArchive);
       localStorage.removeItem('cachedDisputes');
   localStorage.removeItem('disputesLastFetch');
-router.push('/cases');
-
     }
   };
 

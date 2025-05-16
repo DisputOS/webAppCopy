@@ -1,6 +1,5 @@
 import { Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-const router = useRouter();
+
 export function DeleteButton({ disputeId }: { disputeId: string }) {
   const handleDelete = async () => {
     const confirmed = confirm(
@@ -19,7 +18,8 @@ export function DeleteButton({ disputeId }: { disputeId: string }) {
       localStorage.removeItem('disputesLastFetch');
     
       // Перейти обратно к списку
-      router.push('/cases');
+      window.location.href = '/cases';
+    
     } else {
       const result = await res.json();
       alert(result.error || 'Failed to delete dispute');
