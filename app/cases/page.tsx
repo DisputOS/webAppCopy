@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import ChatDisputeModal from '@/components/ChatDisputeModal';
-
+import { useRef } from 'react';
 interface DisputeWithProof extends Record<string, any> {
   hasProof: boolean;
 }
@@ -27,6 +27,8 @@ export default function CasesPage() {
 
   /* ─────────────────────────── route transition hook ──────────────────── */
   const [isPending, startTransition] = useTransition();
+
+  const fetchedRef = useRef(false); // ⬅️ Индикатор: загружены ли данные
 
   /* ─────────────────────────── fetch disputes ─────────────────────────── */
   const fetchData = async () => {
@@ -54,10 +56,13 @@ export default function CasesPage() {
 
     setDisputes(withProof);
     setLoading(false);
+    fetchedRef.current = true; // ⬅️ Отметим, что данные загружены
   };
 
   useEffect(() => {
-    if (session) fetchData();
+    if (session && !fetchedRef.current) {
+      fetchData(); // ⬅️ Загружаем только один раз
+    }
   }, [session]);
 
   if (!session) {
