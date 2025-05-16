@@ -284,12 +284,12 @@ const handleLogout = async () => {
   <nav
     className="
       phonemenu
+      w-full
       sm:hidden
       fixed bottom-0
       bg-opacity-90 backdrop-blur-md
       shadow-2xl
-      z-50
-    "
+      z-50"
   >
     {[
       { href: '/cases',    Icon: Folder,   label: 'Cases'    },

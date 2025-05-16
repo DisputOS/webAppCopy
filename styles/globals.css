@@ -162,8 +162,12 @@
 
 
 .phonemenu{
-  width:100%;
-  padding-bottom: 12px;
+  width: 100%;
+padding-bottom: 12px;
+display: flex;
+flex-direction: row;
+justify-content: center;
+gap: 100px;
 }
 
 
