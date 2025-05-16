@@ -283,8 +283,9 @@ const handleLogout = async () => {
 {session && (
   <nav
     className="
+      phonemenu
       sm:hidden
-      fixed bottom-0 bottom-8 inset-x-4
+      fixed bottom-0 inset-x-4
       bg-opacity-90 backdrop-blur-md
       rounded-2xl shadow-2xl
       flex justify-between items-center

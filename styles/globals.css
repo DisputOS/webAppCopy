@@ -160,6 +160,13 @@
   }
 }
 
+
+.phonemenu{
+  width:100%;
+  padding-bottom: 12px;
+}
+
+
 /* Apply fade-up animation */
 .animate-fade-up {
   animation-name: fadeUp;
