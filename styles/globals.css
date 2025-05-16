@@ -167,14 +167,10 @@ padding-bottom: 12px;
 display: flex;
 flex-direction: row;
 justify-content: center;
-gap: 100px;
+gap: 10vw;
 padding-top: 10px;
 }
 
-.ml-6px{margin-left:1.4rem;}
-
-.mr-6px{margin-right: 1.4rem;
-        margin-top: 1rem;}
 
 
 /* Apply fade-up animation */
@@ -258,6 +254,11 @@ padding-top: 10px;
   .main{
   padding-bottom: 40px
 }
+.ml-6px{margin-left:1.4rem;}
+
+.mr-6px{margin-right: 1.4rem;
+        margin-top: 1rem;}
+
 }
 
 
