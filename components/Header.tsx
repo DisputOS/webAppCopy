@@ -125,11 +125,9 @@ const handleLogout = async () => {
   const NavLink = ({
     href,
     icon: Icon,
-    label,
   }: {
     href: string;
     icon: React.ElementType;
-    label: string;
   }) => {
     const isActive = pathname === href;
     return (
@@ -141,7 +139,6 @@ const handleLogout = async () => {
         )}
       >
         <Icon className="w-4 h-4" />
-        <span>{label}</span>
       </Link>
     );
   };
@@ -150,7 +147,7 @@ const handleLogout = async () => {
   // JSX
   // ---------------------------------------------------------------------------
   return (
-    <header className="w-full  border-gray-800 z-50 relative">
+    <header className="w-full p-20px border-gray-800 z-50 relative">
       <div className="max-w-6xl ml-6px mr-6px mx-auto flex items-center justify-between gap-4">
         {/* Brand / Logo */}
         <Link
@@ -214,9 +211,9 @@ const handleLogout = async () => {
         {/* Desktop navigation */}
         {session && (
           <nav className="hidden sm:flex items-center gap-4 ml-auto">
-            <NavLink href="/cases" icon={Folder} label="Cases" />
-            <NavLink href="/profile" icon={User} label="Profile" />
-            <NavLink href="/settings" icon={Settings} label="Settings" />
+            <NavLink href="/cases" icon={Folder}/>
+            <NavLink href="/profile" icon={User} />
+            <NavLink href="/settings" icon={Settings}/>
 
             {/* Notification bell (desktop) */}
             <div className="relative">
