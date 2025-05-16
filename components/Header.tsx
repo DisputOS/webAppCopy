@@ -325,13 +325,6 @@ const handleLogout = async () => {
           </div>
           <span className="mt-1">{label}</span>
           {/* sliding underline */}
-          <span
-            className={clsx(
-              'block h-0.5 w-full mt-1 rounded-full bg-white transition-all duration-300',
-              isActive ? 'scale-x-100' : 'scale-x-0'
-            )}
-            style={{ transformOrigin: 'left' }}
-          />
         </Link>
       );
     })}
