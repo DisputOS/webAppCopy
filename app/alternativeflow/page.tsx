@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from "react";
 import { useSupabaseClient, useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
