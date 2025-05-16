@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import ChatDisputeModal from '@/components/ChatDisputeModal';
-import { useRef } from 'react';
+
 interface DisputeWithProof extends Record<string, any> {
   hasProof: boolean;
 }
@@ -27,8 +27,6 @@ export default function CasesPage() {
 
   /* ─────────────────────────── route transition hook ──────────────────── */
   const [isPending, startTransition] = useTransition();
-
-  const fetchedRef = useRef(false); // ⬅️ Индикатор: загружены ли данные
 
   /* ─────────────────────────── fetch disputes ─────────────────────────── */
   const fetchData = async () => {
@@ -53,17 +51,33 @@ export default function CasesPage() {
         return { ...d, hasProof: (count ?? 0) > 0 };
       }),
     );
-
+    localStorage.setItem('cachedDisputes', JSON.stringify(withProof));
     setDisputes(withProof);
     setLoading(false);
-    fetchedRef.current = true; // ⬅️ Отметим, что данные загружены
   };
 
   useEffect(() => {
-    if (session && !fetchedRef.current) {
-      fetchData(); // ⬅️ Загружаем только один раз
+    if (!session) return;
+  
+    // 1. Загрузить кэшированные данные
+    const cached = localStorage.getItem('cachedDisputes');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      setDisputes(parsed);
+      setLoading(false);
+    }
+  
+    // 2. Проверить, нужно ли обновить (раз в 5 минут)
+    const lastFetch = localStorage.getItem('disputesLastFetch');
+    const now = Date.now();
+    const shouldRefetch = !lastFetch || now - Number(lastFetch) > 1000 * 60 * 5;
+  
+    if (shouldRefetch) {
+      fetchData(); // 👈 вызов только при необходимости
+      localStorage.setItem('disputesLastFetch', now.toString());
     }
   }, [session]);
+  
 
   if (!session) {
     return (
