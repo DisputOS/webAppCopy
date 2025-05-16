@@ -10,6 +10,11 @@ export function DisputeActionsMenu({
   disputeId: string;
   isArchived: boolean;
 }) {
+  if (!disputeId) {
+    console.error('❌ disputeId is missing in DisputeActionsMenu');
+    return null;
+  }
+
   const [open, setOpen] = useState(false);
 
   return (
