@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import { MoreVertical, Undo2, Trash2 } from 'lucide-react';

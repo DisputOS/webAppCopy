@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { MoreVertical } from 'lucide-react';
 import { DeleteButton } from '@/components/DeleteButton';

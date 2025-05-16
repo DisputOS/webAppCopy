@@ -1,7 +1,6 @@
 // -----------------------------------------------------------------------------
-// file: src/components/EvidenceUploader.tsx   (client component)
+// INACTIVE file: src/components/EvidenceUploader.tsx   (client component)
 // -----------------------------------------------------------------------------
-"use client";
 
 import { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
