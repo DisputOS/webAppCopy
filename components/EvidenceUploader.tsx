@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// INACTIVE file: src/components/EvidenceUploader.tsx   (client component)
+// UNACTIVE file: src/components/EvidenceUploader.tsx   (client component)
 // -----------------------------------------------------------------------------
 
 import { useState, useEffect } from "react";

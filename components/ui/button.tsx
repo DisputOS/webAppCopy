@@ -7,8 +7,8 @@ import { ButtonHTMLAttributes } from "react";
 // -------------------------------
 // Variant & Size types
 // -------------------------------
-export type Variant = "primary" | "outline" | "secondary" | "ghost";
-export type Size    = "xs" | "sm" | "md" | "lg";
+export type Variant = "default" | "primary" | "outline" | "secondary" | "ghost";
+export type Size = "xs" | "sm" | "md" | "lg" | "icon";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -25,19 +25,21 @@ export function Button({ className, variant = "primary", size = "md", ...props }
     "disabled:opacity-50 disabled:pointer-events-none " +
     "ring-offset-white dark:ring-offset-gray-950";
 
-  const sizes: Record<Size, string> = {
-    xs: "px-2 py-1 text-xs",          //   4×4 → 2×1
-    sm: "px-3 py-1.5 text-sm",        //   original small
-    md: "px-4 py-2 text-sm",          // ← default
-    lg: "px-5 py-2.5 text-base",      //   comfy
-  };
+ const sizes: Record<Size, string> = {
+  xs: "px-2 py-1 text-xs",
+  sm: "px-3 py-1.5 text-sm",
+  md: "px-4 py-2 text-sm",
+  lg: "px-5 py-2.5 text-base",
+  icon: "p-2 w-9 h-9", // або w-10 h-10, залежно від бажаного розміру
+};
 
   const variants: Record<Variant, string> = {
-    primary:   clsx("bg-gray-800 text-white hover:bg-gray-700"),
-    outline:   clsx("border border-gray-500 text-gray-200 hover:bg-gray-800"),
-    secondary: clsx("bg-gray-700 text-white hover:bg-gray-600"),
-    ghost:     clsx("text-gray-200 hover:bg-gray-800/60"),
-  };
+  default:   clsx("bg-gray-900 text-white hover:bg-gray-800"),
+  primary:   clsx("bg-gray-800 text-white hover:bg-gray-700"),
+  outline:   clsx("border border-gray-500 text-gray-200 hover:bg-gray-800"),
+  secondary: clsx("bg-gray-700 text-white hover:bg-gray-600"),
+  ghost:     clsx("text-gray-200 hover:bg-gray-800/60"),
+};
 
   return (
     <button
