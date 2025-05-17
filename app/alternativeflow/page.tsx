@@ -470,9 +470,40 @@ const handleFinalSubmit = async () => {
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={() => setCurrentStep((s) => Math.max(s - 1, 1))} disabled={currentStep === 1}>Back</Button>
-          <Button onClick={() => setCurrentStep((s) => Math.min(s + 1, 5))}>Continue</Button>
-        </div>
+  <Button
+    variant="outline"
+    onClick={() => setCurrentStep((s) => Math.max(s - 1, 1))}
+    disabled={currentStep === 1}
+  >
+    Back
+  </Button>
+  <Button
+    onClick={() => {
+      if (currentStep === 4) {
+        const requiredFields = [
+          disputeFields?.dispute_name,
+          disputeFields?.description,
+          disputeFields?.purchase_amount,
+          disputeFields?.currency,
+          disputeFields?.user_contact_platform,
+          ...(disputeFields?.user_contact_platform === "yes"
+            ? [disputeFields?.user_contact_desc]
+            : []),
+          disputeFields?.training_permission,
+        ];
+        const allFilled = requiredFields.every(Boolean);
+        if (!allFilled) {
+          alert("Please complete all required fields before submitting.");
+          return;
+        }
+      }
+      setCurrentStep((s) => Math.min(s + 1, 5));
+    }}
+  >
+    Continue
+  </Button>
+</div>
+
 
         <div className="text-xs text-slate-400">
           Your data is encrypted. OpenAI logging is disabled.
