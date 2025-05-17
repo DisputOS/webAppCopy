@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------------
+// file: src/components/Header.tsx
+// Responsive header with notification bell in both desktop & mobile
+// -----------------------------------------------------------------------------
+
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -40,9 +46,13 @@ export default function Header() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 
+  // ---------------------------------------------------------------------------
   // Fetch & subscribe to unread notifications
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (!session) return;
+
+    // Initial fetch
     supabase
       .from("user_notifications")
       .select("id, title, body, created_at, read_at")
@@ -53,6 +63,7 @@ export default function Header() {
         if (!error && data) setNotifications(data as NotificationRow[]);
       });
 
+    // Real‑time inserts
     const channel = supabase
       .channel("user_notifications_header")
       .on(
@@ -65,7 +76,7 @@ export default function Header() {
         },
         (payload) => {
           setNotifications((n) => [payload.new as NotificationRow, ...n]);
-        }
+        },
       )
       .subscribe();
 
@@ -74,7 +85,7 @@ export default function Header() {
     };
   }, [supabase, session]);
 
-  // Mark helpers
+  // Mark helpers --------------------------------------------------------------
   const markRead = async (id: string) => {
     setNotifications((n) => n.filter((m) => m.id !== id));
     await supabase
@@ -94,21 +105,32 @@ export default function Header() {
     }
   };
 
-  // Logout
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (err: any) {
-      if (!err?.message?.includes("session missing")) {
-        console.error("Logout error:", err.message);
-      }
-    } finally {
-      router.replace("/login");
+  // Logout --------------------------------------------------------------------
+ // Logout --------------------------------------------------------------------
+const handleLogout = async () => {
+  try {
+    await supabase.auth.signOut();
+  } catch (err: any) {
+    // Ignore “Auth session missing!” & log the rest
+    if (!err?.message?.includes("session missing")) {
+      console.error("Logout error:", err.message);
     }
-  };
+  } finally {
+    router.replace("/login");        // always navigate away
+  }
+};
 
-  // Reusable link
-  const NavLink = ({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string; }) => {
+
+  // Reusable link -------------------------------------------------------------
+  const NavLink = ({
+    href,
+    icon: Icon,
+    label,
+  }: {
+    href: string;
+    icon: React.ElementType;
+    label: string;
+  }) => {
     const isActive = pathname === href;
     return (
       <Link
@@ -116,8 +138,8 @@ export default function Header() {
         className={clsx(
           "flex items-center gap-3 text-sm transition px-4 py-2 rounded",
           isActive
-            ? "text-white bg-blue-600 dark:bg-blue-500"
-            : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+            ? "text-white bg-gray-800 dark:bg-gray-200 dark:text-gray-900"
+            : "text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-gray-200"
         )}
       >
         <Icon className="w-4 h-4" />
@@ -126,23 +148,26 @@ export default function Header() {
     );
   };
 
+  // ---------------------------------------------------------------------------
+  // JSX
+  // ---------------------------------------------------------------------------
   return (
-    <header className="w-full p-5 border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 z-50 relative">
+    <header className="w-full p-5 border-b border-gray-800 dark:border-gray-200 bg-white dark:bg-gray-900 z-50 relative">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
         {/* Brand / Logo */}
         <Link
           href="/cases"
-          className="text-xl font-bold text-gray-900 dark:text-white tracking-tight"
+          className="text-xl font-bold text-gray-900 dark:text-white tracking-tight sm:ml-0"
         >
           Disput<span className="text-blue-500">.ai</span>
         </Link>
 
-        {/* Mobile Bell */}
+        {/* ─── Stand-alone bell (mobile only) ───────────────────── */}
         {session && (
           <div className="sm:hidden relative">
             <button
               onClick={() => setNotifOpen(!notifOpen)}
-              className="relative text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="relative text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-gray-200"
               type="button"
             >
               <Bell className="w-6 h-6" />
@@ -153,9 +178,10 @@ export default function Header() {
               )}
             </button>
 
+            {/* Mobile dropdown (anchors to the bell) */}
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 animate-fade-in-down backdrop-blur-sm">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+              <div className="absolute right-0 mt-2 w-72 backdrop-blur px-6 py-4 border border-gray-700 dark:border-gray-300 bg-white dark:bg-gray-800 rounded-xl shadow-lg z-50 animate-fade-in-down">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700 dark:border-gray-300">
                   <span className="text-sm font-medium text-gray-900 dark:text-white">Notifications</span>
                   {notifications.length > 0 && (
                     <Button size="xs" variant="ghost" onClick={markAllRead}>
@@ -163,20 +189,21 @@ export default function Header() {
                     </Button>
                   )}
                 </div>
+
                 {notifications.length === 0 ? (
-                  <p className="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-center py-6 text-sm text-gray-400 dark:text-gray-500">
                     No unread messages
                   </p>
                 ) : (
-                  <ul className="max-h-80 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+                  <ul className="max-h-80 overflow-y-auto divide-y divide-gray-800 dark:divide-gray-600">
                     {notifications.map((n) => (
                       <li
                         key={n.id}
                         onClick={() => markRead(n.id)}
-                        className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                        className="px-4 py-3 hover:bg-gray-800 dark:hover:bg-gray-700 cursor-pointer"
                       >
                         <p className="text-sm font-medium text-gray-900 dark:text-white">{n.title}</p>
-                        <p className="text-xs mt-1 line-clamp-2 text-gray-600 dark:text-gray-400">{n.body}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">{n.body}</p>
                       </li>
                     ))}
                   </ul>
@@ -186,18 +213,18 @@ export default function Header() {
           </div>
         )}
 
-        {/* Desktop nav */}
+        {/* Desktop navigation */}
         {session && (
           <nav className="hidden sm:flex items-center gap-4 ml-auto">
             <NavLink href="/cases" icon={Folder} label="Cases" />
             <NavLink href="/profile" icon={User} label="Profile" />
             <NavLink href="/settings" icon={Settings} label="Settings" />
 
-            {/* Desktop Bell */}
+            {/* Notification bell (desktop) */}
             <div className="relative">
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                className="relative p-2 text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-gray-200"
                 type="button"
               >
                 <Bell className="w-5 h-5" />
@@ -207,9 +234,11 @@ export default function Header() {
                   </span>
                 )}
               </button>
+
+              {/* Desktop dropdown */}
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 backdrop-blur-sm">
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="absolute right-0 mt-2 w-72 backdrop-blur px-6 py-4 border border-gray-700 dark:border-gray-300 bg-white dark:bg-gray-800 rounded-xl shadow-lg z-50">
+                  <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700 dark:border-gray-300">
                     <span className="text-sm font-medium text-gray-900 dark:text-white">Notifications</span>
                     {notifications.length > 0 && (
                       <Button size="xs" variant="ghost" onClick={markAllRead}>
@@ -217,20 +246,21 @@ export default function Header() {
                       </Button>
                     )}
                   </div>
+
                   {notifications.length === 0 ? (
-                    <p className="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-center py-6 text-sm text-gray-400 dark:text-gray-500">
                       No unread messages
                     </p>
                   ) : (
-                    <ul className="max-h-80 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+                    <ul className="max-h-80 overflow-y-auto divide-y divide-gray-800 dark:divide-gray-600">
                       {notifications.map((n) => (
                         <li
                           key={n.id}
                           onClick={() => markRead(n.id)}
-                          className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                          className="px-4 py-3 hover:bg-gray-800 dark:hover:bg-gray-700 cursor-pointer"
                         >
                           <p className="text-sm font-medium text-gray-900 dark:text-white">{n.title}</p>
-                          <p className="text-xs mt-1 line-clamp-2 text-gray-600 dark:text-gray-400">{n.body}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">{n.body}</p>
                         </li>
                       ))}
                     </ul>
@@ -243,7 +273,7 @@ export default function Header() {
             <button
               onClick={handleLogout}
               type="button"
-              className="flex items-center gap-2 text-sm text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 px-2 py-1 transition"
+              className="flex items-center gap-2 text-sm text-red-500 hover:text-red-400 dark:text-red-400 dark:hover:text-red-300 px-2 py-1 transition"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -252,47 +282,58 @@ export default function Header() {
         )}
       </div>
 
-      {/* Mobile bottom nav */}
-      {session && (
-        <nav className="phonemenu w-full sm:hidden fixed bottom-0 bg-white dark:bg-gray-900 bg-opacity-90 dark:bg-opacity-90 backdrop-blur-md shadow-2xl z-50">
-          {[
-            { href: '/cases',    Icon: Folder,   label: 'Cases'    },
-            { href: '/profile',  Icon: User,     label: 'Profile'  },
-            { href: '/settings', Icon: Settings, label: 'Settings' },
-          ].map(({ href, Icon, label }) => {
-            const isActive = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={clsx(
-                  'group flex flex-col items-center text-sm transition-transform duration-200 py-2',
-                  isActive
-                    ? 'text-gray-900 dark:text-white'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                )}
-              >
-                <div
-                  className={clsx(
-                    'p-2 rounded-full transition-colors duration-300',
-                    isActive
-                      ? 'bg-gray-100 dark:bg-gray-800 shadow-lg'
-                      : 'group-hover:bg-gray-100 dark:group-hover:bg-gray-800'
-                  )}
-                >
-                  <Icon className={clsx(
-                    'w-7 h-7 transition-colors duration-300',
-                    isActive
-                      ? 'text-gray-900 dark:text-white'
-                      : 'text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white'
-                  )} />
-                </div>
-                <span className="mt-1">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      )}
+{session && (
+  <nav
+    className="
+      phonemenu
+      w-full
+      sm:hidden
+      fixed bottom-0
+      bg-opacity-90 backdrop-blur-md
+      shadow-2xl
+      z-50
+      bg-white dark:bg-gray-900"
+  >
+    {[
+      { href: '/cases',    Icon: Folder,   label: 'Cases'    },
+      { href: '/profile',  Icon: User,     label: 'Profile'  },
+      { href: '/settings', Icon: Settings, label: 'Settings' },
+    ].map(({ href, Icon, label }) => {
+      const isActive = pathname === href;
+      return (
+        <Link
+          key={href}
+          href={href}
+          className={clsx(
+            'group flex flex-col items-center text-sm transition-transform duration-200',
+            isActive
+              ? 'text-white'
+              : 'text-gray-200 dark:text-gray-400'
+          )}
+        >
+          <div
+            className={clsx(
+              'p-2 rounded-full transition-colors duration-300',
+              isActive
+                ? 'bg-white bg-opacity-25 dark:bg-gray-800 shadow-lg'
+                : 'group-hover:bg-white/20 dark:group-hover:bg-gray-700'
+            )}
+          >
+
+            <Icon className={clsx(
+              'w-7 h-7 transition-colors duration-300',
+              isActive
+                ? 'text-white'
+                : 'text-gray-200 group-hover:text-white'
+            )} />
+          </div>
+          <span className="mt-1">{label}</span>
+          {/* sliding underline */}
+        </Link>
+      );
+    })}
+  </nav>
+)}
     </header>
   );
 }
