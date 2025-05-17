@@ -14,6 +14,7 @@ const disputeSchema = {
     - Ask clearly if anything is missing.
     - Max 2–3 questions per turn.
     - Stay on-topic.
+    - After you collected all information just call for your function!
   `,
   parameters: {
     type: "object",

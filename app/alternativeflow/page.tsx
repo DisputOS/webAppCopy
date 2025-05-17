@@ -35,14 +35,9 @@ export default function DisputeWizard() {
   const [purchaseDate, setPurchaseDate] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([
     {
-      role: "system",
-      content:
-        "Your goal is to collect all required dispute fields. Ask for each explicitly. Do not guess values. Require proof upload and set 'proof_uploaded: true' only after confirmation.",
-    },
-    {
       role: "assistant",
       content:
-        "I'm here to help you create your dispute. Could you please describe your issue briefly?",
+        "I'm here to help you create your dispute. Could you please describe your issue briefly? We can talk on any language you want!",
     },
   ]);
   const [input, setInput] = useState<string>("");
@@ -165,6 +160,72 @@ try {
     }
   };
 
+const handleFinalSubmit = async () => {
+  if (!disputeFields || !session?.user) return;
+  setSaving(true);
+  let countryCode = 'XX';
+  try {
+    const res = await fetch('/api/get-country');
+    const json = await res.json();
+    countryCode = json.country || 'XX';
+  } catch (e) {
+    console.warn("Could not fetch country code:", e);
+  }
+  try {
+    let dispute_id = disputeId;
+    if (!dispute_id) {
+      const { data: inserted, error: insertErr } = await supabase
+        .from("disputes")
+        .insert({
+          user_id: session.user.id,
+          user_confirmed_input: true,
+          status: "draft",
+          jurisdiction_flag: countryCode,
+          archived: false,
+          ...disputeFields,
+          user_contact_platform: disputeFields.user_contact_platform === "yes",
+          training_permission: disputeFields.training_permission === "yes",
+        })
+        .select("id")
+        .single();
+      if (insertErr || !inserted?.id) {
+        throw insertErr || new Error("Failed to create dispute");
+      }
+      dispute_id = inserted.id;
+      setDisputeId(dispute_id);
+    }
+    const BUCKET = "proofbundle";
+    const urls: string[] = [];
+    const uploadedList: { name: string; url: string }[] = [];
+    for (const file of Array.from(files || [])) {
+      const filePath = `${dispute_id}/${Date.now()}-${file.name}`;
+      const { error: uploadErr } = await supabase.storage.from(BUCKET).upload(filePath, file);
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+      urls.push(urlData.publicUrl);
+      uploadedList.push({ name: file.name, url: urlData.publicUrl });
+    }
+    await supabase.from("proof_bundle").insert([
+      {
+        user_id: session.user.id,
+        dispute_id: dispute_id,
+        receipt_url: urls[0],
+        screenshot_urls: urls.slice(1),
+        evidence_source: "user_upload",
+        dispute_type: evidenceType,
+        user_description: evidenceDescription,
+        policy_snapshot: null,
+      },
+    ]);
+    setUploadedFiles(uploadedList);
+    setCurrentStep(5);
+  } catch (err: any) {
+    console.error("Failed to finalize dispute:", err);
+  } finally {
+    setSaving(false);
+  }
+};
+
   return (
     <div className="text-black min-h-screen bg-slate-50 flex flex-col lg:flex-row">
       <aside className="w-full lg:w-1/4 p-4 border-r border-slate-200">
@@ -251,6 +312,112 @@ try {
           </div>
         )}
 
+{currentStep === 4 && disputeFields && (
+  <div className="bg-white p-6 rounded-xl border">
+    <h2 className="text-xl font-semibold mb-4">Review your dispute</h2>
+    <div className="space-y-3">
+      <Input
+        value={disputeFields.dispute_name || ""}
+        onChange={(e) => setDisputeFields({ ...disputeFields, dispute_name: e.target.value })}
+        placeholder="Name for your dispute (e.g. 'Spotify Refund Case')"
+      />
+      <Input
+        value={disputeFields.problem_type || ""}
+        onChange={(e) => setDisputeFields({ ...disputeFields, problem_type: e.target.value })}
+        placeholder="Problem Type (e.g. 'non_delivery')"
+      />
+      <Input
+        value={disputeFields.problem_subtype || ""}
+        onChange={(e) => setDisputeFields({ ...disputeFields, problem_subtype: e.target.value })}
+        placeholder="Problem Subtype (e.g. 'auto_renewal')"
+      />
+      <Input
+        value={disputeFields.description || ""}
+        onChange={(e) => setDisputeFields({ ...disputeFields, description: e.target.value })}
+        placeholder="Description"
+      />
+      <Input
+        type="number"
+        value={disputeFields.purchase_amount || ""}
+        onChange={(e) => setDisputeFields({ ...disputeFields, purchase_amount: parseFloat(e.target.value) })}
+        placeholder="Amount Spent"
+      />
+      <Input
+        value={disputeFields.currency || ""}
+        onChange={(e) => setDisputeFields({ ...disputeFields, currency: e.target.value })}
+        placeholder="Currency (e.g. USD)"
+      />
+      <select
+        value={disputeFields.user_contact_platform || ""}
+        onChange={(e) => setDisputeFields({ ...disputeFields, user_contact_platform: e.target.value })}
+        className="w-full bg-gray-100 p-2 rounded"
+      >
+        <option value="">Did you contact the platform?</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+      {disputeFields.user_contact_platform === "yes" && (
+        <Input
+          value={disputeFields.user_contact_desc || ""}
+          onChange={(e) => setDisputeFields({ ...disputeFields, user_contact_desc: e.target.value })}
+          placeholder="Describe your communication"
+        />
+      )}
+      <label className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          checked={disputeFields.training_permission === "yes"}
+          onChange={(e) =>
+            setDisputeFields({
+              ...disputeFields,
+              training_permission: e.target.checked ? "yes" : "no",
+            })
+          }
+        />
+        <span>Allow use of this dispute to improve Disput.ai</span>
+      </label>
+
+      {uploadedFiles.length > 0 && (
+        <div className="pt-4">
+          <h3 className="text-md font-semibold mb-2">Uploaded Evidence</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {uploadedFiles.map((f, idx) => {
+              const isImage = f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+              const isPDF = f.url.match(/\.pdf$/i);
+              return (
+                <div key={idx} className="relative border rounded overflow-hidden group bg-gray-100">
+                  {isImage ? (
+                    <img src={f.url} alt={f.name} className="w-full h-32 object-cover" />
+                  ) : isPDF ? (
+                    <div className="w-full h-32 flex items-center justify-center bg-red-100 text-red-600 font-semibold">
+                      PDF File
+                    </div>
+                  ) : (
+                    <div className="w-full h-32 flex items-center justify-center bg-yellow-100 text-yellow-800 font-semibold">
+                      File
+                    </div>
+                  )}
+                  <button
+                    onClick={() =>
+                      setUploadedFiles((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                  >
+                    ✕
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <Button onClick={handleFinalSubmit} disabled={saving} className="mt-4">
+        {saving ? <Loader2 className="animate-spin w-4 h-4" /> : "Confirm and Submit"}
+      </Button>
+    </div>
+  </div>
+)}
         {/* Navigation */}
         <div className="flex justify-between items-center">
           <Button variant="outline" onClick={() => setCurrentStep((s) => Math.max(s - 1, 1))} disabled={currentStep === 1}>Back</Button>
