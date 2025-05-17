@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import Header from '@/components/Header';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
-import { useTheme } from 'next-themes';
 
 export default function SettingsPage() {
   const session = useSession();
@@ -18,7 +18,6 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState('en');
   const [tone, setTone] = useState('auto');
   const [plan, setPlan] = useState('free');
-  const [appearance, setAppearance] = useState('system');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -34,7 +33,7 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
       const { data, error } = await supabase
         .from('users')
-        .select('username, retention_opt_in, language_code, ai_response_tone_preference, plan, appearance')
+        .select('username, retention_opt_in, language_code, ai_response_tone_preference, plan')
         .eq('id', session.user.id)
         .single();
 
@@ -44,8 +43,6 @@ export default function SettingsPage() {
         setLanguage(data.language_code || 'en');
         setTone(data.ai_response_tone_preference || 'auto');
         setPlan(data.plan || 'free');
-        setAppearance(data.appearance || 'system');
-        setTheme(data.appearance || 'system');
       } else {
         console.error('Failed to load settings:', error);
       }
@@ -66,13 +63,8 @@ export default function SettingsPage() {
         retention_opt_in: retentionOptIn,
         language_code: language,
         ai_response_tone_preference: tone,
-        appearance
       })
       .eq('id', session.user.id);
-
-    if (!error) {
-      setTheme(appearance);
-    }
 
     setSaved(!error);
     setLoading(false);
@@ -113,11 +105,11 @@ export default function SettingsPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-white dark:bg-gray-950 text-black dark:text-white p-6 space-y-6">
+      <main className="min-h-screen p-6 space-y-6 bg-white text-black dark:bg-gray-900 dark:text-white">
         <div className="max-w-3xl mx-auto space-y-10">
           <h1 className="text-3xl font-bold">My Settings</h1>
 
-          <section className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl p-6 space-y-6">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-6">
             <div>
               <Label htmlFor="username" className="block mb-1">Username</Label>
               <input
@@ -125,7 +117,7 @@ export default function SettingsPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
+                className="w-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
                 placeholder="yourname"
               />
             </div>
@@ -141,7 +133,7 @@ export default function SettingsPage() {
                 id="language"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
+                className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
               >
                 <option value="en">English</option>
                 <option value="uk">Українська</option>
@@ -155,7 +147,7 @@ export default function SettingsPage() {
                 id="tone"
                 value={tone}
                 onChange={(e) => setTone(e.target.value)}
-                className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
+                className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
               >
                 <option value="strict">Strict Evidence</option>
                 <option value="soft">Soft Legal</option>
@@ -164,16 +156,16 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <Label htmlFor="appearance" className="block mb-1">Appearance</Label>
+              <Label htmlFor="theme" className="block mb-1">Appearance</Label>
               <select
-                id="appearance"
-                value={appearance}
-                onChange={(e) => setAppearance(e.target.value)}
-                className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
+                id="theme"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
               >
                 <option value="system">System</option>
-                <option value="light">Light</option>
                 <option value="dark">Dark</option>
+                <option value="light">Light</option>
               </select>
             </div>
 
@@ -181,7 +173,7 @@ export default function SettingsPage() {
               <Label className="text-gray-600 dark:text-gray-400">
                 Plan: <span className="text-black dark:text-white font-semibold">{plan}</span>
               </Label>
-              <p className="text-xs text-gray-500">Plan controls PDF watermarking and escalation options.</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Plan controls PDF watermarking and escalation options.</p>
             </div>
 
             <Button onClick={handleSave} disabled={loading}>
@@ -189,7 +181,7 @@ export default function SettingsPage() {
             </Button>
           </section>
 
-          <section className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl p-6 space-y-4">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
             <h2 className="text-xl font-semibold mb-2">Change Password</h2>
 
             <div>
@@ -199,7 +191,7 @@ export default function SettingsPage() {
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
+                className="w-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
                 placeholder="Enter current password"
               />
             </div>
@@ -211,7 +203,7 @@ export default function SettingsPage() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
+                className="w-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded px-3 py-2"
                 placeholder="Enter new password"
               />
             </div>
@@ -227,7 +219,7 @@ export default function SettingsPage() {
             </Button>
           </section>
 
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-gray-500 text-center dark:text-gray-400">
             Your preferences power Legal UX, AI logic and fraud control.
           </p>
         </div>
