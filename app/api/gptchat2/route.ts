@@ -12,7 +12,6 @@ const disputeSchema = {
     properties: {
       problem_type: { type: "string", description: "Type of problem encountered" },
       description: { type: "string", description: "Description of the dispute" },
-proof_description: { type: "string" },
       user_contact_platform: {
         type: "string",
         enum: ["yes", "no"],

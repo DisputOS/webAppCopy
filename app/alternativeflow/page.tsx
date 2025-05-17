@@ -15,6 +15,11 @@ export type Message = {
 interface DisputeFields {
   platform_name?: string;
   purchase_date?: string;
+  problem_type?: string;
+  description?: string;
+  user_contact_platform?: string;
+  user_contact_desc?: string;
+  training_permission?: string;
   [key: string]: any;
 }
 
@@ -47,44 +52,7 @@ export default function DisputeWizard() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; url: string }[]>([]);
   const [disputeId, setDisputeId] = useState<string | null>(null);
-
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-    const userMessage: Message = { role: "user", content: input };
-    const updated = [...messages, userMessage];
-    setMessages(updated);
-    setInput("");
-    setChatLoading(true);
-    try {
-      const res = await fetch("/api/gptchat2", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updated }),
-      });
-      const data = await res.json();
-      if (data.function_call?.name === "create_dispute") {
-        let fields: DisputeFields = {};
-        try {
-          fields = JSON.parse(data.function_call.arguments);
-        } catch (err) {
-          setMessages((prev) => [...prev, { role: "assistant", content: "❌ Error parsing response." }]);
-          setChatLoading(false);
-          return;
-        }
-        fields.platform_name = platformName;
-        fields.purchase_date = purchaseDate;
-        setDisputeFields(fields);
-        setCurrentStep(3);
-      } else if (data.reply) {
-        setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
-      }
-    } catch (err) {
-      console.error(err);
-      setMessages((prev) => [...prev, { role: "assistant", content: "❌ Something went wrong." }]);
-    } finally {
-      setChatLoading(false);
-    }
-  };
+  const [saving, setSaving] = useState(false);
 
   const handleUpload = async () => {
     if (!files || files.length === 0) return setUploadError("Please select at least one file.");
@@ -94,7 +62,7 @@ export default function DisputeWizard() {
     setUploadLoading(true);
     try {
       let dispute_id = disputeId;
-      if (!dispute_id) {
+      if (!dispute_id && disputeFields) {
         const { data: inserted, error: insertErr } = await supabase
           .from("disputes")
           .insert({
@@ -103,6 +71,8 @@ export default function DisputeWizard() {
             status: "draft",
             archived: false,
             ...disputeFields,
+            user_contact_platform: disputeFields.user_contact_platform === "yes",
+            training_permission: disputeFields.training_permission === "yes",
           })
           .select("id")
           .single();
@@ -142,6 +112,74 @@ export default function DisputeWizard() {
       console.error(err);
       setUploadError(err.message || "Upload failed");
       setUploadLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!input.trim()) return;
+    const userMessage: Message = { role: "user", content: input };
+    const updated = [...messages, userMessage];
+    setMessages(updated);
+    setInput("");
+    setChatLoading(true);
+    try {
+      const res = await fetch("/api/gptchat2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: updated }),
+      });
+      const data = await res.json();
+      if (data.function_call?.name === "create_dispute") {
+        let fields: DisputeFields = {};
+        try {
+          fields = JSON.parse(data.function_call.arguments);
+        } catch (err) {
+          setMessages((prev) => [...prev, { role: "assistant", content: "❌ Error parsing response." }]);
+          setChatLoading(false);
+          return;
+        }
+        fields.platform_name = platformName;
+        fields.purchase_date = purchaseDate;
+        setDisputeFields(fields);
+        setCurrentStep(3);
+      } else if (data.reply) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessages((prev) => [...prev, { role: "assistant", content: "❌ Something went wrong." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!disputeFields || !session?.user) return;
+    setSaving(true);
+    try {
+      const { data: inserted, error } = await supabase
+        .from("disputes")
+        .upsert({
+          id: disputeId || undefined,
+          user_id: session.user.id,
+          user_confirmed_input: true,
+          status: "draft",
+          archived: false,
+          ...disputeFields,
+          user_contact_platform: disputeFields.user_contact_platform === "yes",
+          training_permission: disputeFields.training_permission === "yes",
+        })
+        .select("id")
+        .single();
+
+      if (inserted?.id) {
+        setDisputeId(inserted.id);
+        setCurrentStep(5);
+      }
+    } catch (err) {
+      console.error("Failed to save dispute", err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -203,12 +241,19 @@ export default function DisputeWizard() {
           <div>
             <h2 className="text-2xl font-bold mb-4">Step 3: Upload Evidence</h2>
             <input type="file" multiple onChange={(e) => setFiles(e.target.files)} className="mb-4" />
-            <Input
-              placeholder="Evidence Type"
+            <label className="block text-sm mb-1">Evidence Type</label>
+            <select
               value={evidenceType}
               onChange={(e) => setEvidenceType(e.target.value)}
-              className="mb-4"
-            />
+              className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="">Select evidence type</option>
+              <option value="receipt">Receipt / Invoice</option>
+              <option value="bank_statement">Bank Statement</option>
+              <option value="chat_screenshot">Chat Screenshot</option>
+              <option value="tracking_doc">Tracking / Shipping Doc</option>
+              <option value="other">Other</option>
+            </select>
             <Input
               placeholder="Evidence Description"
               value={evidenceDescription}
@@ -222,19 +267,68 @@ export default function DisputeWizard() {
           </div>
         )}
 
-        {/* Summary */}
+        {/* Review & Confirm */}
         {currentStep === 4 && disputeFields && (
           <div>
-            <h2 className="text-2xl font-bold mb-4">Step 4: Summary</h2>
-            <pre className="text-sm bg-gray-700 p-4 rounded-lg overflow-auto">
-              {JSON.stringify(disputeFields, null, 2)}
-            </pre>
+            <h2 className="text-2xl font-bold mb-4">Step 4: Review & Confirm</h2>
+            <div className="grid gap-4">
+              <Input
+                value={disputeFields.problem_type || ""}
+                onChange={(e) => setDisputeFields({ ...disputeFields, problem_type: e.target.value })}
+                placeholder="Problem Type"
+              />
+              <Input
+                value={disputeFields.description || ""}
+                onChange={(e) => setDisputeFields({ ...disputeFields, description: e.target.value })}
+                placeholder="Description"
+              />
+              <label>Did you contact the platform?</label>
+              <select
+                value={disputeFields.user_contact_platform || ""}
+                onChange={(e) => setDisputeFields({ ...disputeFields, user_contact_platform: e.target.value })}
+                className="bg-gray-700 text-white p-2 rounded"
+              >
+                <option value="">Select</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+              {disputeFields.user_contact_platform === "yes" && (
+                <Input
+                  value={disputeFields.user_contact_desc || ""}
+                  onChange={(e) => setDisputeFields({ ...disputeFields, user_contact_desc: e.target.value })}
+                  placeholder="Describe your communication"
+                />
+              )}
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={disputeFields.training_permission === "yes"}
+                  onChange={(e) =>
+                    setDisputeFields({
+                      ...disputeFields,
+                      training_permission: e.target.checked ? "yes" : "no",
+                    })
+                  }
+                />
+                <span>May we use this dispute (without personal data) to improve Disput.ai?</span>
+              </label>
+            </div>
+            <Button onClick={handleFinalSubmit} className="mt-6" disabled={saving}>
+              {saving ? <Loader2 className="animate-spin w-4 h-4" /> : "Confirm and Submit"}
+            </Button>
+          </div>
+        )}
+
+        {/* Confirmation */}
+        {currentStep === 5 && (
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-green-400">✅ Dispute submitted successfully!</h2>
           </div>
         )}
 
         {/* Navigation */}
         <div className="mt-6 flex justify-between">
-          {currentStep > 1 && (
+          {currentStep > 1 && currentStep < 5 && (
             <Button onClick={() => setCurrentStep(currentStep - 1)}>
               <ChevronLeft className="w-4 h-4" /> Back
             </Button>
