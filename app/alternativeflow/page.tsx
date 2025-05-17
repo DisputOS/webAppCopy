@@ -205,31 +205,39 @@ const handleFinalSubmit = async () => {
       }
       dispute_id = inserted.id;
       setDisputeId(dispute_id);
+    } else {
+      const { error: updateErr } = await supabase
+        .from("disputes")
+        .update({
+          ...disputeFields,
+          user_contact_platform: disputeFields.user_contact_platform === "yes",
+          training_permission: disputeFields.training_permission === "yes",
+        })
+        .eq("id", dispute_id);
+      if (updateErr) throw updateErr;
     }
-    const BUCKET = "proofbundle";
-    const urls: string[] = [];
-    const uploadedList: { name: string; url: string }[] = [];
-    for (const file of Array.from(files || [])) {
-      const filePath = `${dispute_id}/${Date.now()}-${file.name}`;
-      const { error: uploadErr } = await supabase.storage.from(BUCKET).upload(filePath, file);
-      if (uploadErr) throw uploadErr;
-      const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-      urls.push(urlData.publicUrl);
-      uploadedList.push({ name: file.name, url: urlData.publicUrl });
+
+    // Replace old proof_bundle with current state
+    await supabase
+      .from("proof_bundle")
+      .delete()
+      .eq("dispute_id", dispute_id);
+
+    if (uploadedFiles.length > 0) {
+      await supabase.from("proof_bundle").insert([
+        {
+          user_id: session.user.id,
+          dispute_id: dispute_id,
+          receipt_url: uploadedFiles[0].url,
+          screenshot_urls: uploadedFiles.slice(1).map((f) => f.url),
+          evidence_source: "user_upload",
+          dispute_type: evidenceType,
+          user_description: evidenceDescription,
+          policy_snapshot: null,
+        },
+      ]);
     }
-    await supabase.from("proof_bundle").insert([
-      {
-        user_id: session.user.id,
-        dispute_id: dispute_id,
-        receipt_url: urls[0],
-        screenshot_urls: urls.slice(1),
-        evidence_source: "user_upload",
-        dispute_type: evidenceType,
-        user_description: evidenceDescription,
-        policy_snapshot: null,
-      },
-    ]);
-    setUploadedFiles(uploadedList);
+
     setCurrentStep(5);
   } catch (err: any) {
     console.error("Failed to finalize dispute:", err);
@@ -237,6 +245,7 @@ const handleFinalSubmit = async () => {
     setSaving(false);
   }
 };
+
 
   return (
     <div className="text-black min-h-screen bg-slate-50 flex flex-col lg:flex-row">
