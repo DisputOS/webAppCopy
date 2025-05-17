@@ -1,6 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest } from 'next/server';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const country = req.headers['cf-ipcountry'] || 'XX';
-  res.status(200).json({ country });
+export function GET(req: NextRequest) {
+  const country = req.headers.get('cf-ipcountry') || 'XX';
+  return new Response(JSON.stringify({ country }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
