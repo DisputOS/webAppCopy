@@ -341,44 +341,57 @@ const handleFinalSubmit = async () => {
   <div className="bg-white p-6 rounded-xl border">
     <h2 className="text-xl font-semibold mb-4">Review your dispute</h2>
     <div className="space-y-3">
+      <Label>Name for your dispute</Label>
       <Input
         value={disputeFields.dispute_name || ""}
         onChange={(e) => setDisputeFields({ ...disputeFields, dispute_name: e.target.value })}
-        placeholder="Name for your dispute (e.g. 'Spotify Refund Case')"
+        placeholder="e.g. 'Spotify Refund Case'"
       />
-      
+
+      <Label>Description</Label>
       <Input
         value={disputeFields.description || ""}
         onChange={(e) => setDisputeFields({ ...disputeFields, description: e.target.value })}
         placeholder="Description"
       />
+
+      <Label>Amount Spent</Label>
       <Input
         type="number"
         value={disputeFields.purchase_amount || ""}
         onChange={(e) => setDisputeFields({ ...disputeFields, purchase_amount: parseFloat(e.target.value) })}
         placeholder="Amount Spent"
       />
+
+      <Label>Currency</Label>
       <Input
         value={disputeFields.currency || ""}
         onChange={(e) => setDisputeFields({ ...disputeFields, currency: e.target.value })}
         placeholder="Currency (e.g. USD)"
       />
+
+      <Label>Did you contact the platform?</Label>
       <select
         value={disputeFields.user_contact_platform || ""}
         onChange={(e) => setDisputeFields({ ...disputeFields, user_contact_platform: e.target.value })}
         className="w-full bg-gray-100 p-2 rounded"
       >
-        <option value="">Did you contact the platform?</option>
+        <option value="">Select</option>
         <option value="yes">Yes</option>
         <option value="no">No</option>
       </select>
+
       {disputeFields.user_contact_platform === "yes" && (
-        <Input
-          value={disputeFields.user_contact_desc || ""}
-          onChange={(e) => setDisputeFields({ ...disputeFields, user_contact_desc: e.target.value })}
-          placeholder="Describe your communication"
-        />
+        <>
+          <Label>Describe your communication</Label>
+          <Input
+            value={disputeFields.user_contact_desc || ""}
+            onChange={(e) => setDisputeFields({ ...disputeFields, user_contact_desc: e.target.value })}
+            placeholder="Describe your communication"
+          />
+        </>
       )}
+
       <label className="flex items-center space-x-2">
         <input
           type="checkbox"
