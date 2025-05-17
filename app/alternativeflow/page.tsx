@@ -4,8 +4,9 @@ import { useSupabaseClient, useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Loader2, Upload, FilePlus, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, FilePlus, CheckCircle, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 // Types
 export type Message = {
@@ -250,6 +251,9 @@ const handleFinalSubmit = async () => {
   return (
     <div className="text-black min-h-screen bg-slate-50 flex flex-col lg:flex-row">
       <aside className="w-full lg:w-1/4 p-4 border-r border-slate-200">
+      <Link href="/cases" className="inline-flex items-center text-gray-400 hover:text-white mb-4">
+        <ArrowLeft className="w-4 h-4" /> Back
+      </Link>
         <h2 className="text-xl font-semibold mb-6">Dispute Progress</h2>
         <ul className="space-y-2">
           {steps.map((label, i) => (
