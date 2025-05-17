@@ -22,7 +22,7 @@ import EvidenceUploader from "./EvidenceUploader";
 
 interface Dispute {
   id: string;
-  problem_type?: string;
+  dispute_name?: string;
   status?: string;
   platform_name?: string;
   purchase_date?: string;
@@ -131,7 +131,7 @@ export default function TabbedDisputeDetail({
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold break-all">
-                  {dispute.problem_type || "Untitled Dispute"}
+                  {dispute.dispute_name || "Untitled Dispute"}
                 </h1>
                 <DisputeActionsMenu
                   disputeId={dispute.id}
