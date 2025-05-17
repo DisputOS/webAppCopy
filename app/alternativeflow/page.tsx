@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState } from "react";
 import { useSupabaseClient, useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Loader2, Upload, FilePlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, FilePlus, CheckCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Types
 export type Message = {
@@ -159,7 +159,19 @@ try {
       setUploadLoading(false);
     }
   };
+function CountdownRedirect() {
+  const [count, setCount] = useState(5);
 
+  useEffect(() => {
+    if (count === 0 && disputeId) {
+      window.location.href = `/cases/${disputeId}`;
+    }
+    const timer = setTimeout(() => setCount((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [count]);
+
+  return <p className="text-gray-600">Redirecting in {count} seconds...</p>;
+}
 const handleFinalSubmit = async () => {
   if (!disputeFields || !session?.user) return;
   setSaving(true);
@@ -321,16 +333,7 @@ const handleFinalSubmit = async () => {
         onChange={(e) => setDisputeFields({ ...disputeFields, dispute_name: e.target.value })}
         placeholder="Name for your dispute (e.g. 'Spotify Refund Case')"
       />
-      <Input
-        value={disputeFields.problem_type || ""}
-        onChange={(e) => setDisputeFields({ ...disputeFields, problem_type: e.target.value })}
-        placeholder="Problem Type (e.g. 'non_delivery')"
-      />
-      <Input
-        value={disputeFields.problem_subtype || ""}
-        onChange={(e) => setDisputeFields({ ...disputeFields, problem_subtype: e.target.value })}
-        placeholder="Problem Subtype (e.g. 'auto_renewal')"
-      />
+      
       <Input
         value={disputeFields.description || ""}
         onChange={(e) => setDisputeFields({ ...disputeFields, description: e.target.value })}
@@ -418,6 +421,27 @@ const handleFinalSubmit = async () => {
     </div>
   </div>
 )}
+{currentStep === 5 && (
+  <div className="text-center space-y-6 py-10">
+    <div className="mx-auto w-16 h-16 animate-bounce text-green-500">
+      <CheckCircle className="w-full h-full" />
+    </div>
+    <h2 className="text-2xl font-bold text-green-500 animate-fade-in">✅ Dispute submitted successfully!</h2>
+    <CountdownRedirect />
+    <Button
+      onClick={() => {
+        if (disputeId) {
+          window.location.href = `/cases/${disputeId}`;
+        }
+      }}
+      className="mt-4"
+    >
+      Navigate to the Dispute!
+    </Button>
+  </div>
+)}
+
+
         {/* Navigation */}
         <div className="flex justify-between items-center">
           <Button variant="outline" onClick={() => setCurrentStep((s) => Math.max(s - 1, 1))} disabled={currentStep === 1}>Back</Button>

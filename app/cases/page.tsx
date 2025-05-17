@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import ChatDisputeModal from '@/components/ChatDisputeModal';
+          import Link from "next/link";
 
 interface DisputeWithProof extends Record<string, any> {
   hasProof: boolean;
@@ -101,14 +102,14 @@ export default function CasesPage() {
         <div className="sticky top-0 z-20 flex items-center justify-between backdrop-blur to-black/90 px-6 py-4">
           <h1 className="text-3xl font-bold">My Disputes</h1>
 
-          <button
-            onClick={() => setShowChatModal(true)}
-            className="flex items-center gap-2 px-4 py-2 cursor-pointer border border-gray-800 rounded-xl hover:border-blue-600 transition"
-            type="button"
-          >
-            <PlusCircle className="w-5 h-5" />
-            New Dispute
-          </button>
+
+<Link
+  href="/alternativeflow"
+  className="flex items-center gap-2 px-4 py-2 cursor-pointer border border-gray-800 rounded-xl hover:border-blue-600 transition"
+>
+  <PlusCircle className="w-5 h-5" />
+  New Dispute
+</Link>
         </div>
 
         {/* ── scrollable list ───────────────────────────────────── */}
@@ -134,7 +135,7 @@ export default function CasesPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
                       <h2 className="text-lg font-semibold break-all">
-                        {d.problem_type || 'Untitled'}
+                        {d.dispute_name || 'Untitled'}
                       </h2>
                       {!d.hasProof && (
                         <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
