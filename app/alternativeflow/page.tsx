@@ -100,6 +100,14 @@ export default function DisputeWizard() {
     if (!evidenceType) return setUploadError("Please choose the evidence type.");
     if (!session?.user) return setUploadError("You must be logged in.");
     setUploadError(null);
+    let countryCode = 'XX';
+try {
+  const res = await fetch('/api/get-country');
+  const json = await res.json();
+  countryCode = json.country || 'XX';
+} catch (e) {
+  console.warn("Could not fetch country code:", e);
+}
     setUploadLoading(true);
     try {
       let dispute_id = disputeId;
@@ -110,6 +118,7 @@ export default function DisputeWizard() {
             user_id: session.user.id,
             user_confirmed_input: true,
             status: "draft",
+            jurisdiction_flag: countryCode, // <--- додано сюди
             archived: false,
             ...disputeFields,
             user_contact_platform: disputeFields.user_contact_platform === "yes",
@@ -157,7 +166,7 @@ export default function DisputeWizard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
+    <div className="text-black min-h-screen bg-slate-50 flex flex-col lg:flex-row">
       <aside className="w-full lg:w-1/4 p-4 border-r border-slate-200">
         <h2 className="text-xl font-semibold mb-6">Dispute Progress</h2>
         <ul className="space-y-2">
@@ -225,6 +234,19 @@ export default function DisputeWizard() {
             <Button className="mt-4" onClick={handleUpload} disabled={uploadLoading}>
               {uploadLoading ? <Loader2 className="animate-spin w-4 h-4" /> : "Upload & Continue"}
             </Button>
+            <label className="block text-sm mb-1">Evidence Type</label>
+            <select
+              value={evidenceType}
+              onChange={(e) => setEvidenceType(e.target.value)}
+              className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="">Select evidence type</option>
+              <option value="receipt">Receipt / Invoice</option>
+              <option value="bank_statement">Bank Statement</option>
+              <option value="chat_screenshot">Chat Screenshot</option>
+              <option value="tracking_doc">Tracking / Shipping Doc</option>
+              <option value="other">Other</option>
+            </select>
             {uploadError && <p className="text-red-500 mt-2 text-sm">{uploadError}</p>}
           </div>
         )}
