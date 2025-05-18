@@ -9,6 +9,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
+
 import {
   BadgeCheck,
   ArrowLeft,
@@ -32,6 +33,7 @@ interface Dispute {
   description?: string;
   pdf_url?: string;
 }
+
 
 interface Proof {
   proof_id: string;

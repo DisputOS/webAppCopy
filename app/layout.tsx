@@ -39,7 +39,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <style>{`html,body{background:#1a202c;}`}</style>
       </head>
 
-      <body className="min-h-screen relative flex flex-col bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white">
+   <body
+  className="
+    min-h-screen
+    relative
+    flex
+    flex-col
+    bg-gradient-to-b
+      from-white
+      via-gray-100
+      to-gray-200
+    dark:from-gray-900
+    dark:via-gray-950
+    dark:to-black
+    text-gray-900
+    dark:text-white
+  "
+>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NoZoom />
           <GlowingBorder />

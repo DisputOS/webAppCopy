@@ -169,6 +169,8 @@ flex-direction: row;
 justify-content: center;
 gap: 20vw;
 padding-top: 10px;
+left: 0;
+right: 0;
 }
 
 
